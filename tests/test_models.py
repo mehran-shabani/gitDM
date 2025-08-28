@@ -17,6 +17,11 @@ def test_patient_create():
 
 @pytest.mark.django_db
 def test_encounter_link():
+    """
+    آزمایشی که ایجاد و پیوند یک Encounter به یک Patient را بررسی می‌کند.
+    
+    این تست یک رکورد Patient می‌سازد و سپس یک Encounter مرتبط با آن را با مقدار occurred_at معین و created_by (UUID) ایجاد می‌کند. آزمون تضمین می‌کند که Encounter به همان شیء Patient اشاره می‌کند و فیلد occurred_at مقداردهی شده است. این تست نیاز به دسترسی به پایگاه‌داده دارد و تغییرات موقتی در دیتابیس ایجاد می‌کند.
+    """
     p = Patient.objects.create(
         full_name="Ali Test", 
         primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111")
