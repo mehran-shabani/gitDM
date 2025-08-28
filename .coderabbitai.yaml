@@ -1,0 +1,163 @@
+version: 1
+project:
+  name: Diabetes Pilot (Helssa continuation)
+  language: python
+  frameworks: [django, drf, celery]
+  default_branch: develop
+review:
+  mode: comments_only  # فقط کامنت در PR، بدون تغییر کد
+  trigger: pull_request  # فقط در pull request فعال
+  auto_review: true
+  comment_format: structured  # کامنت‌های ساختاریافته
+  summary:
+    enabled: true
+    format: pr_comment  # خلاصه به صورت کامنت در PR
+  issues:
+    enabled: true
+    format: pr_comment  # مشکلات به صورت کامنت در PR
+  checklists:
+    enabled: true
+    format: pr_comment  # چک‌لیست به صورت کامنت در PR
+rules:
+  - id: scope-limits
+    description: تغییر فقط در فایل‌های فاز فعال
+    severity: error
+    include:
+      - phases/**
+      - cursoragent/**
+      - api/**
+      - apps/**
+      - config/**
+      - tests/**
+    exclude:
+      - '**/*.md'
+      - '**/.env*'
+  - id: follow-should-files
+    description: همهٔ پیاده‌سازی‌ها باید مطابق should-* باشند
+    severity: error
+  - id: no-central-url-change
+    description: تغییر URL/Router مرکزی خارج از محدودهٔ فاز ممنوع
+    severity: error
+  - id: tests-required
+    description: وجود و اجرای تست‌های الزامی هر فاز
+    severity: warning
+outputs:
+  on_pr_only: true  # فقط در PR
+  comment_templates:
+    summary: |
+      ## 📋 Summary – {{phase}}
+      **Branch:** `{{branch_name}}`
+      **Scope:** {{affected_files}}
+      **Architecture:** {{architecture_overview}}
+      **Key Decisions:** {{important_decisions}}
+      **Helssa Compatibility:** {{compatibility_status}}
+      **Risks:** {{identified_risks}}
+      **Suggestions:** {{improvement_suggestions}}
+    
+    issues: |
+      ## ⚠️ Issues Found – {{phase}}
+      {{#each issues}}
+      - **{{severity}}** in `{{file}}:{{line}}` - {{description}}
+        - Rule: `{{rule}}`
+        - Reference: {{reference}}
+      {{/each}}
+    
+    helssa_compat: |
+      ## 🔗 Helssa Compatibility Check – {{phase}}
+      - ✅/❌ Namespace‌ها مطابق الگوی Helssa
+      - ✅/❌ URL‌های مرکزی تغییر نکرده‌اند  
+      - ✅/❌ مدل‌های داده با Helssa تعارض ندارند
+      - ✅/❌ متغیرهای محیطی در جای مناسب
+      - ✅/❌ لاگ‌ها و تست‌ها در مسیر صحیح
+      - ✅/❌ Migration‌ها backward compatible هستند
+      - ✅/❌ API‌ها با conventions موجود سازگارند
+      
+      **Critical Notes:** {{critical_notes}}
+      **Integration Recommendations:** {{integration_recommendations}}
+
+policies:
+  external_sources: deny
+  prompt_conflicts:
+    action: stop
+    report: cursoragent/PARADOX_REPORT.md
+labels:
+  required:
+    - cursor-agent
+    - phase-xx
+
+# CodeRabbit Agent Instructions - فقط کامنت در PR
+agent_instructions: |
+  # CodeRabbit Review Agent – دستورالعمل کامنت در PR
+
+  ## ⚠️ مهم: فقط کامنت در Pull Request
+  - هیچ فایلی ایجاد یا تغییر نکن
+  - فقط کامنت‌های ریویو در PR بگذار
+  - هر برنچ/فاز را جداگانه بررسی کن
+
+  ## منابع اصلی (فقط این منابع مجاز است):
+  - /phases/phase-01-setup/should-*.md
+  - /phases/phase-02-models/should-*.md  
+  - /phases/phase-03-versioning/should-*.md
+  - /phases/phase-04-api/should-*.md
+  - /phases/phase-05-ai/should-*.md
+  - /phases/phase-06-references/should-*.md
+  - /phases/phase-07-security/should-*.md
+  - /phases/phase-08-testflow/should-*.md
+  - /cursoragent/AGENT.MD
+
+  ## قالب کامنت‌های PR:
+
+  ### 1. Summary Comment (در بالای PR):
+  ```
+  ## 📋 CodeRabbit Review Summary
+  
+  **Phase:** phase-XX-name
+  **Files Changed:** X files
+  **Architecture Compliance:** ✅/❌
+  **Test Coverage:** ✅/❌  
+  **Helssa Compatibility:** ✅/❌
+  
+  ### Key Findings:
+  - ✅ کد مطابق should-coding-code.md
+  - ❌ تست الزامی در should-test-coding-code.md موجود نیست
+  - ⚠️ معماری در should-phase-architecture.md رعایت شده
+  
+  ### Helssa Integration:
+  - ✅ Namespace ها سازگار
+  - ❌ URL مرکزی تغییر کرده (ریسک)
+  - ✅ مدل‌ها compatible
+  ```
+
+  ### 2. Inline Comments (روی خطوط کد):
+  ```
+  // 🤖 CodeRabbit: این کد مطابق /phases/phase-XX/should-coding-code.md نیست
+  // مرجع: بخش "## model_name/file.py" در should فایل
+  // پیشنهاد: استفاده از UUID بجای AutoField
+  ```
+
+  ### 3. Issue Comments (برای مشکلات):
+  ```
+  ## ⚠️ Issues Found
+  
+  | File | Line | Severity | Rule | Description |
+  |------|------|----------|------|-------------|
+  | models.py | 15 | error | follow-should-files | مدل Patient مطابق should-* نیست |
+  | views.py | 23 | warning | tests-required | تست ViewSet موجود نیست |
+  ```
+
+  ## فازها و تمرکز ریویو:
+  - **feat/phase-01-setup**: Docker, settings, dependencies
+  - **feat/phase-02-models**: مدل‌ها، روابط، migrations  
+  - **feat/phase-03-versioning**: append-only، revert
+  - **feat/phase-04-api**: ViewSets، JWT، endpoints
+  - **feat/phase-05-ai**: Celery، OpenAI، error handling
+  - **feat/phase-06-references**: references، M2M، seeding
+  - **feat/phase-07-security**: RBAC، audit، export
+  - **feat/phase-08-testflow**: integration tests
+
+  ## قوانین کامنت:
+  1. **فقط should-* بررسی کن** - suggestion-* راهنماست
+  2. **ارجاع مستقیم** به فایل و بخش should-*
+  3. **Helssa سازگاری** همیشه چک شود
+  4. **کامنت مفید** با راه‌حل عملی
+  5. **بدون تغییر کد** - فقط کامنت
