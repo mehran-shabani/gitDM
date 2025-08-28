@@ -17,4 +17,9 @@ class RecordVersion(models.Model):
     changed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        """
+        نمایش متنی خوانا برای نمونه RecordVersion.
+        
+        برمی‌گرداند یک رشته مختصر که نوع مدل مرتبط، شناسه شیء و شماره نسخه را به صورت "<model> <object_id> v<version>" نمایش می‌دهد. این مقدار برای نمایش در پنل ادمین، لاگ‌ها و خروجی‌های متنی مفید است.
+        """
         return f"{self.content_type.model} {self.object_id} v{self.version}"

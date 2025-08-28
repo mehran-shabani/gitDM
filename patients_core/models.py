@@ -18,4 +18,12 @@ class Patient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        """
+        رشته‌ای قابل‌خواندن برای نمونه Patient برمی‌گرداند.
+        
+        این متد نمایشی انسانی (human-readable) از شیء Patient را بازمی‌گرداند؛ مقدار فیلد `full_name` را به‌عنوان نمایش متنی نمونه برمی‌گرداند که در Django admin، لاگ‌ها و تبدیل به رشته استفاده می‌شود.
+        
+        Returns:
+        	str: مقدار `full_name` بیمار.
+        """
         return self.full_name

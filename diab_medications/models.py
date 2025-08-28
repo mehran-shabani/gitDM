@@ -14,4 +14,11 @@ class MedicationOrder(models.Model):
     end_date = models.DateField(null=True, blank=True)
 
     def __str__(self):
+        """
+        یک نمایش متنی برای سفارش دارو برمی‌گرداند.
+        
+        نمایش به‌صورت "<نام دارو> for <نام‌و‌نام‌خانوادگی بیمار>" است و برای نمایش در پنل ادمین، لاگ‌ها و خروجی‌های متنی مدل استفاده می‌شود.
+        Returns:
+        	(str): رشته قالب‌بندی‌شده شامل نام دارو و مقدار `patient.full_name`.
+        """
         return f"{self.name} for {self.patient.full_name}"

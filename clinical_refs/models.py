@@ -11,4 +11,9 @@ class ClinicalReference(models.Model):
     topic = models.CharField(max_length=80)
 
     def __str__(self):
+        """
+        نمایش رشته‌ای نمونه به صورت "عنوان (سال)".
+        
+        یک رشته بازمی‌گرداند که عنوان مرجع و سال آن را در قالب "title (year)" نمایش می‌دهد. این نمایش در رابط ادمین، هنگام لاگ‌گیری، و هر جایی که نمونه مدل به رشته تبدیل شود استفاده می‌شود.
+        """
         return f"{self.title} ({self.year})"
