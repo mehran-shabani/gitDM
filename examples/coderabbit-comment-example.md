@@ -10,7 +10,7 @@
 **Helssa Compatibility:** ⚠️  
 
 ### Key Findings:
-- ✅ مدل‌ها مطابق `/phases/phase-02-models/should-coding-code.md`
+- ✅ مدل‌ها مطابق `/doc/phase2/should-coding-code.md`
 - ❌ تست‌های الزامی در `should-test-coding-code.md` ناقص
 - ⚠️ فیلد `primary_doctor_id` نیازمند namespace سازگار با Helssa
 
@@ -42,7 +42,7 @@
 primary_doctor_id = models.UUIDField()  # doctor مالک
 ```
 **🤖 CodeRabbit:** این فیلد برای سازگاری با Helssa باید `helssa_doctor_id` نام‌گذاری شود  
-**مرجع:** `/phases/phase-02-models/should-coding-code.md` + `/cursoragent/AGENT.MD` بخش سازگاری Helssa  
+**مرجع:** `/doc/phase2/should-coding-code.md` + `/cursoragent/AGENT.MD` بخش سازگاری Helssa  
 **پیشنهاد:** تغییر نام + migration برای rename field
 
 ### در فایل `diab_encounters/models.py`:
@@ -53,5 +53,5 @@ created_by = models.UUIDField()
 
 ### در فایل `tests/test_models.py`:
 **🤖 CodeRabbit:** ❌ تست relationship بین Patient و Encounter موجود نیست  
-**مرجع:** `/phases/phase-02-models/should-test-coding-code.md` خط 15-20  
+**مرجع:** `/doc/phase2/should-test-coding-code.md` خط 15-20  
 **لازم:** افزودن `test_encounter_link` طبق نمونه should فایل

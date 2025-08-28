@@ -56,7 +56,7 @@ class Patient(models.Model):
     primary_doctor_id = models.UUIDField()  # doctor مالک
 ```
 
-**🧠 Gemini:** تحلیل معماری - این طراحی با `/phases/phase-02-models/should-phase-architecture.md` مطابقت دارد اما برای integration با Helssa، پیشنهاد:
+**🧠 Gemini:** تحلیل معماری - این طراحی با `/doc/phase2/should-phase-architecture.md` مطابقت دارد اما برای integration با Helssa، پیشنهاد:
 
 1. **Namespace Strategy**: تغییر به `helssa_doctor_id` برای consistency
 2. **Future-Proofing**: افزودن `Meta.db_table = 'helssa_diabetes_patient'`  
