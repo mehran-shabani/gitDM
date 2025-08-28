@@ -72,6 +72,7 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 - Reference the appropriate `should-*.md` files for implementation requirements
 - AI agents will review all pull requests for compliance
 - Maintain compatibility with Helssa platform standards
+- Set up pre-commit hooks before contributing (see `docs/development/pre-commit.md`)
 
 ## 📖 Additional Documentation
 

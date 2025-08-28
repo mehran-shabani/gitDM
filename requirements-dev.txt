@@ -1,0 +1,7 @@
+# Development dependencies
+-r requirements.txt
+
+# Pre-commit and linting tools
+pre-commit>=3.5.0
+ruff>=0.1.9
+dotenv-linter>=3.3.0
