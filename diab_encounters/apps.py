@@ -9,4 +9,4 @@ class DiabEncountersConfig(AppConfig):
     name = 'diab_encounters'
     verbose_name = 'Diabetes Encounters'
     # def ready(self):
-    #     import diab_encounters.signals  # noqa: F401
+    #     import diab_encounters.signals
