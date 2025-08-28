@@ -9,7 +9,17 @@ This project uses pre-commit hooks to ensure code quality and consistency.
    pip install -r requirements-dev.txt
    ```
 
-2. Install pre-commit hooks:
+2. Install dotenv-linter (binary):
+   ```bash
+   # On Linux/macOS:
+   curl -sSfL https://github.com/dotenv-linter/dotenv-linter/releases/latest/download/dotenv-linter-$(uname -s)-x86_64.tar.gz | tar xzf - dotenv-linter
+   sudo mv dotenv-linter /usr/local/bin
+   
+   # Or using brew on macOS:
+   brew install dotenv-linter
+   ```
+
+3. Install pre-commit hooks:
    ```bash
    pre-commit install
    ```

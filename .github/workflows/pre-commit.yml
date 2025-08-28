@@ -13,4 +13,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install dotenv-linter
+        run: |
+          curl -sSfL https://github.com/dotenv-linter/dotenv-linter/releases/latest/download/dotenv-linter-linux-x86_64.tar.gz | tar xzf - dotenv-linter
+          sudo mv dotenv-linter /usr/local/bin
       - uses: pre-commit/action@v3.0.0

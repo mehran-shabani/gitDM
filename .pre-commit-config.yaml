@@ -18,13 +18,12 @@ repos:
         args: [--fix]
       - id: ruff-format
 
-  # Dotenv linter for .env files
-  - repo: https://github.com/dotenv-linter/dotenv-linter
-    rev: v3.3.0
+  # Dotenv linter for .env files - using local hook
+  - repo: local
     hooks:
       - id: dotenv-linter
         name: Lint .env files
         entry: dotenv-linter
-        language: rust
+        language: system
         files: '\.env(\.example)?$'
-        exclude: '^$'
+        pass_filenames: true

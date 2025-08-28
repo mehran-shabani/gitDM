@@ -4,4 +4,4 @@
 # Pre-commit and linting tools
 pre-commit>=3.5.0
 ruff>=0.1.9
-dotenv-linter>=3.3.0
+# Note: dotenv-linter is installed separately as a binary, not via pip
