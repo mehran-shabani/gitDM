@@ -226,6 +226,7 @@ celery -A config beat -l info
 If you want to run the application without any external services, you can create a local settings file:
 
 1. **Create `config/local_settings.py`:**
+
 ```python
 from .settings import *
 
@@ -256,6 +257,8 @@ CACHES = {
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
 ```
+
+> **IMPORTANT**: Do not commit `config/local_settings.py`. Keep it local only.
 
 2. **Use local settings:**
 ```bash

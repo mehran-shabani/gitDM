@@ -14,10 +14,20 @@ class Patient(models.Model):
     full_name = models.CharField(max_length=120)
     dob = models.DateField(null=True, blank=True)
     sex = models.CharField(max_length=10, choices=Sex.choices, null=True, blank=True)
-    primary_doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='patients')  # doctor مالک
+    primary_doctor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='patients',
+    )  # doctor مالک
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
+    class Meta:
+        indexes = [
+            models.Index(fields=['full_name']),
+            models.Index(fields=['created_at']),
+        ]
+
+    def __str__(self) -> str:
         """
         رشته‌ای قابل‌خواندن برای نمونه Patient برمی‌گرداند.
         
