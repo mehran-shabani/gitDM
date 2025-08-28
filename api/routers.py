@@ -1,7 +1,9 @@
 from django.urls import path
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
+from django.views.decorators.http import require_GET
 
-def health(_request):
-    return JsonResponse({"status":"ok"})
+@require_GET
+def health(_request: HttpRequest) -> JsonResponse:
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [path('health/', health)]
