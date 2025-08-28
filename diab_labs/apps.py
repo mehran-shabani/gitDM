@@ -6,4 +6,4 @@ class DiabLabsConfig(AppConfig):
     verbose_name = 'Diabetes Labs'
     # فقط وقتی diab_labs/signals.py داری:
     # def ready(self):
-    #     import diab_labs.signals  # noqa: F401
+    #     import diab_labs.signals
