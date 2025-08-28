@@ -13,12 +13,6 @@ class AISummary(models.Model):
     summary = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        """
-        نمایش متنی مختصر از نمونه AISummary.
-        
-        این متد یک رشتهٔ خوانا برای نمونهٔ مدل برمی‌گرداند به شکل:
-        "AI Summary for {نام کامل بیمار} - {نوع محتوای مرتبط}".
-        برای تولید این متن از self.patient.full_name و self.content_type.model استفاده می‌کند. هیچ اثر جانبی ندارد.
-        """
+    def __str__(self: "AISummary") -> str:
+        """نمایش کوتاه برای ادمین: 'AI Summary for <Patient> - <Model>'."""
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
