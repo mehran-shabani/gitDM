@@ -1,0 +1,11 @@
+# BUILD LOG – phase-01
+DATE: ${ISO_DATETIME}
+BRANCH: feat/phase-01-<slug>
+COMMANDS:
+  - python manage.py check
+  - python manage.py makemigrations
+  - python manage.py migrate
+  - docker compose ps
+OUTPUT:
+<trimmed output>
+STATUS: success|failure
