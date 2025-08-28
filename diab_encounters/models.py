@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import uuid
 
 
@@ -10,7 +11,7 @@ class Encounter(models.Model):
     objective = models.JSONField(default=dict)
     assessment = models.JSONField(default=dict)
     plan = models.JSONField(default=dict)
-    created_by = models.UUIDField()
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

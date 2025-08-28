@@ -1,16 +1,20 @@
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.conf import settings
 import uuid
 
 
 class RecordVersion(models.Model):
     id = models.BigAutoField(primary_key=True)
-    resource_type = models.CharField(max_length=32)
-    resource_id = models.UUIDField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.UUIDField()
+    content_object = GenericForeignKey('content_type', 'object_id')
     version = models.PositiveIntegerField()
     prev_version = models.PositiveIntegerField(null=True, blank=True)
     snapshot = models.JSONField()
-    changed_by = models.UUIDField()
+    changed_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     changed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.resource_type} {self.resource_id} v{self.version}"
+        return f"{self.content_type.model} {self.object_id} v{self.version}"
