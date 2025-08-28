@@ -41,14 +41,14 @@
 
 ## 📋 منابع مجاز (هر دو agent)
 ```
-/phases/phase-01-setup/should-*.md
-/phases/phase-02-models/should-*.md  
-/phases/phase-03-versioning/should-*.md
-/phases/phase-04-api/should-*.md
-/phases/phase-05-ai/should-*.md
-/phases/phase-06-references/should-*.md
-/phases/phase-07-security/should-*.md
-/phases/phase-08-testflow/should-*.md
+/doc/phase1/should-*.md
+/doc/phase2/should-*.md  
+/doc/phase3/should-*.md
+/doc/phase4/should-*.md
+/doc/phase5/should-*.md
+/doc/phase6/should-*.md
+/doc/phase7/should-*.md
+/doc/phase8/should-*.md
 /cursoragent/AGENT.MD
 /cursoragent/CODING_RULES.md
 ```
@@ -56,7 +56,7 @@
 ## 🚫 ممنوعیت‌های قطعی
 - ❌ هیچ فایلی ایجاد نکن
 - ❌ هیچ فایلی تغییر نده  
-- ❌ فایل‌های `/logs/` یا `/reviews/` نساز
+- ❌ فایل‌های خارج از `/doc/` نساز
 - ❌ فقط کامنت در PR
 - ❌ منابع خارجی استفاده نکن
 
@@ -73,6 +73,7 @@ review:
 ### برای Gemini:  
 ```markdown
 # خواندن /gemini/gemini.md برای دستورالعمل‌ها
+# منابع در /doc/phaseX/ قرار دارند
 # فقط در PR comment کردن
 ```
 
