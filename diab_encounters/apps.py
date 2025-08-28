@@ -2,8 +2,7 @@ from django.apps import AppConfig
 
 # File: diab_encounters/apps.py
 
-from django.apps import AppConfig
-
+# (duplicate import removed)
 class DiabEncountersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'diab_encounters'
