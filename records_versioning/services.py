@@ -225,7 +225,7 @@ def revert_to_version(
         # Match test expectations: resource not found should raise DoesNotExist
         raise model_cls.DoesNotExist(
             f"{model_name} matching query does not exist."
-        )
+        ) from None
     
     target = RecordVersion.objects.get(
         resource_type=resource_type, 
