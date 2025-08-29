@@ -20,5 +20,13 @@ class Encounter(models.Model):
              models.Index(fields=["created_by", "created_at"]),
          ]
     def __str__(self) -> str:
-        """رشتهٔ کوتاه برای نمایش: نام بیمار و زمان مواجهه."""
+        """
+        رشتهٔ نمایشی کوتاه که نام کامل بیمار و زمان مواجهه را برمی‌گرداند.
+        
+        این متد یک نمای انسانی‌خوانا برای نمونه‌ی Encounter تولید می‌کند به صورت:
+        "Encounter for {patient.full_name} at {occurred_at}"
+        
+        Returns:
+            str: رشتهٔ نمایش شامل نام کامل بیمار و زمان وقوع مواجهه.
+        """
         return f"Encounter for {self.patient.full_name} at {self.occurred_at}"
