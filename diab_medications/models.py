@@ -61,7 +61,11 @@ class MedicationOrder(models.Model):
         ]
 
     def clean(self) -> None:
-        """Validate that end_date is not before start_date."""
+        """
+        اعتبارسنجی ترتیب زمانی سفارش دارو.
+        
+        این متد به‌عنوان هوک اعتبارسنجی مدل اجرا می‌شود و بررسی می‌کند که در صورت تعیین شدن end_date، مقدار آن قبل از start_date نباشد. اگر end_date کوچک‌تر از start_date باشد، یک ValidationError با کلید 'end_date' و پیام مناسب پرتاب می‌کند. در غیر این صورت تغییری ایجاد نمی‌شود (هیچ مقداری بازگردانده نمی‌شود).
+        """
         if self.end_date and self.end_date < self.start_date:
             raise ValidationError({
                 'end_date': 'End date cannot be before start date.'

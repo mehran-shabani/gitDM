@@ -28,7 +28,14 @@ class ClinicalReference(models.Model):
         ]
 
     def clean(self) -> None:
-        """Validate that year is not in the future."""
+        """
+        اعتبارسنجی مقدار فیلد year پیش از ذخیره مدل.
+        
+        این متد بررسی می‌کند که مقدار year بیش از یک سال جلوتر از سال جاری نباشد (حداکثر مجاز: سال جاری + 1). در صورت نقض این شرط، یک ValidationError بازمی‌گرداند که به کلید 'year' متصل است و پیام خطا مقدار بیشینه مجاز را شامل می‌شود.
+        
+        Raises:
+            ValidationError: اگر self.year بزرگ‌تر از timezone.now().year + 1 باشد.
+        """
         if self.year > timezone.now().year + 1:
             raise ValidationError({
                 'year': f'Year cannot be more than one year in the future. Maximum allowed: {timezone.now().year + 1}'

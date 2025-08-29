@@ -7,10 +7,20 @@ from rest_framework.response import Response
 @permission_classes([AllowAny])
 def api_root(request):
     """
-    API Root - Diabetes Management System
+    نمای API ریشه برای سامانه مدیریت دیابت.
     
-    This API requires JWT authentication for all endpoints except token endpoints.
-    Users must be created through the Django admin panel - there is no public user registration.
+    این تابع یک پاسخ ثابت (JSON-like) بازمی‌گرداند که اطلاعات کشف سرویس را شامل پیام خلاصه، تنظیمات احراز هویت مبتنی بر JWT (نقاط گرفتن/رفرش توکن و فرمت هدر)، سیاست مدیریت کاربران (ثبت‌نام فقط از طریق پنل ادمین)، آدرس‌های مطلق برای نقاط انتهایی اصلی (patients، encounters، labs، meds، refs) و آدرس‌های مرتبط با مستندات و اسکیمای API ارائه می‌دهد. آدرس‌ها با استفاده از request.build_absolute_uri از مسیرهای نسبی ساخته می‌شوند تا URLهای کامل برگردانده شوند.
+    
+    Parameters:
+        request (Request): شیٔ درخواستی DRF/Django که برای ساخت URLهای مطلق استفاده می‌شود.
+    
+    Returns:
+        Response: شیٔ rest_framework.response.Response که حاوی دیکشنری کشف سرویس ذکرشده است.
+    
+    نکات:
+    - همهٔ نقاط انتهایی API به‌جز مسیرهای مربوط به دریافت/رفرش توکن از طریق JWT محافظت می‌شوند.
+    - ایجاد حساب کاربری به‌صورت عمومی مجاز نیست و باید از طریق پنل ادمین انجام شود.
+    - این تابع هیچ خطای خاصی را صریحاً پرتاب نمی‌کند؛ خطاهای مربوط به ساخت URL یا محیط وب توسط لایه‌های بالاتر مدیریت می‌شوند.
     """
     return Response({
         'message': 'Diabetes Management System API',

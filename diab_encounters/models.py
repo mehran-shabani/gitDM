@@ -21,11 +21,10 @@ class Encounter(models.Model):
          ]
     def __str__(self) -> str:
         """
-        نمایش متن‌توصیفی کوتاه برای شیٔ Encounter.
+        نمایش خلاصهٔ خوانا از یک Encounter.
         
-        برمی‌گرداند یک رشتهٔ خوانا که بیمار (با مقدار patient.full_name) و زمان رخداد ملاقات (occurred_at) را نشان می‌دهد؛ برای نمایش در پنل ادمین، لاگ‌ها یا هنگام تبدیل شی به رشته استفاده می‌شود.
-        
-        Returns:
-            str: رشته‌ای به فرمت "Encounter for {patient.full_name} at {occurred_at}" که نام کامل بیمار و تاریخ/زمان وقوع را شامل می‌شود.
+        برمی‌گرداند رشته‌ای کوتاه به‌صورت:
+        "Encounter for {patient.full_name} at {occurred_at}"
+        که نام کامل بیمار و زمان وقوع ملاقات را شامل می‌شود؛ مناسب برای لاگ‌، رابط ادمین و تبدیل شی به رشته.
         """
         return f"Encounter for {self.patient.full_name} at {self.occurred_at}"
