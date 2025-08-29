@@ -17,7 +17,6 @@ We do NOT test serializers/models per request; AuditLog ORM calls are mocked.
 """
 
 import types
-import uuid
 from unittest.mock import Mock, patch
 
 import pytest
