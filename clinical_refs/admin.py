@@ -6,6 +6,6 @@ from .models import ClinicalReference
 class ClinicalReferenceAdmin(admin.ModelAdmin):
     list_display = ('title', 'source', 'year', 'topic')
     list_filter = ('year', 'topic', 'source')
-    search_fields = ('title', 'source', 'topic')
+    search_fields = ('title', 'source', 'topic', 'url')
     readonly_fields = ('id',)
 
