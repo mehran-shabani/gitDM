@@ -28,8 +28,23 @@ class VersionViewSet(viewsets.ViewSet):
         } for v in qs]
         return Response(data)
 
+from rest_framework import viewsets, status, serializers
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ObjectDoesNotExist
+import logging
+from rest_framework.response import Response
+from rest_framework.decorators import action
+
+logger = logging.getLogger(__name__)
+
+class VersionViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    class _RevertSerializer(serializers.Serializer):
+        target_version = serializers.IntegerField(min_value=1)
+
     @action(detail=False, methods=['post'])
-    def revert(self, request, resource_type=None, resource_id=None):
+    def revert(self, request, resource_type: str | None = None, resource_id: str | None = None) -> Response:
         # Get resource identifiers from URL parameters
         """
         درخواست بازگردانی (revert) یک منبع به یک نسخهٔ مشخص را پردازش می‌کند.
@@ -54,20 +69,27 @@ class VersionViewSet(viewsets.ViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Get target version from request body
-        try:
-            target_version = int(request.data.get('target_version'))
-        except (ValueError, TypeError):
-            return Response(
-                {"error": "Invalid or missing 'target_version' in request body"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        ser = self._RevertSerializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        target_version = ser.validated_data["target_version"]
         
-        # Get user from authenticated request, not from request body
         user = request.user if request.user.is_authenticated else None
+        
+        # وایت‌لیست resource_type
+        from records_versioning.services import RESOURCE_MAP  # lazy import
+        if resource_type not in RESOURCE_MAP:
+            return Response({"error": "invalid resource_type"}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             revert_to_version(resource_type, resource_id, target_version, user)
-            return Response({"status":"ok","reverted_to": target_version}, status=status.HTTP_200_OK)
-        except Exception as e:
+            return Response({"status": "ok", "reverted_to": target_version}, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist as e:
+            return Response({"error": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            logger.exception(
+                "revert failed",
+                extra={"resource_type": resource_type, "resource_id": str(resource_id)},
+            )
+            return Response({"error": "internal error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
