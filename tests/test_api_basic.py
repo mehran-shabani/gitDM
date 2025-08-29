@@ -11,6 +11,7 @@ def test_token_and_create_patient():
     c = APIClient()
     r = c.post('/api/token/', {'username': 'u1', 'password': 'p1'}, format='json')
     assert r.status_code == 200
+    assert 'access' in r.data and 'refresh' in r.data
     token = r.data['access']
     c.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
     payload = {
