@@ -22,6 +22,11 @@ PATCH_TARGET = "doc.phase7.should_coding_code"  # module path to patch
 
 class ExportPatientViewTests(TestCase):
     def setUp(self):
+        """
+        یک RequestFactory جدید را برای استفاده در هر تست مقداردهی اولیه می‌کند.
+        
+        این متد که پیش از اجرای هر مورد آزمون فراخوانی می‌شود، یک نمونه RequestFactory در self.factory ایجاد می‌کند تا درخواست‌های شبیه‌سازی‌شده (GET/POST و غیره) در تست‌های view قابل ساخت و ارسال باشند.
+        """
         self.factory = RequestFactory()
 
     def test_unauthorized_returns_401_json_error(self):

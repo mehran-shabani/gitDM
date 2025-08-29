@@ -27,6 +27,19 @@ API_URLS_CANDIDATES = [
 
 
 def _import_first(modules: Iterable[str]) -> object:
+    """
+    یک ماژول از فهرست مسیرهای ماژول داده‌شده به ترتیب وارد (import) می‌کند و اولین ماژولِ قابل وارد شدن را برمی‌گرداند.
+    
+    پارامترها:
+        modules (Iterable[str]): یک iterable از نام‌های ماژولی (مثلاً "api.urls" یا "apps.api.urls") که به ترتیب تلاش برای وارد کردن آنها انجام می‌شود.
+    
+    برگردان:
+        object: شیء ماژولِ وارد شدهٔ موفق (همان چیزی که importlib.import_module برمی‌گرداند).
+    
+    خطاها:
+        هر استثنایی که در آخرین تلاش وارد کردن رخ داده باشد را بازپخش می‌کند؛
+        اگر هیچ تلاشی انجام نشد (لیست خالی) یک ImportError با پیام "Could not import any API urls module" رخ می‌دهد.
+    """
     last_exc = None
     for m in modules:
         try:
@@ -44,18 +57,39 @@ api_urls = _import_first(API_URLS_CANDIDATES)
 
 @pytest.fixture(scope="module")
 def urlpatterns() -> list:
+    """
+    یک لیست از URL pattern‌های ماژول API را برمی‌گرداند.
+    
+    این تابع بررسی می‌کند که ماژول `api_urls` دارای صفت `urlpatterns` باشد و در صورت نبودن با AssertionError متوقف می‌شود. سپس مقدار `api_urls.urlpatterns` را بازمی‌گرداند که معمولاً فهرستی از الگوهای URL (Django URL patterns) است.
+    """
     assert hasattr(api_urls, "urlpatterns"), "urlpatterns not found in api urls module"
     return api_urls.urlpatterns
 
 
 @pytest.fixture(scope="module")
 def health_view() -> Callable:
+    """
+    یک تابع کم‌حجم که نمای (view) سلامت را از ماژول آدرس‌دهی API برمی‌گرداند.
+    
+    این تابع بررسی می‌کند که ماژول api_urls دارای صفت `health` باشد و در صورت نبودن آن با AssertionError با پیام `"health view not found in api urls module"` شکست می‌دهد. در صورت وجود، مقدار `api_urls.health` (معمولاً یک callable مناسب برای استفاده به‌عنوان Django view) را بازمی‌گرداند.
+    """
     assert hasattr(api_urls, "health"), "health view not found in api urls module"
     return api_urls.health
 
 
 @pytest.fixture
 def rf() -> RequestFactory:
+    """
+    تهیه‌کنندهٔ یک RequestFactoryٔ جدید برای استفاده در تست‌ها.
+    
+    این تابع (به‌صورت fixture در تست‌ها) یک نمونهٔ جدید از
+    django.test.RequestFactory را برمی‌گرداند که برای ساختن درخواست‌های فرضی
+    (GET/POST/HEAD و ...) در unit/integration تست‌های ویوها و middlewareها استفاده می‌شود.
+    بازگردانده‌شده همیشه یک نمونهٔ تازه است (بدون حالت مشترک بین فراخوانی‌ها).
+    
+    Returns:
+        RequestFactory: نمونهٔ جدیدی از django.test.RequestFactory برای ساخت درخواست‌های تستی.
+    """
     return RequestFactory()
 
 
@@ -121,6 +155,14 @@ class TestHealthViewBehavior:
     def test_health_get_ok_json_and_never_cache_headers(
         self, rf: RequestFactory, health_view: Callable
     ) -> None:
+        """
+        آزمون اینکه نماگر سلامت (health view) به درخواست GET به مسیر "/health/" پاسخ 200 با بدنه JSON {"status": "ok"} برمی‌گرداند و هدرهای جلوگیری از کشینگ قوی را تنظیم می‌کند.
+        
+        جزئیات:
+        - درخواست GET به "/health/" ارسال می‌شود (با استفاده از RequestFactory و fixture مربوطه).
+        - انتظار می‌رود وضعیت پاسخ برابر 200 باشد و بدنه JSON دقیقا {"status": "ok"} باشد.
+        - هدرهای مرتبط با کشینگ باید مانع ذخیره‌سازی شوند: مقدار `Cache-Control` باید شامل `no-cache`، `no-store` و `max-age=0` باشد، مقدار `Pragma` باید `no-cache` باشد و هدر `Expires` باید موجود باشد.
+        """
         req = rf.get("/health/")
         res = health_view(req)
         assert res.status_code == 200
