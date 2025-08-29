@@ -30,14 +30,22 @@ class AISummary(models.Model):
                 })
 
     def __str__(self) -> str:
-        """
-        یک رشتهٔ نمایش خوانا برای پنل ادمین که خلاصهٔ AI را به صورت "AI Summary for <نام بیمار> - <نام مدل>" ارائه می‌دهد.
-        
-        از patient.full_name و content_type.model برای ساخت این نمایش استفاده می‌شود. مقدار تولیدشده برای لیست‌ها و نمای مختصر در رابط مدیریت مناسب است و پیش‌وند ثابت انگلیسی "AI Summary for" دارد تا خوانایی و سازگاری بین‌المللی حفظ شود.
-        
-        Returns:
-            str: رشتهٔ نمایش قالب‌بندی‌شده برای این نمونهٔ AISummary.
-        """
+from __future__ import annotations
+
+    def resource_type(self: "AISummary") -> str:
+        """Backward-compatible property for admin display."""
+        return self.content_type.model
+
+    def clean(self: "AISummary") -> None:
+        """Validate that content_object's patient matches self.patient if applicable."""
+        if self.content_object and hasattr(self.content_object, 'patient'):
+            if self.content_object.patient != self.patient:
+                raise ValidationError({
+                    'patient': 'Patient mismatch: The selected patient must match the patient of the related object.'
+                })
+
+    def __str__(self: "AISummary") -> str:
+        """Admin label: 'AI Summary for <patient> - <model>'."""
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
 
 
