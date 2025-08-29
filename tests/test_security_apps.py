@@ -20,7 +20,7 @@ import pytest
 # Import the class under test
 try:
     from security.apps import SecurityConfig
-except Exception as exc:  # pragma: no cover
+except ImportError as exc:  # pragma: no cover
     # import error should be explicit in failure
     pytest.fail(f"Failed to import SecurityConfig from security.apps: {exc}")
 
