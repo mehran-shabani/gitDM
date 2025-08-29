@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    'minio_storage',
+    # 'minio_storage',  # removed to simplify; not required for core functionality
     'patients_core',
     'diab_encounters',
     'diab_labs',
@@ -79,24 +79,38 @@ TEMPLATES = [{
 WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'diabetes'),
-        'USER': os.getenv('POSTGRES_USER', 'diabetes'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'diabetes'),
-        'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+USE_SQLITE = os.getenv('USE_SQLITE', 'True' if DEBUG else 'False').lower() in ('true','1','yes')
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'diabetes'),
+            'USER': os.getenv('POSTGRES_USER', 'diabetes'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'diabetes'),
+            'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
+
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# In config/settings.py
-
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Diabetes Pilot API',
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
-}
-
+# API schema settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Diabetes Pilot API',
     'DESCRIPTION': 'API for Diabetes Management System. Authentication required for all endpoints. '
@@ -113,50 +127,31 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
+# No system user fallback; enforce authenticated actions
+SYSTEM_USER_ID = None
 
-# Redis configuration
-REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': REDIS_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+# Optional Redis; default to local memory cache when not provided
+REDIS_URL = os.getenv('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
         }
     }
-}
-
-# MinIO configuration (django-minio-storage)
-DEFAULT_FILE_STORAGE = 'minio_storage.storage.MinioMediaStorage'
-STATICFILES_STORAGE = 'minio_storage.storage.MinioStaticStorage'
-
-if DEBUG:
-    # Development: use getenv with defaults
-    MINIO_STORAGE_ENDPOINT = os.getenv('MINIO_STORAGE_ENDPOINT', 'localhost:9000')
-    MINIO_STORAGE_ACCESS_KEY = os.getenv('MINIO_STORAGE_ACCESS_KEY', 'minioadmin')
-    MINIO_STORAGE_SECRET_KEY = os.getenv('MINIO_STORAGE_SECRET_KEY', 'minioadmin')
-    MINIO_STORAGE_MEDIA_BUCKET_NAME = os.getenv('MINIO_STORAGE_MEDIA_BUCKET', 'media')
-    MINIO_STORAGE_STATIC_BUCKET_NAME = os.getenv('MINIO_STORAGE_STATIC_BUCKET', 'static')
 else:
-    # Production: require environment variables
-    MINIO_STORAGE_ENDPOINT = os.environ['MINIO_STORAGE_ENDPOINT']
-    MINIO_STORAGE_ACCESS_KEY = os.environ['MINIO_STORAGE_ACCESS_KEY']
-    MINIO_STORAGE_SECRET_KEY = os.environ['MINIO_STORAGE_SECRET_KEY']
-    MINIO_STORAGE_MEDIA_BUCKET_NAME = os.environ['MINIO_STORAGE_MEDIA_BUCKET']
-    MINIO_STORAGE_STATIC_BUCKET_NAME = os.environ['MINIO_STORAGE_STATIC_BUCKET']
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
 
-MINIO_STORAGE_USE_HTTPS = os.getenv('MINIO_STORAGE_USE_HTTPS', 'False').lower() in ('true', '1', 'yes')
-MINIO_STORAGE_AUTO_CREATE_MEDIA_BUCKET = False
-MINIO_STORAGE_AUTO_CREATE_STATIC_BUCKET = False
+# Use default Django file storage
 
-# Celery Configuration
-CELERY_BROKER_URL = REDIS_URL
-CELERY_RESULT_BACKEND = REDIS_URL
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
+# Omit Celery by default; enable via env in deployments if needed
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

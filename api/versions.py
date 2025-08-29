@@ -1,7 +1,7 @@
 import logging
 from typing import Any, ClassVar, Sequence, Type
 from rest_framework import viewsets, status, serializers
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
@@ -31,9 +31,9 @@ class VersionViewSet(viewsets.GenericViewSet):
         orders them by 'version' ascending, and returns a paginated HTTP response.
         """
         qs = RecordVersion.objects.filter(
-            resource_type=resource_type, resource_id=resource_id
+            resource_type=resource_type, resource_id=str(resource_id)
         ).order_by('version')
-
+        
         page = self.paginate_queryset(qs)
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)

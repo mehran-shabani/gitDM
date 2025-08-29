@@ -1,4 +1,3 @@
-from uuid import UUID
 from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -15,7 +14,7 @@ from .serializers import (
     MedicationOrderSerializer, ClinicalReferenceSerializer, AISummarySerializer
 )
 
-SYSTEM_USER_ID = UUID(getattr(settings, 'SYSTEM_USER_ID'))
+SYSTEM_USER_ID = getattr(settings, 'SYSTEM_USER_ID', None)
 
 
 from rest_framework import viewsets
@@ -43,6 +42,10 @@ class PatientViewSet(viewsets.ModelViewSet):
         if getattr(user, "is_superuser", False):
             return super().get_queryset()
         return super().get_queryset().filter(primary_doctor=user)
+    
+    def perform_create(self, serializer) -> None:
+        # Assign current user as primary_doctor to satisfy permission model
+        serializer.save(primary_doctor=self.request.user)
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):
         """
@@ -107,28 +110,13 @@ class EncounterViewSet(viewsets.ModelViewSet):
     serializer_class = EncounterSerializer
 
     def perform_create(self, serializer) -> None:
-        # Use the authenticated user if available, otherwise use system user
         """
         ایجاد و ذخیره‌ی یک نمونه Encounter و تعیین نویسندهٔ آن.
         
-        این متد هنگام ایجاد (create) یک Encounter، serializer.save() را فراخوانی می‌کند و فیلد مالک/سازنده را تضمینی مقداردهی می‌کند: اگر درخواست‌دهنده احراز هویت شده باشد، شیٔ User مربوطه در created_by قرار می‌گیرد، و در غیر این‌صورت به‌عنوان مقدار جایگزین شناسه‌ی UUID تعریف‌شده در SYSTEM_USER_ID در created_by_id نوشته می‌شود. نتیجهٔ متد ایجاد و ذخیرهٔ شیٔ پایگاه‌داده‌ای Encounter است؛ این روش تضمین می‌کند همیشه یک مقدار مرجع برای سازنده وجود دارد (یا ارجاع به یک User واقعی یا شناسهٔ سیستم).
+        این متد هنگام ایجاد (create) یک Encounter، serializer.save() را فراخوانی می‌کند و فیلد created_by را با کاربر احراز هویت شده مقداردهی می‌کند.
+        چون این ViewSet از تنظیمات پیش‌فرض DRF استفاده می‌کند که نیازمند احراز هویت است، کاربر همیشه احراز هویت شده خواهد بود.
         """
-        user = self.request.user if self.request.user.is_authenticated else None
-        if user:
-            serializer.save(created_by=user)
-            return
-
-        # Fallback به کاربر سیستمی واقعی
-        User = get_user_model()
-        try:
-            system_user = User.objects.get(pk=SYSTEM_USER_ID)
-        except User.DoesNotExist as exc:
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "SYSTEM_USER_ID not found in the user table. "
-                "Create the system user or set a valid existing UUID."
-            ) from exc
-        serializer.save(created_by=system_user)
+        serializer.save(created_by=self.request.user)
 
 
 class LabResultViewSet(viewsets.ModelViewSet):

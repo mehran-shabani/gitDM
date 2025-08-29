@@ -1,5 +1,4 @@
 import threading
-import uuid
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -36,10 +35,11 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
         dict: دیکشنریِ فیلدها و مقادیرِ نمونه که UUIDها به رشته تبدیل شده‌اند.
     """
     d = model_to_dict(instance)
-    # Convert UUIDs to strings for JSON serialization
-    for key, value in d.items():
-        if isinstance(value, uuid.UUID):
-            d[key] = str(value)
+    # Convert non-JSON-serializable values to strings
+    import datetime
+    for key, value in list(d.items()):
+        if isinstance(value, datetime.datetime):
+            d[key] = value.isoformat()
     return d
 
 
@@ -125,7 +125,7 @@ def save_with_version(
     _thread_state.in_version = True
     try:
         rtype = instance.__class__.__name__
-        rid = instance.id  # Direct attribute access
+        rid = str(instance.pk)
         curr = _compute_snapshot(instance)
         
         # Retry mechanism for handling race conditions
@@ -133,7 +133,7 @@ def save_with_version(
             try:
                 last = (RecordVersion.objects
                         .select_for_update(skip_locked=True)
-                        .filter(resource_type=rtype, resource_id=rid)
+                        .filter(resource_type=rtype, resource_id=str(rid))
                         .order_by('-version')
                         .first())
                 next_ver = 1 if not last else last.version + 1
@@ -142,7 +142,7 @@ def save_with_version(
                 
                 RecordVersion.objects.create(
                     resource_type=rtype,
-                    resource_id=rid,
+                    resource_id=str(rid),
                     version=next_ver,
                     prev_version=None if not last else last.version,
                     snapshot=curr,
@@ -228,7 +228,7 @@ def revert_to_version(
     
     target = RecordVersion.objects.get(
         resource_type=resource_type, 
-        resource_id=resource_id, 
+        resource_id=str(resource_id), 
         version=target_version
     )
     
@@ -236,7 +236,17 @@ def revert_to_version(
     for k, v in target.snapshot.items():
         if k in IGNORE_FIELDS:
             continue
-        setattr(obj, k, v)
+        # Handle FK fields by assigning instance when possible
+        field = obj._meta.get_field(k)
+        if field.many_to_one and not isinstance(v, dict):
+            try:
+                rel_model = field.remote_field.model
+                v_inst = rel_model.objects.get(pk=v)
+                setattr(obj, k, v_inst)
+            except (rel_model.DoesNotExist, ValueError, TypeError):
+                setattr(obj, k, v)
+        else:
+            setattr(obj, k, v)
     
     # Apply changes without triggering post_save signals
     fields = {k: v for k, v in target.snapshot.items() if k not in IGNORE_FIELDS}
