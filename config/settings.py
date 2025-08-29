@@ -7,14 +7,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security settings
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 if not SECRET_KEY:
-    if os.getenv('DJANGO_DEBUG', 'True') == 'True':
+    if os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes'):
         # Only use a default key in DEBUG mode for development
         SECRET_KEY = 'django-insecure-dev-key-do-not-use-in-production'
     else:
         raise ImproperlyConfigured(
             "The SECRET_KEY setting must not be empty in production."
         )
-
 DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
 
 # ALLOWED_HOSTS configuration
