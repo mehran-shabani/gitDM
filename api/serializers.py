@@ -8,8 +8,10 @@ from ai_summarizer.models import AISummary
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    primary_doctor_id = serializers.UUIDField(source='primary_doctor.id', read_only=True)
-    
+    primary_doctor_id = serializers.UUIDField(
+        source='primary_doctor.id',
+        read_only=True,
+    )
     class Meta:
         model = Patient
         fields = ['id', 'national_id', 'full_name', 'dob', 'sex', 'primary_doctor', 'primary_doctor_id', 'created_at']
