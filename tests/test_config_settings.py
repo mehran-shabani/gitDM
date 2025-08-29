@@ -111,7 +111,7 @@ def test_allowed_hosts_required_in_production_raises_when_missing_secret_is_ok()
         "DJANGO_DEBUG": "False",
         "DJANGO_SECRET_KEY": "prod-secret",
     }
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(ImproperlyConfigured) as excinfo:
         with fresh_import_with_env(env):
             pass
     assert "ALLOWED_HOSTS" in str(excinfo.value)
