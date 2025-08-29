@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     # 'minio_storage',  # removed to simplify; not required for core functionality
+    'security',
+    'api',
     'patients_core',
     'diab_encounters',
     'diab_labs',
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'security.middleware.AuditMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
