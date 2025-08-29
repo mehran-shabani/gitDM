@@ -61,10 +61,11 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 
 ## 🚀 Getting Started
 
-1. Review the phase documentation in `/doc/phase1/` to understand the project setup
-2. Check AI agent configurations in `/cursoragent/` and `/gemini/`
-3. Follow the implementation guidelines in phase-specific `should-*.md` files
-4. Ensure all changes maintain Helssa compatibility standards
+1. Copy `.env.example` to `.env` and adjust values as needed
+2. Simple stack (SQLite): `./scripts/start-simple.sh` (stop with `./scripts/stop-simple.sh`)
+3. Advanced stack (Postgres, Redis, MinIO): `./scripts/start-advanced.sh` (stop with `./scripts/stop-advanced.sh`)
+4. API docs: Swagger at `/api/docs/`, Redoc at `/api/redoc/`, RapiDoc at `/api/rapidoc/`, schema at `/api/schema/`
+5. Health at `/api/health/`, readiness at `/api/ready/`
 
 ## 🔐 Authentication & User Management
 
