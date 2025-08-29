@@ -1,5 +1,7 @@
 # کدهای الزامی – API
 
+**نکته مهم**: این سیستم فقط از طریق پنل ادمین Django امکان ایجاد کاربر دارد. هیچ endpoint عمومی برای ثبت‌نام وجود ندارد.
+
 ## config/settings.py (بخش‌های افزوده/به‌روزشده)
 REST_FRAMEWORK.update({
     'DEFAULT_AUTHENTICATION_CLASSES': (
