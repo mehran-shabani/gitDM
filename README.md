@@ -66,6 +66,17 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 3. Follow the implementation guidelines in phase-specific `should-*.md` files
 4. Ensure all changes maintain Helssa compatibility standards
 
+## 🔐 Authentication & User Management
+
+This application uses **JWT authentication** with **admin-only user creation**:
+
+- **No Public Signup**: Users can only be created through Django admin panel
+- **JWT Tokens**: API access requires valid JWT tokens obtained via `/api/token/`
+- **Secure by Design**: No public user registration endpoints exist
+- **Admin Control**: Full user lifecycle management through Django admin
+
+For detailed authentication documentation, see `/doc/phase4/authentication-guide.md`
+
 ## 📝 Contributing
 
 - All development should follow the phase-based approach

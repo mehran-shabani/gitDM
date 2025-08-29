@@ -101,6 +101,12 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Diabetes Pilot API',
+    'DESCRIPTION': 'API for Diabetes Management System. Authentication required for all endpoints. '
+                   'Users are created exclusively through Django admin panel - no public registration available.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api',
 }
 
 SIMPLE_JWT = {
