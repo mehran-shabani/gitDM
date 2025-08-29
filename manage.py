@@ -6,7 +6,21 @@ import sys
 
 def main() -> None:
     """اجرای ابزار خط‌دستور مدیریتی جنگو (پیام خطا کوتاه، بدون traceback)."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+    # Load environment variables from .env file
+    try:
+        from dotenv import load_dotenv
+        load_dotenv()
+    except ImportError:
+        pass
+    
+    # Determine settings module based on environment
+    settings_mode = os.getenv('SETTINGS_MODE', 'full')
+    if settings_mode == 'simple':
+        settings_module = 'config.simple_settings'
+    else:
+        settings_module = 'config.settings'
+    
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', settings_module)
     try:
         from django.core.management import execute_from_command_line
     except ImportError:

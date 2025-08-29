@@ -183,3 +183,75 @@ API های authentication موجود هستند و نیازی به ایجاد en
 تنظیمات اضافی حذف شدند و کل ساختار بهینه‌تر شد.
 
 ⚠️ **توجه**: قبل از استفاده در production حتماً migration ها را روی یک کپی از داده‌ها تست کنید.
+
+---
+
+## 🐳 **تنظیمات Docker و حالت‌های مختلف**
+
+### 📁 **فایل‌های جدید اضافه شده:**
+- `config/simple_settings.py` - تنظیمات ساده با SQLite
+- `docker-compose.simple.yml` - Docker compose برای حالت ساده  
+- `.env` و `.env.example` - مدیریت environment variables
+- `switch_mode.sh` - اسکریپت تغییر حالت
+
+### 🔄 **دو حالت پیکربندی:**
+
+#### **Simple Mode** (حالت ساده):
+```bash
+./switch_mode.sh simple
+```
+- **Database**: SQLite (فایل محلی)
+- **Cache**: Django LocMem Cache  
+- **Storage**: Django FileSystemStorage
+- **Dependencies**: بدون نیاز به Redis, PostgreSQL, MinIO
+
+#### **Full Mode** (حالت کامل):
+```bash
+./switch_mode.sh full
+```
+- **Database**: PostgreSQL
+- **Cache**: Redis
+- **Storage**: MinIO (S3-compatible)
+- **Dependencies**: نیاز به سرویس‌های خارجی
+
+### 🚀 **راه‌های اجرا:**
+
+#### **Python محلی:**
+```bash
+# تنظیم حالت
+./switch_mode.sh simple
+
+# اجرای برنامه
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
+```
+
+#### **Docker Simple:**
+```bash
+./switch_mode.sh simple
+docker-compose -f docker-compose.simple.yml up
+```
+
+#### **Docker Full:**
+```bash
+./switch_mode.sh full
+docker-compose up
+```
+
+### ✅ **تست شده:**
+- ✅ Migration ها با SQLite کار می‌کنند
+- ✅ JWT Authentication فعال است (`/api/token/`)
+- ✅ API endpoints در دسترس هستند (`/api/`)
+- ✅ Django Admin در دسترس است (`/admin/`)
+- ✅ Health check کار می‌کند
+
+### 🔧 **Environment Variables:**
+```bash
+# در .env
+SETTINGS_MODE=simple     # یا full
+DJANGO_DEBUG=True
+DJANGO_SECRET_KEY=your-key
+```
+
+این تنظیمات اجازه می‌دهد پروژه هم برای development ساده و هم برای production پیچیده استفاده شود.
