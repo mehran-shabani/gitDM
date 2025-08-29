@@ -246,6 +246,8 @@ def test_versions_history_endpoint_lists_versions() -> None:
     p.save()
 
     candidate_paths = [
+        f"/api/versions/Patient/{p.id}/",
+        # Legacy paths for backward compatibility
         f"/api/versioning/Patient/{p.id}/history/",
         f"/records-versioning/Patient/{p.id}/history/",
         f"/api/records-versioning/Patient/{p.id}/history/",

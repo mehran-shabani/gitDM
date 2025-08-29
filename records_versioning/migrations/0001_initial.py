@@ -30,15 +30,11 @@ class Migration(migrations.Migration):
                 ('changed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-             options={
--                'indexes': [
--                    models.Index(fields=['resource_type', 'resource_id', 'version'], name='records_ver_resourc_8e8f5f_idx'),
--                    models.Index(fields=['changed_at'], name='records_ver_changed_f3e8f5_idx'),
--                ],
                 'indexes': [
+                    models.Index(fields=['resource_type', 'resource_id', 'version'], name='records_ver_resourc_8e8f5f_idx'),
                     models.Index(fields=['changed_at'], name='records_ver_changed_f3e8f5_idx'),
                 ],
                 'unique_together': {('resource_type', 'resource_id', 'version')},
-             },
+            },
         ),
     ]
