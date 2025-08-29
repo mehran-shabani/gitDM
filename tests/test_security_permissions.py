@@ -125,8 +125,9 @@ def test_permissions_when_user_has_no_role_attribute(view_unused: Any) -> None:
     assert IsDoctor().has_permission(req, view_unused) is False
 
 
-def test_permissions_when_user_is_none(view_unused: Any) -> None:
-    req = FakeRequest(user=None)
+def test_permissions_when_role_is_none(view_unused: Any) -> None:
+    user = Obj(role=None)
+    req = FakeRequest(user=user)
     # hasattr(None, 'role') -> False; should not raise
     assert IsAdmin().has_permission(req, view_unused) is False
     assert IsDoctor().has_permission(req, view_unused) is False
