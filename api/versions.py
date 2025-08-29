@@ -17,22 +17,20 @@ class VersionViewSet(viewsets.ViewSet):
         return Response(data)
 
     @action(detail=False, methods=['post'])
-    def revert(self, request):
-        resource_type = request.data.get('resource_type')
-        resource_id = request.data.get('resource_id')
-        
-        # Validate input
+    def revert(self, request, resource_type=None, resource_id=None):
+        # Get resource identifiers from URL parameters
         if not resource_type or not resource_id:
             return Response(
-                {"error": "Missing required fields: resource_type and resource_id"}, 
+                {"error": "Missing required URL parameters: resource_type and resource_id"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Get target version from request body
         try:
             target_version = int(request.data.get('target_version'))
         except (ValueError, TypeError):
             return Response(
-                {"error": "Invalid or missing 'target_version'"}, 
+                {"error": "Invalid or missing 'target_version' in request body"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         

@@ -19,11 +19,13 @@ def health(_request: HttpRequest) -> JsonResponse:
     """لایونس‌چک ساده: 200 و {"status": "ok"}؛ فقط GET/HEAD و کش غیرفعال."""
     return JsonResponse({"status": "ok"})
 
-# Create version list view
+# Create version views
 version_list = VersionViewSet.as_view({'get': 'list'})
+version_revert = VersionViewSet.as_view({'post': 'revert'})
 
 urlpatterns = [
     path('health/', health, name='health'),
     path('', include(router.urls)),
     path('versions/<str:resource_type>/<uuid:resource_id>/', version_list, name='version-list'),
+    path('versions/<str:resource_type>/<uuid:resource_id>/revert/', version_revert, name='version-revert'),
 ]
