@@ -9,6 +9,7 @@ from .views import (
     MedicationOrderViewSet, ClinicalReferenceViewSet
 )
 from .root_view import api_root
+from .views_export import export_patient
 
 
 @never_cache
@@ -34,4 +35,6 @@ urlpatterns = [
     # Convenience: expose also under /api prefix when included at project root
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair_api'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_api'),
+    # Export patient data endpoint
+    path('export/patient/<uuid:pk>/', export_patient, name='export_patient'),
 ]
