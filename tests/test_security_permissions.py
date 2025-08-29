@@ -27,13 +27,13 @@ from typing import Any
 # Adjust import paths if your project structure differs.
 try:
     from security.permissions import IsAdmin, IsDoctor  # pragma: no cover
-except Exception:
+except (ImportError, ModuleNotFoundError):
     try:
         from app.security.permissions import IsAdmin, IsDoctor  # pragma: no cover
-    except Exception:
+    except (ImportError, ModuleNotFoundError):
         try:
             from permissions import IsAdmin, IsDoctor  # pragma: no cover
-        except Exception as e:  # Last resort: fail with a clear message
+        except (ImportError, ModuleNotFoundError) as e:  # Last resort: fail with a clear message
             raise ImportError(
                 "Could not import IsAdmin/IsDoctor. "
                 "Tried: security.permissions, app.security.permissions, permissions. "
