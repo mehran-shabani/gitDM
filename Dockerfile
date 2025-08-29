@@ -1,23 +1,35 @@
+# Dockerfile
+
 FROM python:3.11-slim
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    bash \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
 WORKDIR /app
 
-# Create a non-root user and group
-RUN addgroup --system app && adduser --system --group app
-
+# Copy dependency list
 COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Python packages
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Copy source code
 COPY . .
 
-# Change ownership to the new user
-RUN chown -R app:app /app
+# Entrypoint script
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Switch to the non-root user
-USER app
-
-RUN python manage.py migrate && python manage.py collectstatic --noinput
-
+# Expose default Django port
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/entrypoint.sh"]

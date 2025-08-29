@@ -1,18 +1,32 @@
+# --- Django core ---
 Django>=5.0
+
+# --- REST & Auth ---
 djangorestframework>=3.15
-psycopg2-binary>=2.9
-python-dotenv>=1.0
 djangorestframework-simplejwt>=5.3
 drf-spectacular>=0.27
-uvicorn[standard]>=0.30
+
+# --- Database (PostgreSQL driver) ---
+psycopg2-binary>=2.9    # درایور Postgres برای Django
+
+# --- Celery & scheduling ---
 celery>=5.3
+django-celery-beat>=2.5  # اگر از DatabaseScheduler استفاده کنی لازم میشه
+
+# --- Redis (cache, broker, result) ---
 redis>=5.0
 django-redis>=5.4
-django-storages>=1.14
-boto3>=1.33
-django-minio-storage>=0.1.0
+
+# --- Storage (MinIO / S3-compatible) ---
+django-storages>=1.14    # نیاز به 'storages' داخل INSTALLED_APPS
+boto3>=1.33              # برای S3/MinIO وقتی با django-storages کار می‌کنی
+django-minio-storage>=0.1.0  # اگر از backend اختصاصی MinIO استفاده کنی (INSTALLED_APPS لازم ندارد)
+
+# --- AI / LLM ---
 openai>=1.65.0
-psycopg2-binary==2.9.10
-postgrest>=0.1.0
-django-background-tasks>=1.2.0
-drf_spectacular>=0.27
+
+# --- Server ---
+gunicorn>=21.2
+
+# --- Optional (لوکال ران کردن با .env) ---
+python-dotenv>=1.0
