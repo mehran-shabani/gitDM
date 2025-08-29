@@ -33,3 +33,4 @@ class AISummary(models.Model):
         """نمایش کوتاه برای ادمین: 'AI Summary for <Patient> - <Model>'."""
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
 
+

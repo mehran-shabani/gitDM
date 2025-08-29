@@ -1,12 +1,17 @@
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from api import urls as api_urls
-from api.routers import urlpatterns as health_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('api.routers')),
+    path('api/', include('api.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
+
+# Include api.routers if available
+try:
+    from api.routers import urlpatterns as health_urls
+    urlpatterns.append(path('', include('api.routers')))
+except ImportError:
+    pass

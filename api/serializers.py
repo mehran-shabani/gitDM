@@ -4,13 +4,16 @@ from diab_encounters.models import Encounter
 from diab_labs.models import LabResult
 from diab_medications.models import MedicationOrder
 from clinical_refs.models import ClinicalReference
+from ai_summarizer.models import AISummary
 
 
 class PatientSerializer(serializers.ModelSerializer):
+    primary_doctor_id = serializers.UUIDField(source='primary_doctor.id', read_only=True)
+    
     class Meta:
         model = Patient
-        fields = ['id', 'national_id', 'full_name', 'dob', 'sex', 'primary_doctor_id', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'national_id', 'full_name', 'dob', 'sex', 'primary_doctor', 'primary_doctor_id', 'created_at']
+        read_only_fields = ['id', 'created_at', 'primary_doctor_id']
 
 
 class EncounterSerializer(serializers.ModelSerializer):
@@ -39,3 +42,16 @@ class ClinicalReferenceSerializer(serializers.ModelSerializer):
         model = ClinicalReference
         fields = ['id', 'title', 'source', 'year', 'url', 'topic']
         read_only_fields = ['id']
+
+
+class AISummarySerializer(serializers.ModelSerializer):
+    resource_type = serializers.CharField(read_only=True)
+    resource_id = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = AISummary
+        fields = ['id', 'resource_type', 'resource_id', 'summary', 'created_at']
+        read_only_fields = ['id', 'resource_type', 'resource_id', 'created_at']
+    
+    def get_resource_id(self, obj):
+        return str(obj.object_id)

@@ -11,7 +11,7 @@ from clinical_refs.models import ClinicalReference
 from ai_summarizer.models import AISummary
 from .serializers import (
     PatientSerializer, EncounterSerializer, LabResultSerializer,
-    MedicationOrderSerializer, ClinicalReferenceSerializer
+    MedicationOrderSerializer, ClinicalReferenceSerializer, AISummarySerializer
 )
 
 SYSTEM_USER_ID = UUID(getattr(settings, 'SYSTEM_USER_ID'))
@@ -24,23 +24,21 @@ class PatientViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):
         p = self.get_object()
-        enc = Encounter.objects.filter(patient=p).order_by('-occurred_at')
-        labs = LabResult.objects.filter(patient=p).order_by('-taken_at')
-        meds = MedicationOrder.objects.filter(patient=p).order_by('-start_date')
+        # Limit results to prevent performance issues
+        limit = int(request.query_params.get('limit', 100))
+        limit = min(limit, 500)  # Max 500 items per type
+        
+        enc = Encounter.objects.filter(patient=p).order_by('-occurred_at')[:limit]
+        labs = LabResult.objects.filter(patient=p).order_by('-taken_at')[:limit]
+        meds = MedicationOrder.objects.filter(patient=p).order_by('-start_date')[:limit]
         summaries = AISummary.objects.filter(patient=p).order_by('-created_at')[:5]
+        
         return Response({
             'patient': PatientSerializer(p).data,
             'encounters': EncounterSerializer(enc, many=True).data,
             'labs': LabResultSerializer(labs, many=True).data,
             'medications': MedicationOrderSerializer(meds, many=True).data,
-            'ai_summaries': [
-                {
-                    'resource_type': s.resource_type,
-                    'resource_id': str(s.resource_id),
-                    'summary': s.summary,
-                    'created_at': s.created_at,
-                } for s in summaries
-            ]
+            'ai_summaries': AISummarySerializer(summaries, many=True).data
         })
 
 
@@ -49,7 +47,13 @@ class EncounterViewSet(viewsets.ModelViewSet):
     serializer_class = EncounterSerializer
 
     def perform_create(self, serializer):
-        serializer.save(created_by=SYSTEM_USER_ID)
+        # Use the authenticated user if available, otherwise use system user
+        user = self.request.user if self.request.user.is_authenticated else None
+        if user:
+            serializer.save(created_by=user)
+        else:
+            # Fallback to system user ID - this should ideally be a proper User instance
+            serializer.save(created_by_id=SYSTEM_USER_ID)
 
 
 class LabResultViewSet(viewsets.ModelViewSet):
