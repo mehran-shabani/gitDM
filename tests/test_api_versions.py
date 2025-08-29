@@ -109,17 +109,19 @@ class TestApiVersionPaths:
 @pytest.mark.skipif(not HAS_DRF, reason="DRF not installed in test environment")
 class TestVersionEndpoints:
     def test_versions_list_empty_ok(self) -> None:
+        from uuid import uuid4
         client = APIClient()
-        resp = client.get(f"/api/versions/Patient/999999/")
+        resp = client.get(f"/api/versions/Patient/{uuid4()}/")
         assert resp.status_code == 200
         data = resp.json()
         assert isinstance(data, list)
         assert data == []
 
     def test_versions_revert_missing_target_version_400(self) -> None:
+        from uuid import uuid4
         client = APIClient()
         resp = client.post(
-            f"/api/versions/Patient/999999/revert/", 
+            f"/api/versions/Patient/{uuid4()}/revert/", 
             data={}, 
             format="json"
         )

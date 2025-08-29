@@ -144,10 +144,11 @@ def test_revert_rejects_invalid_version_numbers() -> None:
 
 @pytest.mark.django_db
 def test_revert_requires_existing_resource() -> None:
+    import uuid
     admin = User.objects.create_user(username="admin_missing", password="p")
     # Non-existent Patient id
     with pytest.raises(Patient.DoesNotExist):
-        revert_to_version("Patient", 999999, 1, admin)  # Using non-existent integer ID
+        revert_to_version("Patient", uuid.uuid4(), 1, admin)
 
 
 @pytest.mark.django_db

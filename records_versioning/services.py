@@ -1,4 +1,5 @@
 import threading
+import uuid
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -35,7 +36,10 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
         dict: دیکشنریِ فیلدها و مقادیرِ نمونه که UUIDها به رشته تبدیل شده‌اند.
     """
     d = model_to_dict(instance)
-    # No need to convert IDs as they are already integers
+    # Convert UUIDs to strings for JSON serialization
+    for key, value in d.items():
+        if isinstance(value, uuid.UUID):
+            d[key] = str(value)
     return d
 
 

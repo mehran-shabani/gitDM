@@ -116,7 +116,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-SYSTEM_USER_ID = 1  # Default system user ID (integer)
+SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 # Redis configuration
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')

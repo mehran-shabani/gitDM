@@ -6,7 +6,7 @@ class RecordVersion(models.Model):
     id = models.BigAutoField(primary_key=True)
     resource_type = models.CharField(max_length=48)  # 'Patient','Encounter','LabResult','MedicationOrder'
 
-    resource_id = models.PositiveIntegerField()
+    resource_id = models.UUIDField()
     version = models.PositiveIntegerField()
     prev_version = models.PositiveIntegerField(null=True, blank=True)
     snapshot = models.JSONField()

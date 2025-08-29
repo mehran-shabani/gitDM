@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+import uuid
 
 
 class Patient(models.Model):
@@ -9,7 +10,7 @@ class Patient(models.Model):
         OTHER = 'OTHER', 'Other'
     
 
-    id = models.AutoField(primary_key=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     full_name = models.CharField(max_length=120)
     dob = models.DateField(null=True, blank=True)
