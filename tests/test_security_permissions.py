@@ -44,11 +44,26 @@ except Exception:
 class FakeRequest:
     """Minimal request surrogate with a 'user' attribute."""
     def __init__(self, user: Any) -> None:
+        """
+        سازندهٔ شیء حاملِ کاربر را مقداردهی می‌کند.
+        
+        پارامترها:
+            user: شیئی که نمایندهٔ کاربر درخواست است؛ می‌تواند None یا هر نوع دیگری باشد
+                  (مثلاً یک آبجکت ساده با خصوصیت‌های مورد انتظار مانند `role`). مقدار
+                  ورودی بدون اعتبارسنجی نگهداری و در صفت نمونه‌ای `self.user` قرار می‌گیرد.
+        """
         self.user = user
 
 
 class Obj:  # simple dynamic object for attribute bags
     def __init__(self, **kwargs: Any) -> None:
+        """
+        نمونه‌ساز ساده‌ای که مقادیر کلید‌=مقدار داده‌شده را به صفت‌های نمونه انتساب می‌دهد.
+        
+        هر جفت کلید=مقدار در kwargs به‌عنوان صفتی با نام کلید روی شیء قرار می‌گیرد (setattr). این متد هیچ اعتبارسنجی یا کپی‌برداری انجام نمی‌دهد و مقادیر را مستقیماً انتساب می‌کند، بنابراین:
+        - صفت‌های موجود با همان نام بازنویسی خواهند شد.
+        - می‌توان هر نام و هر مقدار معتبری را اضافه کرد.
+        """
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -56,6 +71,14 @@ class Obj:  # simple dynamic object for attribute bags
 @pytest.fixture
 def view_unused() -> Any:
     # The permission classes don't use 'view'; provide a placeholder.
+    """
+    بازگرداندن یک شیء جایگزین که به‌عنوان مقدار نمادین برای پارامتر `view` استفاده می‌شود.
+    
+    این مقدار جهت استفاده در تست‌ها به‌عنوان یک placeholder ارائه می‌شود زیرا کلاس‌های مجوز (`IsAdmin` و `IsDoctor`) پارامتر `view` را استفاده نمی‌کنند. شیء بازگشتی بی‌حالتی (opaque) است و تنها برای متمایز کردن و پر کردن آرگومان `view` در فراخوانی `has_permission` به کار می‌رود.
+    
+    Returns:
+        object: شیء نمادین که به عنوان مقدار `view` در تست‌ها استفاده می‌شود.
+    """
     return object()
 
 
@@ -77,6 +100,18 @@ def test_permissions_with_valid_role_string(
     expected_doctor: bool,
     view_unused: Any,
 ) -> None:
+    """
+    تست پارامتری‌شده‌ای که پذیرش سطوح دسترسی بر اساس رشته نقش داخلی را بررسی می‌کند.
+    
+    هر بار با یک مقدار `user_role` یک شیء کاربر با ساختار تو در تو (user.role.role) ساخته می‌شود و سپس بررسی می‌شود که
+    IsAdmin.has_permission و IsDoctor.has_permission نتیجه‌ی مورد انتظار (`expected_admin` و `expected_doctor`) را برگردانند.
+    
+    Parameters:
+        user_role (str): مقدار رشته‌ای نقش که در user.role.role قرار می‌گیرد (مثلاً "admin" یا "doctor").
+        expected_admin (bool): مقدار بولی مورد انتظار برای IsAdmin().has_permission.
+        expected_doctor (bool): مقدار بولی مورد انتظار برای IsDoctor().has_permission.
+        view_unused (Any): فیکسچر جایگزین برای پارامتر view (در این تست نادیده گرفته می‌شود).
+    """
     user = Obj(role=Obj(role=user_role))
     req = FakeRequest(user=user)
     assert IsAdmin().has_permission(req, view_unused) is expected_admin
@@ -137,6 +172,11 @@ def test_permissions_view_parameter_is_ignored(view_unused: Any) -> None:
 def test_permissions_user_object_without_dunder_dict(view_unused: Any) -> None:
     # Use types.SimpleNamespace (has __dict__) and a custom object without dict
     # to ensure attribute access works
+    """
+    بررسی رفتار کلاس‌های مجوز (IsAdmin و IsDoctor) هنگام دریافت یک شیء کاربر از نوع types.SimpleNamespace.
+    
+    شیء کاربر با صفت تو در تو role.role برابر "admin" ساخته می‌شود؛ انتظار می‌رود IsAdmin.has_permission مقدار True و IsDoctor.has_permission مقدار False بازگرداند. پارامتر view_unused صرفاً یک مقدار کمکی/فیکسچر است و در منطق مجوز نادیده گرفته می‌شود.
+    """
     user = types.SimpleNamespace(role=types.SimpleNamespace(role="admin"))
     req = FakeRequest(user=user)
     assert IsAdmin().has_permission(req, view_unused) is True

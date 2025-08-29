@@ -14,8 +14,18 @@ from django.apps import apps
 
 def _get_model_by_name(name: str) -> None:
     """
-    Resolve a model by its class name across installed apps.
-    Avoids hard-coding import paths for portability across projects.
+    یک مدل را بر اساس نام کلاس‌ (string) در میان اپ‌های نصب‌شده پیدا و برمی‌گرداند.
+    
+    به‌طور دقیق‌تر، نام کلاس مدل را می‌پذیرد و تمام مدل‌های ثبت‌شده در Django را پیمایش می‌کند تا کلاس مدلی که __name__ آن با مقدار ورودی مطابقت دارد بیابد و آن کلاس مدل (نه یک نمونه) را بازگرداند. این تابع برای جلوگیری از واردات سخت‌کد‌شده مسیرهای ماژول مفید است و امکان استفاده از نام کلاس برای دسترسی به مدل را فراهم می‌کند.
+    
+    Parameters:
+        name (str): نام کلاس مدل مورد نظر (مثلاً "AuditLog" یا "Role").
+    
+    Returns:
+        type: کلاس مدل پیدا شده.
+    
+    Raises:
+        LookupError: اگر هیچ مدلی با نام داده‌شده در اپ‌های نصب‌شده یافت نشود.
     """
     for model in apps.get_models():
         if model.__name__ == name:
@@ -71,6 +81,11 @@ class AuditLogModelTests(TestCase):
 
     def test_meta_default_is_not_shared_between_instances(self) -> None:
         # JSONField(default=dict) should create a fresh dict per instance
+        """
+        بررسی می‌کند که مقدار پیش‌فرض فیلد JSONField (`meta`) برای هر نمونه جداگانه است و بین نمونه‌ها به اشتراک گذاشته نمی‌شود.
+        
+        آزمایش برای اطمینان از این که هر بار که یک AuditLog جدید با مقدار پیش‌فرض `meta` ایجاد می‌شود، یک دیکشنری جدید ساخته می‌شود (و نه ارجاع به یک شیء مشترک). با ایجاد دو نمونه، تغییر در `meta` نمونهٔ اول ذخیره و سپس نمونهٔ دوم از دیتابیس تازه‌سازی می‌شود تا تضمین شود `meta` آن همچنان یک دیکشنری خالی است.
+        """
         log1 = AuditLog.objects.create(path="/l1", method="GET", status_code=200)
         log2 = AuditLog.objects.create(path="/l2", method="GET", status_code=200)
 
@@ -85,6 +100,11 @@ class AuditLogModelTests(TestCase):
 
 class RoleModelTests(TestCase):
     def setUp(self) -> None:
+        """
+        یک نمونه‌ی کاربری تستی با نام کاربری "alice" ایجاد می‌کند و در self.user قرار می‌دهد.
+        
+        این متد برای آماده‌سازی پیش‌شرط‌های تست‌های مربوط به مدل Role اجرا می‌شود. کاربر ایجاد شده با رمز عبور "pwd12345" ساخته می‌شود و برای وابستگی‌هایی که نیاز به یک User واقعی دارند (مثلاً ایجاد یا حذف نقش‌ها و بررسی رفتار یک‌به‌یک یا cascade) استفاده می‌شود.
+        """
         self.user = User.objects.create_user(username="alice", password="pwd12345")
 
     def test_role_creation_and_uuid_primary_key(self) -> None:

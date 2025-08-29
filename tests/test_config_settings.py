@@ -15,8 +15,23 @@ SETTINGS_IMPORT_PATH = os.environ.get("TEST_SETTINGS_IMPORT_PATH", "config.setti
 @contextmanager
 def fresh_import_with_env(env: dict) -> None:
     """
-    Temporarily patch environment and import the settings module fresh,
-    forcing module-level code to re-evaluate.
+    روند واردسازی تازهٔ ماژول تنظیمات با محیط موقت را فراهم می‌کند و پس از خروج محیط و کش ماژول را بازیابی می‌کند.
+    
+    این کانتکست‌منیجر:
+    - به‌صورت موقت os.environ را با دیکشنری env جایگزین می‌کند تا ماژول تنظیمات با آن متغیرهای محیطی ارزیابی شود.
+    - هر نمونهٔ قبلی از ماژول مشخص‌شده (SETTINGS_IMPORT_PATH) را از sys.modules حذف می‌کند تا واردسازی جدید اطمیناناً دوباره ارزیابی شود.
+    - ماژول واردشده را به فراخوان بازمی‌گرداند (yield) تا تست‌ها یا کد فراخوان بتوانند به محتوای ماژول دسترسی داشته باشند.
+    - در خروج (حتی در صورت بروز استثناء) محیط اصلی را دقیقاً بازمی‌گرداند و هر ماژول نیمه‌مقداری که ممکن است باقی مانده باشد را حذف می‌کند تا از اثرات جانبی بر سایر تست‌ها جلوگیری شود.
+    
+    پارامترها:
+        env (dict): نگاشت نام متغیرهای محیطی به مقادیرشان که در طول مدت کانتکست باید اعمال شود.
+    
+    مقدار بازگشتی:
+        ماژول واردشده (module): ماژول تنظیمات تازه واردشده که داخل بلوک کانتکست قابل استفاده است.
+    
+    رفتارهای مهم:
+    - هر استثنایی که در زمان واردسازی ماژول رخ دهد از این کانتکست برمی‌گردد (propagates) و مسئول رسیدگی به آن فراخوان است.
+    - این تابع تضمین می‌کند که پس از خروج هیچ‌یک از تغییرات محیط یا ماژول‌های موقتی در فضای نام باقی نماند.
     """
     original_env = os.environ.copy()
     try:
@@ -56,6 +71,14 @@ def test_secret_key_defaults_in_debug_mode() -> None:
 
 def test_secret_key_required_in_production_raises() -> None:
     # With DJANGO_DEBUG false and missing secret => ImproperlyConfigured
+    """
+    تأیید می‌کند که وقتی DJANGO_DEBUG برابر False است و کلید مخفی (SECRET_KEY) وجود ندارد، وارد کردن ماژول تنظیمات باعث بالا آمدن استثنائی مرتبط با تنظیمات (مثل ImproperlyConfigured) می‌شود.
+    
+    شرح:
+    - محیط آزمایشی با DJANGO_DEBUG="False" و یک مقدار برای DJANGO_ALLOWED_HOSTS تنظیم می‌شود تا خطای ناشی از نبود SECRET_KEY به طور ویژه بررسی شود.
+    - از fresh_import_with_env برای وارد کردن تازهٔ ماژول تنظیمات و از pytest.raises برای انتظار ظهور استثنا استفاده می‌شود.
+    - آزمون موفق است اگر هنگام وارد کردن تنظیمات استثناء پرتاب شود و پیام استثناء شامل رشته "SECRET_KEY" باشد.
+    """
     env = {
         "DJANGO_DEBUG": "False",
         # Ensure ALLOWED_HOSTS provided so we isolate SECRET_KEY failure
@@ -77,6 +100,13 @@ def test_allowed_hosts_default_in_debug() -> None:
 
 def test_allowed_hosts_required_in_production_raises_when_missing_secret_is_ok() -> None:
     # Provide SECRET_KEY to isolate ALLOWED_HOSTS error; omit DJANGO_ALLOWED_HOSTS
+    """
+    تست می‌کند که وقتی برنامه در حالت production (DJANGO_DEBUG=False) است و متغیر محیطی DJANGO_ALLOWED_HOSTS تنظیم نشده، وارد کردن ماژول تنظیمات استثنا برمی‌انگیزد.
+    
+    جزئیات:
+    - برای ایزوله کردن علت خطا، یک SECRET_KEY معتبر در محیط قرار داده می‌شود؛ بنابراین هر استثنایی که رخ دهد باید مربوط به نبود ALLOWED_HOSTS باشد.
+    - انتظار می‌رود که هنگام import تنظیمات یک Exception پرتاب شود و پیام آن شامل رشته "ALLOWED_HOSTS" باشد.
+    """
     env = {
         "DJANGO_DEBUG": "False",
         "DJANGO_SECRET_KEY": "prod-secret",
@@ -97,6 +127,14 @@ def test_allowed_hosts_parsing_and_trimming() -> None:
         assert s.ALLOWED_HOSTS == ["api.example.com", "www.example.com", "localhost"]
 
 def test_use_sqlite_defaults_true_when_debug_true_and_sqlite_config() -> None:
+    """
+    اطمینان می‌دهد که وقتی متغیر محیطی DJANGO_DEBUG برابر با True و DJANGO_SECRET_KEY مقداردهی شده است، تنظیمات پروژه به‌صورت پیش‌فرض از SQLite استفاده می‌کنند.
+    
+    این تست با قرار دادن محیط لازم و وارد کردن تازهٔ ماژول تنظیمات (از طریق fresh_import_with_env) بررسی می‌کند که:
+    - s.USE_SQLITE برابر True باشد،
+    - ENGINE کانکشن پیش‌فرض دیتابیس برابر "django.db.backends.sqlite3" باشد،
+    - و مقدار NAME دیتابیس برابر با مسیر BASE_DIR / 'db.sqlite3' باشد.
+    """
     env = {
         "DJANGO_DEBUG": "True",
         "DJANGO_SECRET_KEY": "dev",
@@ -109,6 +147,14 @@ def test_use_sqlite_defaults_true_when_debug_true_and_sqlite_config() -> None:
         assert Path(s.DATABASES["default"]["NAME"]) == expected
 
 def test_use_sqlite_defaults_false_when_debug_false_and_postgres_config() -> None:
+    """
+    تأیید می‌کند که وقتی حالت DEBUG غیرفعال است و متغیر محیطی USE_SQLITE تنظیم نشده است، پیکربندی پایگاه‌داده به‌صورت پیش‌فرض روی PostgreSQL قرار می‌گیرد.
+    
+    شرح:
+    - با قرار دادن محیطی شامل DJANGO_DEBUG=False، DJANGO_SECRET_KEY و DJANGO_ALLOWED_HOSTS، ماژول تنظیمات تازه وارد شده بررسی می‌شود.
+    - انتظار می‌رود s.USE_SQLITE برابر False باشد.
+    - s.DATABASES['default'] باید از موتور "django.db.backends.postgresql" استفاده کند و مقادیر پیش‌فرض اتصال (NAME, USER, PASSWORD, HOST, PORT) برابر با مقادیر مورد انتظار ("diabetes", "diabetes", "diabetes", "127.0.0.1", "5432") باشد.
+    """
     env = {
         "DJANGO_DEBUG": "False",
         "DJANGO_SECRET_KEY": "prod",
@@ -199,6 +245,14 @@ def test_caches_locmem_when_no_redis_url() -> None:
         assert caches['BACKEND'] == 'django.core.cache.backends.locmem.LocMemCache'
 
 def test_caches_redis_when_url_provided() -> None:
+    """
+    آزمون می‌کند که وقتی متغیر محیطی `REDIS_URL` تنظیم شده باشد، تنظیمات کش به‌درستی برای استفاده از Redis پیکربندی می‌شوند.
+    
+    جزئیات: با قرار دادن `DJANGO_DEBUG=True` و یک `DJANGO_SECRET_KEY` و مقدار `REDIS_URL`، ماژول تنظیمات به‌صورت تازه وارد می‌شود و سپس بررسی می‌شود که CACHES['default']:
+    - از بک‌اند `django_redis.cache.RedisCache` استفاده کند،
+    - مقدار `LOCATION` برابر با مقدار `REDIS_URL` باشد،
+    - و در `OPTIONS`، `CLIENT_CLASS` برابر با `django_redis.client.DefaultClient` باشد.
+    """
     env = {
         "DJANGO_DEBUG": "True",
         "DJANGO_SECRET_KEY": "dev",
@@ -224,6 +278,20 @@ def test_caches_redis_when_url_provided() -> None:
 )
 def test_debug_env_parsing_variants(value: str, expected: bool) -> None:
     # Provide minimum required env to allow module import
+    """
+    آزمونی پارامترایز شده که صحت پارس شدن مقدار محیطی DJANGO_DEBUG به بولین را بررسی می‌کند.
+    
+    این تست برای هر جفت (value, expected) یک محیط مینیمال می‌سازد که شامل:
+    - DJANGO_DEBUG برابر value (رشته‌های مختلف معادل true/false نظیر "TRUE", "false", "1", "0" و غیره)
+    - DJANGO_SECRET_KEY: در حالت توسعه (expected=True) مقدار کوتاه "x" و در حالت تولید مقدار "prod-secret"
+    - در حالت تولید (expected=False) مقدار DJANGO_ALLOWED_HOSTS نیز اضافه می‌شود تا از خطاهای غیرمرتبط هنگام وارد کردن ماژول جلوگیری شود
+    
+    سپس با وارد کردن تازهٔ ماژول تنظیمات درون context manager مربوطه بررسی می‌کند که s.DEBUG با expected مطابقت دارد.
+    
+    Parameters:
+        value (str): نمایش رشته‌ای مقدار DJANGO_DEBUG که باید پارس شود.
+        expected (bool): نتیجهٔ بولینی مورد انتظار پس از پارس شدن value.
+    """
     env = {
         "DJANGO_DEBUG": value,
         "DJANGO_SECRET_KEY": "x" if expected else "prod-secret",

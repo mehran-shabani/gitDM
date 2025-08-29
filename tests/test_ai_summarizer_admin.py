@@ -33,6 +33,22 @@ AISummary = app_admin.AISummary
 pytestmark = pytest.mark.django_db
 
 def make_superuser(**extra):
+    """
+    یک سوپر‌یوزر (superuser) در پایگاه‌داده ایجاد می‌کند و شیٔ کاربر و گذرواژه ایجاد شده را برمی‌گرداند.
+    
+    پارامترها (به‌صورت kwargs):
+    - username: نام کاربری سوپر‌یوزر (پیش‌فرض "admin").
+    - email: ایمیل سوپر‌یوزر (پیش‌فرض "admin@example.com").
+    - password: گذرواژه سوپر‌یوزر (پیش‌فرض "pass1234").
+    - سایر کلیدواژه‌ها به‌صورت مستقیم به user_model.objects.create_superuser ارسال می‌شوند (مثلاً فیلدهای مدل کاربر یا گزینه‌های اضافی).
+    
+    توضیحات:
+    - از get_user_model() برای تعیین مدل کاربری استفاده می‌شود.
+    - این تابع یک رکورد سوپر‌یوزر در دیتابیس ایجاد می‌کند (side effect).
+    
+    بازگشتی:
+    - tuple: (user_instance, password) — نمونه مدل کاربر ایجادشده و گذرواژه‌ای که برای ایجاد استفاده شده است.
+    """
     user_model = get_user_model()
     username = extra.pop("username", "admin")
     email = extra.pop("email", "admin@example.com")
@@ -42,8 +58,24 @@ def make_superuser(**extra):
 
 def create_ai_summary(patient=None, model_label="note", created_at=None):
     """
-    Helper to create AISummary with a valid ContentType to drive resource_type filtering.
-    - model_label corresponds to ContentType.model (lowercase)
+    یک AISummary جدید ایجاد و ذخیره می‌کند که دارای ContentType معتبر برای آزمایش فیلتر resource_type باشد.
+    
+    این تابع:
+    - در صورت عدم ارسال مقدار برای `patient`، مدل رابطه‌ای `patient` را از فیلد AISummary کشف نموده و یک نمونه‌ی حداقلی می‌سازد.
+    - سعی می‌کند یک ContentType موجود با `model` برابر `model_label` را پیدا کند؛ در صورت عدم وجود، یک ContentType جدید با همان `model` و از همان `app_label` که AISummary در آن قرار دارد ایجاد می‌کند.
+    - AISummary را با فیلدهای `patient`, `content_type`, `summary` (و در صورت ارسال، `created_at`) می‌سازد و در پایگاه‌داده ایجاد می‌کند.
+    
+    Parameters:
+        patient (Model | None): نمونهٔ موجود بیمار که به AISummary وابسته است. اگر None باشد، تابع یک نمونهٔ جدید از مدل مرتبط می‌سازد.
+        model_label (str): نام مدل در ContentType (مقدار lowercase و معادل فیلد `content_type.model`) که برای تعیین resource_type استفاده می‌شود.
+        created_at (datetime | None): در صورت ارسال، مقدار زمانی سفارشی برای فیلد `created_at` در AISummary قرار داده می‌شود.
+    
+    Returns:
+        AISummary: شیء AISummary ایجادشده و ذخیره‌شده در پایگاه‌داده.
+    
+    Notes:
+    - تابع ممکن است خطاهای مربوط به ORM (مثلاً مقادیر اجباریِ فیلدها یا محدودیت‌های دیتابیس) را از طریق استثناهای استاندارد Django بازگرداند.
+    - این کمک‌کننده برای استفاده در تست‌ها و تولید نمونه‌های سریع طراحی شده است؛ در پروژه‌هایی با قوانین ایجاد پیچیده‌تر برای مدل بیمار ممکن است نیاز به تنظیم یا فراهم‌کردن `patient` صریح باشد.
     """
     # Patient is likely a FK; if project uses a different patient model adjust accordingly.
     # We'll soft-create a minimal patient if field allows null=False.
@@ -76,6 +108,17 @@ class DummyModelAdmin(admin.ModelAdmin):
     pass
 
 def build_changelist_request(path, user, params=None):
+    """
+    یک درخواست GET شبیه‌سازی‌شدهٔ Django RequestFactory می‌سازد و کاربر را به آن نسبت می‌دهد.
+    
+    پارامترها:
+        path (str): مسیر (path) که برای ساخت URL استفاده می‌شود؛ می‌تواند شامل پیشوند پنل ادمین یا هر مسیر نسبی/مطلقی باشد.
+        user: شیء کاربر (معمولاً یک نمونهٔ User یا AnonymousUser) که به request.user نسبت داده می‌شود.
+        params (dict | None): دیکشنری پارامیمترهای کوئری؛ مقادیر لیستی نیز پشتیبانی می‌شوند و با urlencode (doseq=True) به رشتهٔ کوئری تبدیل می‌شوند.
+    
+    برگشت:
+        django.http.HttpRequest: یک شیء درخواست GET از RequestFactory که query string (در صورت وجود) را دارد و user به آن الصاق شده است.
+    """
     rf = RequestFactory()
     query = ""
     if params:
@@ -86,6 +129,17 @@ def build_changelist_request(path, user, params=None):
     return request
 
 def get_admin_changelist_url(model):
+    """
+    یک رشته‌ی URL برای صفحه‌ی لیست (changelist) ادمین مربوط به مدل داده‌شده تولید می‌کند.
+    
+    این تابع نام مسیر ادمین را از متادیتای مدل (app_label و model_name) می‌سازد و با استفاده از `reverse` آدرس کامل تغییرات (changelist) بخش ادمین را بازمی‌گرداند.
+    
+    Parameters:
+        model: کلاسی از نوع Django model (نوعی subclass از django.db.models.Model) که برای آن آدرس changelist ساخته می‌شود.
+    
+    Returns:
+        str: مسیر کامل (URL) صفحه‌ی changelist در بخش ادمین Django برای مدل ورودی.
+    """
     return reverse(f"admin:{model._meta.app_label}_{model._meta.model_name}_changelist")
 
 def test_list_display_contains_expected_columns():
@@ -128,6 +182,14 @@ def test_resource_type_filter_queryset_filters_when_value_selected(admin_client)
     # Simulate selecting "alpha" from the filter by overriding self.value()
     class _Filter(AISummaryResourceTypeFilter):
         def value(self):
+            """
+            یک مقدار ثابت فیلتر را برمی‌گرداند.
+            
+            این متد در تست‌ها برای شبیه‌سازی حالتی که کاربر فیلتر `resource_type` را روی مقدار `"alpha"` تنظیم کرده، مقدار انتخاب‌شده‌ی فیلتر را برمی‌گرداند.
+            
+            Returns:
+                str: مقدار فیلتر (`"alpha"`).
+            """
             return "alpha"
 
     flt = _Filter(request, {}, AISummary, ma)
@@ -166,6 +228,20 @@ def test_changelist_view_handles_non_renderable_response_gracefully(monkeypatch)
         pass
 
     def fake_changelist_view(self, request, extra_context=None):
+        """
+        واژهٔ کوتاه:
+        یک پاسخ شبیه‌سازی‌شدهٔ غیرقابل‌رندر برای جایگزینی متد changelist_view در تست‌ها بازمی‌گرداند.
+        
+        توضیح کامل:
+        این تابع یک پیاده‌سازی سادهٔ جایگزین برای متد admin.changelist_view است که همیشه یک نمونهٔ NoRenderResponse را بازمی‌گرداند. برای تست سناریوهایی استفاده می‌شود که در آن نمای تغییرات (changelist) به‌جای یک HttpResponse قابل رندر، یک شیئی بازمی‌گرداند که هیچ متد یا محتوای قابل‌ریندری ندارد تا رفتار کد میزبان هنگام دریافت پاسخ‌های غیرمعمول بررسی شود.
+        
+        پارامترها:
+            request: شیٔ درخواست Django — توسط این تابع استفاده نمی‌شود (فقط برای امضا سازگار است).
+            extra_context: دیکشنری زمینهٔ اضافی برای رندر — نادیده گرفته می‌شود.
+        
+        بازگشتی:
+            NoRenderResponse: نمونه‌ای که نشان‌دهندهٔ پاسخ غیرقابل‌رندر است.
+        """
         return NoRenderResponse()
 
     monkeypatch.setattr(AISummaryAdmin, "changelist_view", fake_changelist_view, raising=False)
@@ -184,6 +260,18 @@ def test_changelist_view_handles_non_renderable_response_gracefully(monkeypatch)
     orig_super = app_admin.AISummaryAdmin.changelist_view
 
     def super_stub(self, request, extra_context=None):
+        """
+        یک استاب برای جایگزینی نمای (view) ادمین که همیشه یک NoRenderResponse برمی‌گرداند.
+        
+        این تابع بدون استفاده از ورودی‌ها (request و extra_context) یک نمونه‌ی NoRenderResponse را بازمی‌گرداند. برای تست‌های مرتبط با ادمین استفاده می‌شود تا فرایند رندرینگ صفحه را دور بزند و بتوان رفتار کد هنگام دریافت یک پاسخ غیرقابل‌رنـدر را بررسی کرد.
+        
+        Parameters:
+            request: شیء درخواست Django که نادیده گرفته می‌شود.
+            extra_context (optional): دیکشنری زمینه اضافی که نادیده گرفته می‌شود.
+        
+        Returns:
+            NoRenderResponse: یک نمونه از کلاس NoRenderResponse جهت جلوگیری از رندرینگ پاسخ.
+        """
         return NoRenderResponse()
 
     try:
@@ -202,6 +290,18 @@ def test_search_fields_and_readonly_and_select_related_contract():
 
 def test_created_at_filter_and_date_range_behaviour(client):
     # Verify that created_at remains usable alongside custom filter
+    """
+    آزمون اینکه فیلتر `created_at` در کنار فیلتر سفارشی `resource_type` قابل استفاده بوده و صفحه‌ی changelist با محدوده‌های زمانی مختلف صحیح رندر می‌شود.
+    
+    توضیحات:
+    این تست یک کاربر سوپرازرو ایجاد و با آن وارد می‌شود، سپس دو نمونه‌ی AISummary با مقادیر `created_at` متفاوت (یک مورد قدیمی و یک مورد جدید) می‌سازد. با درخواست به صفحه‌ی changelist ادمین و اعمال فیلتر `resource_type` برای یکی از مدل‌ها بررسی می‌کند که:
+    - پاسخ HTTP با وضعیت 200 بازگردانده می‌شود،
+    - محتوای پاسخ شامل نشانگر `result_list` است (یعنی لیست نتایج رندر شده‌اند)،
+    - و نمای فیلتر کناری در HTML وجود دارد (یعنی یکی از کلاس‌های `filter` یا `changelist-filter` حضور دارد).
+    
+    نکته اجرایی:
+    تست فرض می‌کند امکان تعیین دستی فیلد `created_at` هنگام ایجاد AISummary فراهم است؛ در صورت غیرفعال بودن این قابلیت، بخش مربوط به مقادیر زمانی قابل تنظیم ممکن است معنادار نباشد.
+    """
     user, password = make_superuser(username="dater", email="dater@example.com")
     client = Client()
     assert client.login(username=user.username, password=password)

@@ -25,6 +25,11 @@ except Exception as exc:  # pragma: no cover
     pytest.fail(f"Failed to import SecurityConfig from security.apps: {exc}")
 
 def test_security_config_class_is_subclass_of_appconfig() -> None:
+    """
+    بررسی می‌کند که کلاس SecurityConfig زیرکلاس django.apps.AppConfig باشد.
+    
+    در صورتیکه SecurityConfig از AppConfig ارث‌بری نکرده باشد، تست شکست می‌خورد و پیام خطای مناسبی نشان داده می‌شود.
+    """
     from django.apps import AppConfig
     assert issubclass(SecurityConfig, AppConfig), (
         "SecurityConfig must subclass "
@@ -44,8 +49,8 @@ def test_security_config_default_auto_field_is_bigautofield() -> None:
 
 def test_security_config_instance_has_expected_label_and_name_without_registry() -> None:
     """
-    AppConfig.label defaults to the last component of 'name' if not explicitly set.
-    We instantiate with a minimal module to avoid touching Django's app registry.
+    تست می‌کند که در غیاب رجیستری جنگو، مقدار پیش‌فرض label از مؤلفهٔ آخر نام اپ گرفته می‌شود و ایجاد یک نمونهٔ SecurityConfig با یک ماژول حداقلی (ModuleType) بدون نیاز به رجیستری کار می‌کند. 
+    این تست نام و برچسب (name و label) را برابر "security" انتظار دارد و بررسی می‌کند که صفت `path` بدون وجود `__file__` روی ماژول دسترسی‌پذیر باشد.
     """
     # Simulate a minimal module object for the app.
     # AppConfig expects a module object, not a string.
@@ -63,8 +68,17 @@ def test_security_config_instance_has_expected_label_and_name_without_registry()
 )
 def test_security_config_rejects_invalid_name_types(bad_name: object) -> None:
     """
-    Defensive test: constructing with invalid 'app_name'
-    should raise TypeError/ValueError per Django AppConfig contract.
+    تست می‌کند که هنگام ساخت یک SecurityConfig با مقدار نامعتبر برای آرگومان app_name،
+    یک TypeError یا ValueError بر طبق قرارداد django.apps.AppConfig پرتاب می‌شود.
+    
+    شرح:
+    - از یک شیء ماژول مصنوعی (types.ModuleType) با نام "security" به‌عنوان آرگومان module استفاده می‌کند
+      تا از وابستگی به رجیستری اپ‌های جنگو جلوگیری شود.
+    - انتظار می‌رود مقادیر نامعتبر (مثلاً None، رشتهٔ خالی، عدد یا هر شئ نامربوط) باعث بروز TypeError یا ValueError شوند.
+    
+    Parameters:
+        bad_name (object): مقدار آزمون‌شونده که به عنوان app_name به سازنده SecurityConfig ارسال می‌شود؛
+            باید توضیح دهد که این مقدار نامعتبر است (مثلاً None یا غیررشته‌ای یا رشتهٔ خالی).
     """
     import types
     mod = types.ModuleType("security")
