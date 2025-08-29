@@ -1,0 +1,30 @@
+IMPORTANT INSTRUCTIONS - DJANGO SETTINGS (DO NOT MODIFY)
+
+The Django settings in this project have been finalized with critical security improvements. When working on this codebase:
+
+1. DO NOT MODIFY these files:
+   - config/settings.py (security patches applied)
+   - config/test_settings.py 
+   - pytest.ini (configured for test database)
+   - .env.example
+
+2. DO NOT COMMIT any settings changes, even temporary ones
+
+3. CURRENT STATE:
+   - SECRET_KEY: Secured with production safeguards
+   - ALLOWED_HOSTS: Properly restricted
+   - Database: Uses environment variables
+   - Tests: Configured to use SQLite test database
+
+4. FOR LOCAL SETUP:
+   - Copy .env.example to .env
+   - Follow doc/local-development-without-containers.md
+   - Use environment variables for all configuration
+
+5. IF YOU NEED DIFFERENT SETTINGS:
+   - Create config/local_settings.py (never commit)
+   - Document needs but don't implement changes
+
+The settings have been professionally secured and audited. They must remain unchanged to maintain security integrity.
+
+Reference: doc/AGENT_INSTRUCTIONS_SETTINGS.md for full details.

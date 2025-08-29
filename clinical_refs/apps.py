@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 
-class clinicalRefsConfig(AppConfig):
+class ClinicalRefsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'clinical_refs'
+    verbose_name = 'Clinical References'
