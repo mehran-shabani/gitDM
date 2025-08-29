@@ -34,7 +34,18 @@ class Migration(migrations.Migration):
                 )),
             ],
             options={
-                'unique_together': {('resource_type', 'resource_id', 'version')},
+                'constraints': [
+                    models.UniqueConstraint(
+                        fields=['resource_type', 'resource_id', 'version'],
+                        name='recordver_unique_triplet',
+                    ),
+                ],
+                'indexes': [
+                    models.Index(
+                        fields=['resource_type', 'resource_id', '-version'],
+                        name='recordver_type_id_ver_desc_idx',
+                    ),
+                ],
             },
         ),
     ]

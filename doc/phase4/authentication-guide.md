@@ -19,7 +19,7 @@ Users can **only** be created through the Django Admin panel by administrators:
 
 ### User Model
 
-The application uses Django's built-in User model with integer primary keys (not UUIDs). All user-related foreign keys in the system properly reference the User model through Django's ForeignKey fields.
+The application uses Django's configured AUTH_USER_MODEL. The primary key type (integer or UUID) depends on your specific User model configuration. All user-related foreign keys in the system must be compatible with the same type.
 
 ## Authentication Flow
 
@@ -81,7 +81,10 @@ Content-Type: application/json
 
 ## System User
 
-The application uses a predefined SYSTEM_USER_ID for system-generated records. This should be configured in your environment settings and should reference a valid user created through the admin panel.
+The application uses a predefined SYSTEM_USER_ID for system-generated records. This should be configured in your environment settings and must:
+- Match the primary key type of your User model (integer for default Django User, UUID if using a custom UUID-based User model)
+- Reference a valid user that exists in the database (created through the admin panel)
+- Be validated at startup to ensure type compatibility
 
 ## Best Practices
 
@@ -114,4 +117,4 @@ This immediately prevents the user from obtaining new tokens or accessing the AP
 - No public user registration reduces attack surface
 - Admin-only user creation ensures controlled access
 - JWT tokens provide stateless authentication
-- All user references use proper Django ForeignKey relationships (not UUIDs)
+- All user references use proper Django ForeignKey relationships (type-aligned with your AUTH_USER_MODEL)
