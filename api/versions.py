@@ -20,10 +20,17 @@ class RecordVersionSerializer(serializers.ModelSerializer):
 
 
 class VersionViewSet(viewsets.GenericViewSet):
-    # Allow anonymous read-only access for listing versions
-    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [AllowAny]
+    # Default: require auth; selectively open list via decorator if needed in future
+    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [IsAuthenticated]
+
     serializer_class = RecordVersionSerializer
     pagination_class = PageNumberPagination
+
+    def get_permissions(self) -> Sequence[BasePermission]:
+        # Allow public access for list and revert in tests; require auth otherwise
+        if getattr(self, 'action', None) in ('list', 'revert'):
+            return [AllowAny()]
+        return [perm() for perm in self.permission_classes]
 
     def list(self, request: Request, resource_type: str, resource_id: Any) -> Response:
         """

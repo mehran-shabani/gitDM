@@ -80,3 +80,4 @@
 - Docker: introduced docker-compose.simple.yml, advanced compose with MinIO; scripts to start/stop
 - .env.example added per tests
 - README updated with run instructions
+

@@ -42,8 +42,10 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
         if isinstance(value, datetime.datetime):
             d[key] = value.isoformat()
         elif isinstance(value, Decimal):
-            # Preserve numeric meaning but ensure JSON-serializable
-            d[key] = float(value)
+            # Preserve precision by serializing as string
+            d[key] = str(value)
+           
+
         elif isinstance(value, datetime.date):
             d[key] = value.isoformat()
     return d

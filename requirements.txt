@@ -13,3 +13,4 @@ boto3>=1.33
 django-background-tasks>=1.4.1
 psycopg2-binary==2.9.10
 postgrest>=0.1.0
+
