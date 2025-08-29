@@ -5,8 +5,8 @@ from django.conf import settings
 class RecordVersion(models.Model):
     id = models.BigAutoField(primary_key=True)
     resource_type = models.CharField(max_length=48)  # 'Patient','Encounter','LabResult','MedicationOrder'
-
-    resource_id = models.UUIDField()
+    # Store PKs as string to support either int or UUID transparently
+    resource_id = models.CharField(max_length=64)
     version = models.PositiveIntegerField()
     prev_version = models.PositiveIntegerField(null=True, blank=True)
     snapshot = models.JSONField()

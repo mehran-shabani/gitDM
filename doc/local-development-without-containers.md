@@ -1,3 +1,34 @@
+# Local development without containers
+
+Create a .env.example with the following content for local setup:
+
+```
+# Django settings
+DJANGO_SECRET_KEY=your-secret-key-here
+DJANGO_DEBUG=True
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+
+# PostgreSQL settings (external database)
+POSTGRES_DB=diabetes
+POSTGRES_USER=diabetes
+POSTGRES_PASSWORD=your-postgres-password
+POSTGRES_HOST=your-postgres-host
+POSTGRES_PORT=5432
+
+# Redis settings (external Redis)
+REDIS_URL=redis://your-redis-host:6379/0
+
+# MinIO settings (external MinIO)
+MINIO_ENDPOINT=your-minio-host:9000
+MINIO_ACCESS_KEY=your-minio-access-key
+MINIO_SECRET_KEY=your-minio-secret-key
+MINIO_USE_HTTPS=False
+MINIO_MEDIA_BUCKET=media
+MINIO_STATIC_BUCKET=static
+```
+
+Then copy to .env and adjust as needed.
+
 # Running Django Application Without Containers
 
 **IMPORTANT**: This guide explains how to run the Django application locally without using Docker containers for MinIO, PostgreSQL, and Redis. This approach is suitable for development environments where you want to use local installations of these services.

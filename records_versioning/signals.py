@@ -1,6 +1,5 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from .services import save_with_version, _thread_state
 
@@ -30,12 +29,7 @@ def _create_version_on_save(instance: object) -> None:
     if user_id:
         user = User.objects.filter(id=user_id).first()
     
-    # If no user found, use system user if configured
-    if user is None and getattr(settings, 'SYSTEM_USER_ID', None):
-        try:
-            user = User.objects.get(id=settings.SYSTEM_USER_ID)
-        except User.DoesNotExist:
-            pass
+    # If no user found, proceed with None (allowed by model)
     
     save_with_version(instance, user, reason='auto-signal')
 

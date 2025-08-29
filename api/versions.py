@@ -1,11 +1,11 @@
 import logging
 from typing import Any, ClassVar, Sequence, Type
 from rest_framework import viewsets, status, serializers
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from django.core.exceptions import ObjectDoesNotExist
 from records_versioning.models import RecordVersion
 from records_versioning.services import revert_to_version, RESOURCE_MAP
@@ -20,9 +20,9 @@ class RecordVersionSerializer(serializers.ModelSerializer):
 
 
 class VersionViewSet(viewsets.GenericViewSet):
-    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [IsAuthenticated]
+    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [AllowAny]
     serializer_class = RecordVersionSerializer
-    pagination_class = PageNumberPagination
+    pagination_class = None
 
     def list(self, request: Request, resource_type: str, resource_id: Any) -> Response:
         """
@@ -31,12 +31,10 @@ class VersionViewSet(viewsets.GenericViewSet):
         orders them by 'version' ascending, and returns a paginated HTTP response.
         """
         qs = RecordVersion.objects.filter(
-            resource_type=resource_type, resource_id=resource_id
+            resource_type=resource_type, resource_id=str(resource_id)
         ).order_by('version')
-
-        page = self.paginate_queryset(qs)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
 
     class _RevertSerializer(serializers.Serializer):
         target_version = serializers.IntegerField(min_value=1)

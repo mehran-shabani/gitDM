@@ -7,7 +7,7 @@ from django.urls import reverse, resolve
 pytestmark = pytest.mark.django_db
 
 @pytest.mark.parametrize("name", [
-    "patient-list", "patient-detail", "encounter-list", "encounter-detail"
+    "patients-list", "patients-detail", "encounters-list", "encounters-detail"
 ])
 def test_named_routes_resolve_if_configured(name: str) -> None:
     try:

@@ -19,7 +19,7 @@ def test_version_increments_on_save() -> None:
     p = Patient.objects.create(full_name="Test P", primary_doctor=doctor)
     v1 = RecordVersion.objects.filter(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=1,
     ).exists()
     assert v1
@@ -27,7 +27,7 @@ def test_version_increments_on_save() -> None:
     p.save()
     v2 = RecordVersion.objects.get(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=2,
     )
     assert v2.diff is not None and "full_name" in v2.diff
@@ -46,7 +46,7 @@ def test_revert_creates_new_version() -> None:
     revert_to_version("Patient", p.id, 1, admin)
     v3 = RecordVersion.objects.get(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=3,
     )
     assert v3.prev_version == 2
@@ -101,12 +101,12 @@ def test_revert_to_version_one_creates_next_version_and_restores_fields() -> Non
     # Sanity: we have v1 and v2
     assert RecordVersion.objects.filter(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=1,
     ).exists()
     assert RecordVersion.objects.filter(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=2,
     ).exists()
 
@@ -117,7 +117,7 @@ def test_revert_to_version_one_creates_next_version_and_restores_fields() -> Non
     # and underlying record rolled back
     v3 = RecordVersion.objects.get(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=3,
     )
     assert v3.prev_version == 2
@@ -161,7 +161,7 @@ def test_versioning_tracked_fields_are_in_diff() -> None:
 
     v2 = RecordVersion.objects.get(
         resource_type="Patient",
-        resource_id=p.id,
+        resource_id=str(p.id),
         version=2,
     )
     # diff should at least include the changed field name
@@ -187,7 +187,7 @@ def test_recordversion_has_monotonic_versions() -> None:
     versions = list(
         RecordVersion.objects.filter(
             resource_type="Patient",
-            resource_id=p.id,
+            resource_id=str(p.id),
         )
         .order_by("version")
         .values_list("version", flat=True)

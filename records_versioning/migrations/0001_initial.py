@@ -19,7 +19,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
                 ('resource_type', models.CharField(max_length=48)),
-                ('resource_id', models.UUIDField()),
+                ('resource_id', models.CharField(max_length=64)),
                 ('version', models.PositiveIntegerField()),
                 ('prev_version', models.PositiveIntegerField(blank=True, null=True)),
                 ('snapshot', models.JSONField()),
@@ -51,12 +51,7 @@ class Migration(migrations.Migration):
                         name='recordver_prev_lt_version',
                     ),
                 ],
-                'indexes': [
-                    models.Index(
-                        fields=['resource_type', 'resource_id', '-version'],
-                        name='recordver_type_id_ver_desc_idx',
-                    ),
-                ],
+                'indexes': [],
             },
         ),
     ]
