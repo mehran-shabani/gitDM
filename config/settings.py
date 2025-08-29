@@ -1,10 +1,32 @@
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'dev')
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+
+# Security settings
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes'):
+        # Only use a default key in DEBUG mode for development
+        SECRET_KEY = 'django-insecure-dev-key-do-not-use-in-production'
+    else:
+        raise ImproperlyConfigured(
+            "The SECRET_KEY setting must not be empty in production."
+        )
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(',')]
+else:
+    if DEBUG:
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
+    else:
+        raise ImproperlyConfigured(
+            "ALLOWED_HOSTS must be set in production."
+        )
 
 INSTALLED_APPS = [
     'django.contrib.admin',
