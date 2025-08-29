@@ -18,10 +18,21 @@ from .serializers import (
 SYSTEM_USER_ID = UUID(getattr(settings, 'SYSTEM_USER_ID'))
 
 
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
+
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = Patient.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
+    permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        user = self.request.user
+        if not user.is_authenticated:
+            return Patient.objects.none()
+        if getattr(user, "is_superuser", False):
+            return super().get_queryset()
+        return super().get_queryset().filter(primary_doctor=user)
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):
         """
