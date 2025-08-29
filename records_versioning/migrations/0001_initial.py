@@ -39,6 +39,17 @@ class Migration(migrations.Migration):
                         fields=['resource_type', 'resource_id', 'version'],
                         name='recordver_unique_triplet',
                     ),
+                    models.CheckConstraint(
+                        check=models.Q(version__gte=1),
+                        name='recordver_version_gte_1',
+                    ),
+                    models.CheckConstraint(
+                        check=(
+                            models.Q(prev_version__isnull=True)
+                            | models.Q(prev_version__lt=models.F('version'))
+                        ),
+                        name='recordver_prev_lt_version',
+                    ),
                 ],
                 'indexes': [
                     models.Index(

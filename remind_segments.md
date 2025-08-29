@@ -3,12 +3,14 @@
 ## ✅ Completed Phases
 
 ### Phase 1: Setup & Infrastructure
+
 - ✅ Project structure setup
 - ✅ Django configuration
 - ✅ Docker setup
 - ✅ Basic health check endpoint
 
 ### Phase 2: Data Models & Relationships
+
 - ✅ Patient model with UUID primary keys
 - ✅ Encounter model (SOAP format)
 - ✅ LabResult model (LOINC codes)
@@ -16,6 +18,7 @@
 - ✅ All foreign key relationships established
 
 ### Phase 3: Versioning & Append-only Design
+
 - ✅ RecordVersion model for audit trail
 - ✅ Version tracking for all models
 - ✅ Revert functionality
@@ -27,6 +30,7 @@
 - ✅ Patient timeline endpoint with pagination
 - ✅ OpenAPI/Swagger documentation
 - ✅ Admin-only user creation (no public signup)
+- ✅ OpenAPI/Swagger documentation (available at `/api/schema/` and `/api/docs/`)
 
 ## 🚧 Remaining Phases
 
@@ -67,16 +71,19 @@
 ## 🎯 Priority Tasks
 
 ### High Priority
+
 1. **Phase 5 - AI Integration**: Core functionality for medical summaries
 2. **Phase 7 - Security**: Critical for production readiness
 3. **Phase 8 - Testing**: Ensure reliability and performance
 
 ### Medium Priority
+
 1. **Phase 6 - Clinical References**: Enhance clinical decision support
 2. **Monitoring & Logging**: Production observability
-3. **API Rate Limiting**: Prevent abuse
+3. **API Rate Limiting**: Prevent abuse (implement DRF throttling)
 
 ### Low Priority
+
 1. **UI/Frontend**: If needed for demo purposes
 2. **Advanced Analytics**: Reporting dashboards
 3. **Mobile API optimizations**: Specific mobile endpoints
@@ -84,24 +91,28 @@
 ## 📋 Technical Debt & Improvements
 
 ### Code Quality
+
 - [ ] Add type hints to all functions
 - [ ] Improve error handling with custom exceptions
 - [ ] Add comprehensive logging throughout
 - [ ] Optimize database queries (add select_related/prefetch_related)
 
 ### Documentation
+
 - [ ] API endpoint documentation with examples
 - [ ] Deployment guide
 - [ ] User manual for admin panel
 - [ ] Developer onboarding guide
 
 ### Infrastructure
+
 - [ ] Set up CI/CD pipeline
 - [ ] Configure production environment variables
 - [ ] Add Redis for caching (already in settings)
 - [ ] Set up background task queue (Celery)
 
 ### Performance
+
 - [ ] Database indexing optimization
 - [ ] Query optimization for timeline endpoint
 - [ ] Implement caching strategy
@@ -110,6 +121,7 @@
 ## 🚀 Production Readiness Checklist
 
 ### Security
+
 - [ ] Environment variables for all secrets
 - [ ] HTTPS configuration
 - [ ] CORS properly configured
@@ -171,22 +183,26 @@ Based on complexity and dependencies:
 ## 📞 Support & Resources
 
 ### Technical Resources
-- Django Documentation: https://docs.djangoproject.com/
-- DRF Documentation: https://www.django-rest-framework.org/
-- SimpleJWT: https://django-rest-framework-simplejwt.readthedocs.io/
+
+- [Django Documentation](https://docs.djangoproject.com/)
+- [DRF Documentation](https://www.django-rest-framework.org/)
+- [SimpleJWT](https://django-rest-framework-simplejwt.readthedocs.io/)
 
 ### Medical Standards
-- LOINC: https://loinc.org/
-- ATC Classification: https://www.whocc.no/atc_ddd_index/
-- HL7 FHIR: https://www.hl7.org/fhir/
+
+- [LOINC](https://loinc.org/)
+- [ATC Classification](https://www.whocc.no/atc_ddd_index/)
+- [HL7 FHIR](https://www.hl7.org/fhir/)
 
 ### Compliance Resources
-- HIPAA Guidelines: https://www.hhs.gov/hipaa/
-- GDPR Compliance: https://gdpr.eu/
+
+- [HIPAA Guidelines](https://www.hhs.gov/hipaa/)
+- [GDPR Compliance](https://gdpr.eu/)
 
 ## 💡 Notes
 
-- The project uses UUID primary keys for better distributed system compatibility
+- Clinical domain models (Patient, Encounter, etc.) use UUID primary keys
+- User model uses Django's default AUTH_USER_MODEL (typically integer PK)
 - Admin-only user creation is by design for security
 - The versioning system ensures complete audit trails
 - Consider microservices architecture for AI components if scaling needed

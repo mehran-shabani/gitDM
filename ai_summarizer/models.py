@@ -30,22 +30,5 @@ class AISummary(models.Model):
                 })
 
     def __str__(self) -> str:
-from __future__ import annotations
-
-    def resource_type(self: "AISummary") -> str:
-        """Backward-compatible property for admin display."""
-        return self.content_type.model
-
-    def clean(self: "AISummary") -> None:
-        """Validate that content_object's patient matches self.patient if applicable."""
-        if self.content_object and hasattr(self.content_object, 'patient'):
-            if self.content_object.patient != self.patient:
-                raise ValidationError({
-                    'patient': 'Patient mismatch: The selected patient must match the patient of the related object.'
-                })
-
-    def __str__(self: "AISummary") -> str:
         """Admin label: 'AI Summary for <patient> - <model>'."""
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
-
-
