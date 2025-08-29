@@ -51,7 +51,7 @@ for mod in MIDDLEWARE_CANDIDATES:
         if hasattr(m, "AuditMiddleware"):
             AuditMiddleware = m.AuditMiddleware
             break
-    except Exception as e:  # pragma: no cover - best-effort resolution
+    except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover - best-effort resolution
         _import_error = e
 
 if AuditMiddleware is None:
