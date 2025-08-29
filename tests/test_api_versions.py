@@ -6,7 +6,6 @@ Framework: pytest + pytest-django with DRF's APIClient when available.
 
 import importlib
 import pytest
-from typing import Any
 from django.urls import resolve
 
 
@@ -19,7 +18,7 @@ except Exception:
 
 @pytest.mark.django_db
 class TestProjectUrls:
-    def test_schema_url_resolves(self, settings: Any) -> None:
+    def test_schema_url_resolves(self, settings: object) -> None:
         match = resolve("/api/schema/")
         assert match.func is not None
         # SpectacularAPIView.as_view() sets view_class name
@@ -37,7 +36,7 @@ class TestProjectUrls:
         )
 
     @pytest.mark.skipif(not HAS_DRF, reason="DRF not installed in test environment")
-    def test_schema_endpoint_returns_200(self, db: Any) -> None:
+    def test_schema_endpoint_returns_200(self, db: object) -> None:
         client = APIClient()
         resp = client.get("/api/schema/")
         assert resp.status_code == 200
@@ -45,7 +44,7 @@ class TestProjectUrls:
         assert "json" in ctype
 
     @pytest.mark.skipif(not HAS_DRF, reason="DRF not installed in test environment")
-    def test_swagger_ui_served(self, db: Any) -> None:
+    def test_swagger_ui_served(self, db: object) -> None:
         client = APIClient()
         resp = client.get("/api/docs/")
         assert resp.status_code in (200, 302)
@@ -57,7 +56,7 @@ class TestProjectUrls:
         module = importlib.import_module("api.routers")
         assert module is not None
 
-    def test_root_includes_api_routers(self, settings: Any) -> None:
+    def test_root_includes_api_routers(self, settings: object) -> None:
         from django.conf import settings as dj_settings
         from importlib import import_module
 
@@ -81,7 +80,7 @@ class TestApiVersionPaths:
         "/api/v1/",
         "/api/v2/",
     ])
-    def test_version_index_paths_exist_or_404_clean(self, path: str, db: Any) -> None:
+    def test_version_index_paths_exist_or_404_clean(self, path: str, db: object) -> None:
         """
         Bias for action: check common version roots.
         If not present, ensure a clean 404 without server error.
@@ -91,7 +90,7 @@ class TestApiVersionPaths:
         assert resp.status_code in (200, 301, 302, 404)
         assert resp.status_code < 500
 
-    def test_rest_framework_versioning_config(self, settings: Any) -> None:
+    def test_rest_framework_versioning_config(self, settings: object) -> None:
         rf = getattr(settings, "REST_FRAMEWORK", {})
         for key in (
             "DEFAULT_VERSIONING_CLASS",
@@ -102,3 +101,29 @@ class TestApiVersionPaths:
         ):
             if key in rf:
                 assert rf[key] is not None
+
+
+@pytest.mark.django_db
+@pytest.mark.skipif(not HAS_DRF, reason="DRF not installed in test environment")
+class TestVersionEndpoints:
+    def test_versions_list_empty_ok(self) -> None:
+        from uuid import uuid4
+        client = APIClient()
+        resp = client.get(f"/api/versions/Patient/{uuid4()}/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert isinstance(data, list)
+        assert data == []
+
+    def test_versions_revert_missing_target_version_400(self) -> None:
+        from uuid import uuid4
+        client = APIClient()
+        resp = client.post(
+            f"/api/versions/Patient/{uuid4()}/revert/", 
+            data={}, 
+            format="json"
+        )
+        assert resp.status_code == 400
+        data = resp.json()
+        assert "error" in data
+        assert "target_version" in data["error"].lower()

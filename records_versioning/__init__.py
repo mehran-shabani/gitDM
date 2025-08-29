@@ -1,1 +1,1 @@
-default_app_config = 'records_versioning.apps.RecordsVersioningConfig'
+# Django 5.0+ uses auto-discovery, no need for default_app_config
