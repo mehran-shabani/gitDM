@@ -29,9 +29,9 @@ def readiness(_request: HttpRequest) -> JsonResponse:
         with connections['default'].cursor() as cursor:
             cursor.execute("SELECT 1")
             cursor.fetchone()
-    except Exception as exc:  # pragma: no cover - best-effort
+    except Exception:  # pragma: no cover - best-effort
         db_ok = False
-        db_error = str(exc)
+        db_error = "Database unavailable"
     status = 200 if db_ok else 503
     return JsonResponse({"ready": db_ok, "db": db_ok, "error": db_error}, status=status)
 
