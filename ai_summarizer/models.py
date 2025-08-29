@@ -30,7 +30,14 @@ class AISummary(models.Model):
                 })
 
     def __str__(self) -> str:
-        """نمایش کوتاه برای ادمین: 'AI Summary for <Patient> - <Model>'."""
+        """
+        یک رشتهٔ نمایش خوانا برای پنل ادمین که خلاصهٔ AI را به صورت "AI Summary for <نام بیمار> - <نام مدل>" ارائه می‌دهد.
+        
+        از patient.full_name و content_type.model برای ساخت این نمایش استفاده می‌شود. مقدار تولیدشده برای لیست‌ها و نمای مختصر در رابط مدیریت مناسب است و پیش‌وند ثابت انگلیسی "AI Summary for" دارد تا خوانایی و سازگاری بین‌المللی حفظ شود.
+        
+        Returns:
+            str: رشتهٔ نمایش قالب‌بندی‌شده برای این نمونهٔ AISummary.
+        """
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
 
 

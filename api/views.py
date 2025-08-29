@@ -23,6 +23,33 @@ class PatientViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'])
     def timeline(self, request, pk=None):
+        """
+        بازگرداندن یک "تایم‌لاین" تجمیع‌شده سطح بیمار شامل مواجهات، نتایج آزمایش، دستورهای دارویی و خلاصه‌های هوش‌مصنوعی.
+        
+        این اکشن (GET) برای یک بیمار مشخص:
+        - بیمار را بازیابی می‌کند.
+        - رکوردهای مرتبط را به‌صورت جداگانه پرس‌وجو و بر اساس زمان مرتب می‌کند:
+          - Encounterها بر حسب `occurred_at` نزولی (تا `limit` مورد).
+          - LabResultها بر حسب `taken_at` نزولی (تا `limit` مورد).
+          - MedicationOrderها بر حسب `start_date` نزولی (تا `limit` مورد).
+          - AISummaryها بر حسب `created_at` نزولی (حداکثر ۵ مورد).
+        - هر مجموعه را با Serializer متناظر سریالایز کرده و در یک ساختار JSON ترکیبی برمی‌گرداند.
+        
+        پارامترهای کوئری:
+        - limit (اختیاری): تعداد حداکثر آیتم‌ها در هر نوع (Encounter، LabResult، MedicationOrder). مقدار پیش‌فرض ۱۰۰ و حداکثر مجاز ۵۰۰ است. خلاصه‌های هوش‌مصنوعی همواره تا ۵ مورد محدود می‌شوند.
+        
+        مقدار بازگشتی:
+        - یک Response حاوی دیکشنری با کلیدهای:
+          - patient: داده‌ی سریالایزشده بیمار
+          - encounters: لیست سریالایزشده مواجهات
+          - labs: لیست سریالایزشده نتایج آزمایش
+          - medications: لیست سریالایزشده دستورهای دارویی
+          - ai_summaries: لیست سریالایزشده خلاصه‌های تولیدشده توسط سیستم هوش‌مصنوعی
+        
+        نکات افزوده:
+        - محدود کردن نتایج برای جلوگیری از مشکلات عملکرد و ارسال حجم زیاد داده انجام شده است.
+        - AISummary نشان‌دهنده‌ی خلاصه‌های تحلیلی/هوشمند مرتبط با بیمار است و جدا از داده‌های خام بالینی برگردانده می‌شود (همیشه تا ۵ مورد).
+        """
         p = self.get_object()
         # Limit results to prevent performance issues
         limit = int(request.query_params.get('limit', 100))
@@ -48,6 +75,11 @@ class EncounterViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         # Use the authenticated user if available, otherwise use system user
+        """
+        ایجاد یک نمونه Encounter با انتساب کاربر سازنده.
+        
+        عملیات ذخیره (serializer.save) را فراخوانی می‌کند و فیلد created_by را براساس کاربر احراز هویت‌شدهٔ درخواست تنظیم می‌کند. اگر کاربر احراز هویت‌نشده باشد، به‌عنوان مقدار جایگزین شناسه سراسری سیستم (SYSTEM_USER_ID) را در created_by_id قرار می‌دهد. این متد باعث ایجاد و پایگاه‌داده‌ای شدن نمونه Encounter می‌شود و تضمین می‌کند که همیشه یک مقدار برای مالک/سازنده ثبت شده وجود دارد — در صورت نبود کاربر واقعی، از شناسه سیستم استفاده می‌شود (یک UUID)، نه یک شیء User کامل.
+        """
         user = self.request.user if self.request.user.is_authenticated else None
         if user:
             serializer.save(created_by=user)

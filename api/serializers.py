@@ -54,4 +54,15 @@ class AISummarySerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'resource_type', 'resource_id', 'created_at']
     
     def get_resource_id(self, obj):
+        """
+        شناسه منبع مرتبط با AISummary را به صورت رشته بازمی‌گرداند.
+        
+        از صفت `object_id` نمونهٔ `obj` استفاده کرده و مقدار آن را به رشته تبدیل می‌کند. این مقدار برای قرار گرفتن در فیلد سریالایزر `resource_id` مناسب است و مستقل از نوع زیرین (مثلاً UUID یا عدد صحیح) به شکل رشته برگردانده می‌شود.
+        
+        Parameters:
+            obj: نمونهٔ مدل که دارای صفت `object_id` است.
+        
+        Returns:
+            str: شناسهٔ منبع به صورت رشته.
+        """
         return str(obj.object_id)
