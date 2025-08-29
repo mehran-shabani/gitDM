@@ -2,11 +2,10 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.utils import timezone
-import uuid
 
 
 class ClinicalReference(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # ID field removed - Django will use default BigAutoField
     title = models.CharField(max_length=200)
     source = models.CharField(max_length=120)
     year = models.PositiveIntegerField(validators=[MinValueValidator(1900)])

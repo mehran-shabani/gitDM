@@ -1,4 +1,3 @@
-from uuid import UUID
 from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -15,7 +14,7 @@ from .serializers import (
     MedicationOrderSerializer, ClinicalReferenceSerializer, AISummarySerializer
 )
 
-SYSTEM_USER_ID = UUID(getattr(settings, 'SYSTEM_USER_ID'))
+# System user handling updated to use integer IDs
 
 
 from rest_framework import viewsets
@@ -121,13 +120,15 @@ class EncounterViewSet(viewsets.ModelViewSet):
         # Fallback به کاربر سیستمی واقعی
         User = get_user_model()
         try:
-            system_user = User.objects.get(pk=SYSTEM_USER_ID)
-        except User.DoesNotExist as exc:
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "SYSTEM_USER_ID not found in the user table. "
-                "Create the system user or set a valid existing UUID."
-            ) from exc
+            # Try to get a system user (e.g., with username 'system')
+            system_user = User.objects.get(username='system')
+        except User.DoesNotExist:
+            # Create a system user if it doesn't exist
+            system_user = User.objects.create_user(
+                username='system',
+                email='system@localhost',
+                is_active=False
+            )
         serializer.save(created_by=system_user)
 
 

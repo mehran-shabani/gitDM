@@ -8,7 +8,7 @@ from ai_summarizer.models import AISummary
 
 
 class PatientSerializer(serializers.ModelSerializer):
-    primary_doctor_id = serializers.UUIDField(
+    primary_doctor_id = serializers.IntegerField(
         source='primary_doctor.id',
         read_only=True,
     )
@@ -35,7 +35,7 @@ class LabResultSerializer(serializers.ModelSerializer):
 class MedicationOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = MedicationOrder
-        fields = ['id', 'patient', 'encounter', 'atc', 'name', 'dose', 'frequency', 'route', 'start_date', 'end_date']
+        fields = ['id', 'patient', 'encounter', 'atc', 'name', 'dose', 'frequency', 'start_date', 'end_date']
         read_only_fields = ['id']
 
 

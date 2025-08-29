@@ -2,7 +2,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
-import uuid
 
 
 class MedicationOrder(models.Model):
@@ -20,7 +19,7 @@ class MedicationOrder(models.Model):
         WEEKLY = 'QW', 'Weekly'
         MONTHLY = 'QM', 'Monthly'
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # ID field removed - Django will use default BigAutoField
     patient = models.ForeignKey(
         'patients_core.Patient',
         on_delete=models.CASCADE,
