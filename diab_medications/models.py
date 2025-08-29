@@ -68,7 +68,16 @@ class MedicationOrder(models.Model):
             })
 
     def __str__(self) -> str:
-        """نمایش کوتاه: "<نام دارو> for <نام کامل بیمار>"."""
+        """
+        رشتهٔ نمایشی کوتاه برای نمونهٔ MedicationOrder.
+        
+        خلاصه: مقدار برگشتی رشته‌ای با قالب "<نام دارو> for <نام بیمار>" است.
+        نام بیمار از صفت `full_name` شیء `patient` گرفته می‌شود در صورت موجود نبودن، مقدار `str(patient)` استفاده می‌شود.
+        این نمایش برای نمایش کوتاه در رابط‌ها و لاگ‌ها مناسب است.
+        
+        Returns:
+        	str: رشتهٔ قالب‌بندی‌شده به شکل "<name> for <patient_name>".
+        """
         patient_name = getattr(self.patient, "full_name", str(self.patient))
         return f"{self.name} for {patient_name}"
 

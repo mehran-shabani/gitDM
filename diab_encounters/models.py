@@ -1,4 +1,3 @@
-
 from django.db import models
 from django.conf import settings
 import uuid
@@ -21,5 +20,12 @@ class Encounter(models.Model):
              models.Index(fields=["created_by", "created_at"]),
          ]
     def __str__(self) -> str:
-        """Encounter برای <patient> در <occurred_at>."""
+        """
+        نمایش متن‌توصیفی کوتاه برای شیٔ Encounter.
+        
+        برمی‌گرداند یک رشتهٔ خوانا که بیمار (با مقدار patient.full_name) و زمان رخداد ملاقات (occurred_at) را نشان می‌دهد؛ برای نمایش در پنل ادمین، لاگ‌ها یا هنگام تبدیل شی به رشته استفاده می‌شود.
+        
+        Returns:
+            str: رشته‌ای به فرمت "Encounter for {patient.full_name} at {occurred_at}" که نام کامل بیمار و تاریخ/زمان وقوع را شامل می‌شود.
+        """
         return f"Encounter for {self.patient.full_name} at {self.occurred_at}"
