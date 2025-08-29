@@ -127,5 +127,4 @@ class TestVersionEndpoints:
         )
         assert resp.status_code == 400
         data = resp.json()
-        assert "error" in data
-        assert "target_version" in data["error"].lower()
+        assert "target_version" in data
