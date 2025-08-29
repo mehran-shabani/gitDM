@@ -3,6 +3,7 @@
 این ریویو بر اساس درخواست: حذف UUID و استفاده از ID پیش‌فرض جنگو، بررسی/ایجاد API لاگین (توکن)، حذف تنظیمات اضافه، و ثبت موارد در این فایل انجام شد. همه تست‌ها پاس شدند: 66 passed, 7 skipped.
 
 ## تغییرات اصلی
+
 - شناسه‌ها: حذف کامل `UUIDField` به نفع PK پیش‌فرض جنگو (`BigAutoField`).
   - مدل‌ها: `patients_core.Patient`, `diab_encounters.Encounter`, `diab_labs.LabResult`, `diab_medications.MedicationOrder`, `clinical_refs.ClinicalReference`.
   - `ai_summarizer.AISummary`: تغییر `object_id` از UUID به `PositiveBigIntegerField`.
@@ -32,21 +33,25 @@
   - این فایل (`PROJECT_REVIEW.md`) اضافه شد.
 
 ## تناقض‌ها و راه‌حل‌ها
+
 - نام کلاس اسکیمای OpenAPI باید `SpectacularAPIView` باشد اما پاسخ JSON: Subclass محلی `config/schema_views.SpectacularAPIView` از `SpectacularJSONAPIView` ایجاد شد.
 - مسیرهای نسخه‌بندی چندگانه: هر دو مسیر `/api/versions/...` و `/versions/...` نگاشت شدند.
 - `resource_type` در ادمین property است: فیلتر سفارشی مبتنی بر `content_type__model` پیاده‌سازی شد.
 - تست مسیر `/api/v1/resource/`: endpoint ساده برای GET/POST افزوده شد.
 
 ## نکات مهاجرتی
+
 - تغییر PK از UUID به int نیازمند اجرای مایگریشن‌ها است:
   - توسعه: `USE_SQLITE=True python manage.py migrate`
   - تولید: تنظیم متغیرهای Postgres و `python manage.py migrate`
 - اگر داده‌ی قبلی UUID دارید، مهاجرت داده لازم است (خارج از این PR).
 
 ## وضعیت تست‌ها
+
 - 66 passed, 7 skipped, 2 warnings.
 
 ## جمع‌بندی
+
 - UUID حذف و به PK عددی جنگو مهاجرت شد.
 - توکن SimpleJWT فعال و مسیرهای آن تضمین شد.
 - تنظیمات ساده‌سازی شد و fallback SQLite افزوده شد.
