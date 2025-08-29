@@ -44,7 +44,7 @@ def _import_first(modules: Iterable[str]) -> object:
     for m in modules:
         try:
             return importlib.import_module(m)
-        except Exception as e:  # pragma: no cover - import fallback path
+        except (ImportError, ModuleNotFoundError) as e:  # pragma: no cover - import fallback path
             last_exc = e
             continue
     raise last_exc if last_exc else ImportError(
