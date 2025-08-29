@@ -138,11 +138,12 @@ def test_encounter_str_and_ordering_if_defined(db: object) -> None:
 
 
 @pytest.mark.django_db
-def test_patient_uuid_fields_accept_valid_uuid(db: object) -> None:
-    doctor = User.objects.create_user(username="doc_uuid", password="test123")
+def test_patient_id_fields_accept_valid_id(db: object) -> None:
+    doctor = User.objects.create_user(username="doc_id", password="test123")
     p = Patient.objects.create(
-        full_name="UUID Test",
+        full_name="ID Test",
         primary_doctor=doctor,
     )
     assert p.primary_doctor.id is not None
     assert p.primary_doctor == doctor
+    assert isinstance(p.id, int)  # Check that ID is integer, not UUID

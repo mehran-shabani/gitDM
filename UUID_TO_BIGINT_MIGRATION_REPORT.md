@@ -166,6 +166,42 @@ python manage.py migrate
 2. احراز هویت JWT به درستی پیکربندی شده و نیاز به توکن معتبر دارد
 3. تمام ViewSet ها دارای `permission_classes = [IsAuthenticated]` هستند
 
+## به‌روزرسانی تست‌ها
+
+### تغییرات در فایل‌های تست
+
+1. **tests/test_versioning_basic.py**
+   - تغییر `uuid.uuid4()` به `999999` برای تست ID های غیرموجود
+
+2. **tests/test_models.py**
+   - تغییر نام تست از `test_patient_uuid_fields_accept_valid_uuid` به `test_patient_id_fields_accept_valid_id`
+   - اضافه کردن assertion برای بررسی اینکه ID از نوع integer است
+
+3. **tests/test_api_basic.py**
+   - حذف import uuid
+   - تغییر `primary_doctor_id` UUID به استفاده از `doctor.id` (integer)
+
+4. **tests/test_api_versions.py**
+   - حذف import uuid
+   - تغییر از `uuid4()` به ID های integer ثابت (999999)
+
+5. **records_versioning/services.py**
+   - حذف import uuid
+   - حذف کد تبدیل UUID به string
+
+## فایل‌های مایگریشن جدید
+
+مایگریشن‌های جدید برای تمام اپ‌ها ایجاد شدند:
+- ✅ patients_core/migrations/0001_initial.py
+- ✅ diab_encounters/migrations/0001_initial.py
+- ✅ diab_labs/migrations/0001_initial.py
+- ✅ diab_medications/migrations/0001_initial.py
+- ✅ clinical_refs/migrations/0001_initial.py
+- ✅ ai_summarizer/migrations/0001_initial.py
+- ✅ records_versioning/migrations/0001_initial.py
+
+تمام مایگریشن‌ها با BigAutoField به جای UUIDField ایجاد شدند.
+
 ## نتیجه‌گیری
 
 تمامی تغییرات درخواستی با موفقیت انجام شد:
@@ -174,5 +210,7 @@ python manage.py migrate
 - ✅ بررسی و تأیید API های احراز هویت
 - ✅ حذف تنظیمات اضافی و تکراری
 - ✅ به‌روزرسانی تمام وابستگی‌ها به Integer ID
+- ✅ اصلاح تمام فایل‌های تست برای سازگاری با Integer ID
+- ✅ ایجاد مایگریشن‌های جدید
 
 پروژه اکنون از سیستم ID استاندارد Django استفاده می‌کند که ساده‌تر، سریع‌تر و سازگارتر با اکوسیستم Django است.
