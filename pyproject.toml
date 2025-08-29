@@ -41,6 +41,12 @@ exclude = [
 # Allow unused variables when underscore-prefixed
 dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 
+[tool.ruff.per-file-ignores]
+# Test files don't need self annotations
+"tests/**/*.py" = ["ANN101"]
+# Migration files can have long lines
+"migrations/**/*.py" = ["E501"]
+
 [tool.ruff.format]
 # Like Black, use double quotes for strings
 quote-style = "double"
