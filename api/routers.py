@@ -25,7 +25,6 @@ version_revert = VersionViewSet.as_view({'post': 'revert'})
 
 urlpatterns = [
     path('health/', health, name='health'),
-    path('', include(router.urls)),
     path('versions/<str:resource_type>/<uuid:resource_id>/', version_list, name='version-list'),
     path('versions/<str:resource_type>/<uuid:resource_id>/revert/', version_revert, name='version-revert'),
 ]
