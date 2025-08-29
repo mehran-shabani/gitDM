@@ -90,8 +90,15 @@ class VersionViewSet(viewsets.ViewSet):
         except ValueError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception:
+-            logger.exception(
+-                "revert failed",
+-                extra={"resource_type": resource_type, "resource_id": str(resource_id)},
             logger.exception(
                 "revert failed",
-                extra={"resource_type": resource_type, "resource_id": str(resource_id)},
+                extra={
+                    "resource_type": resource_type,
+                    "resource_id": str(resource_id),
+                    "user_id": getattr(request.user, "pk", None),
+                },
             )
             return Response({"error": "internal error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
