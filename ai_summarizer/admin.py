@@ -30,7 +30,7 @@ class AISummaryAdmin(admin.ModelAdmin):
     list_filter = ('resource_type', 'created_at')
     # Match test spec: use resource_type label for search; admin allows callables/properties
 
-    search_fields = ('patient__full_name', 'resource_type', 'summary')
+    search_fields = ('patient__full_name', 'content_type__model', 'summary')
     readonly_fields = ('id', 'created_at')
     list_select_related = ('patient', 'content_type')
 
