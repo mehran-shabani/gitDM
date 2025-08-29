@@ -90,13 +90,6 @@ DATABASES = {
     }
 }
 
-# In config/settings.py
-
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Diabetes Pilot API',
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
-}
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Diabetes Pilot API',
     'DESCRIPTION': 'API for Diabetes Management System. Authentication required for all endpoints. '
@@ -107,13 +100,22 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': '/api',
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
+# Removed SYSTEM_USER_ID - using Django's default integer IDs instead
 
 # Redis configuration
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')

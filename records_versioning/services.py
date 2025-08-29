@@ -1,5 +1,4 @@
 import threading
-import uuid
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -23,24 +22,17 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
     یک اسنَپ‌شات (نمایه) از یک نمونه مدل Django می‌سازد و آمادهٔ ذخیره/مقایسه می‌کند.
     
     شرح:
-        این تابع از model_to_dict برای تبدیل یک نمونه مدل به دیکشنری استفاده می‌کند 
-        و سپس مقادیر UUID را به رشته تبدیل می‌کند تا برای سریال‌سازی JSON مناسب شوند.
-        تابع هیچ فیلدی را حذف یا فیلتر نمی‌کند و تنها نوع برخی مقادیر را برای 
-        سازگاری تبدیل می‌کند.
+        این تابع از model_to_dict برای تبدیل یک نمونه مدل به دیکشنری استفاده می‌کند.
+        با حذف UUIDها، دیگر نیازی به تبدیل نوع داده‌ای نداریم زیرا از integer IDs استفاده می‌کنیم.
     
     Parameters:
         instance: نمونهٔ مدل Django یا هر آبجکتی که توسط `model_to_dict` 
                  قابل تبدیل باشد.
     
     Returns:
-        dict: دیکشنریِ فیلدها و مقادیرِ نمونه که UUIDها به رشته تبدیل شده‌اند.
+        dict: دیکشنریِ فیلدها و مقادیرِ نمونه.
     """
-    d = model_to_dict(instance)
-    # Convert UUIDs to strings for JSON serialization
-    for key, value in d.items():
-        if isinstance(value, uuid.UUID):
-            d[key] = str(value)
-    return d
+    return model_to_dict(instance)
 
 
 def _compute_diff(
