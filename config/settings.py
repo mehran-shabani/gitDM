@@ -14,7 +14,7 @@ if not SECRET_KEY:
         raise ImproperlyConfigured(
             "The SECRET_KEY setting must not be empty in production."
         )
-DEBUG = os.getenv('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 # ALLOWED_HOSTS configuration
 ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
