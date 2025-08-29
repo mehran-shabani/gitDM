@@ -5,6 +5,19 @@ import uuid
 
 
 class MedicationOrder(models.Model):
+    # Frequency choices
+    class FrequencyChoices(models.TextChoices):
+        ONCE_DAILY = 'QD', 'Once daily'
+        TWICE_DAILY = 'BID', 'Twice daily'
+        THREE_TIMES_DAILY = 'TID', 'Three times daily'
+        FOUR_TIMES_DAILY = 'QID', 'Four times daily'
+        EVERY_6_HOURS = 'Q6H', 'Every 6 hours'
+        EVERY_8_HOURS = 'Q8H', 'Every 8 hours'
+        EVERY_12_HOURS = 'Q12H', 'Every 12 hours'
+        AS_NEEDED = 'PRN', 'As needed'
+        WEEKLY = 'QW', 'Weekly'
+        MONTHLY = 'QM', 'Monthly'
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey(
         'patients_core.Patient',
@@ -18,10 +31,23 @@ class MedicationOrder(models.Model):
         on_delete=models.SET_NULL,
         related_name='medication_orders',
     )
-    atc = models.CharField(max_length=20)
+    atc = models.CharField(
+        max_length=20,
+        validators=[
+            RegexValidator(
+                regex=r'^[A-Z]\d{2}[A-Z]{1,2}\d{2}$',
+                message='ATC code must follow the format: One letter, two digits, one or two letters, two digits (e.g., A10BA02)',
+            )
+        ],
+        help_text='ATC classification code (e.g., A10BA02 for Metformin)'
+    )
     name = models.CharField(max_length=100)
     dose = models.CharField(max_length=50)
-    frequency = models.CharField(max_length=50)
+    frequency = models.CharField(
+        max_length=50,
+        choices=FrequencyChoices.choices,
+        default=FrequencyChoices.ONCE_DAILY,
+    )
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
 
