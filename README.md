@@ -4,7 +4,7 @@ A version control system for diabetes patients from prediabetes, diabetes manage
 
 ## 📁 Project Structure
 
-```
+```bash
 /
 ├── doc/                          # Documentation organized by phases
 │   ├── phase1/                   # Setup & Infrastructure
@@ -26,6 +26,7 @@ A version control system for diabetes patients from prediabetes, diabetes manage
 ## 🎯 Phase Documentation Structure
 
 Each phase directory (`doc/phase1/` through `doc/phase8/`) contains:
+
 - `should-*.md` files: Implementation requirements and specifications
 - `suggestion-*.md` files: Optional recommendations and best practices
 - `AGENT.MD`: Phase-specific AI agent instructions
@@ -39,7 +40,8 @@ This project uses automated AI review agents for code quality and architecture c
 - **CodeRabbit**: Technical code review and compliance checking
 - **Gemini**: High-level architecture analysis and strategic recommendations
 
-### Configuration Files:
+### Configuration Files
+
 - `.ai-review-config.yaml`: General AI review settings
 - `.coderabbitai.yaml`: CodeRabbit-specific configuration
 - `gemini/gemini.md`: Gemini agent instructions
@@ -47,6 +49,7 @@ This project uses automated AI review agents for code quality and architecture c
 ## 🔗 Helssa Integration
 
 This project is designed as a continuation of the Helssa healthcare platform, ensuring:
+
 - **Namespace Compatibility**: All components follow Helssa naming conventions
 - **API Consistency**: Endpoints and data structures align with existing Helssa APIs
 - **Migration Safety**: Backward compatibility with existing Helssa data
@@ -77,6 +80,7 @@ This application uses JWT authentication with admin-only user creation:
 - **Django User Model**: Uses Django's `get_user_model()` for user management
 
 For complete authentication guide, see `/doc/phase4/user-authentication-guide.md`.
+
 ## 📝 Contributing
 
 - All development should follow the phase-based approach
