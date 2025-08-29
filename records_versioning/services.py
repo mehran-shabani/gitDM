@@ -239,17 +239,11 @@ def revert_to_version(
             continue
         setattr(obj, k, v)
     
-    # Temporarily disable signal versioning to avoid double version creation
-    prev_flag = getattr(_thread_state, 'in_version', False)
-    _thread_state.in_version = True
-    try:
-        obj.save(update_fields=[
-            k for k in target.snapshot.keys() 
-            if k not in IGNORE_FIELDS
-        ])
-    finally:
-        _thread_state.in_version = prev_flag
-    
+    # Apply changes without triggering post_save signals
+    fields = {k: v for k, v in target.snapshot.items() if k not in IGNORE_FIELDS}
+    type(obj).objects.filter(pk=obj.pk).update(**fields)
+    obj.refresh_from_db(fields=list(fields.keys()))
+
     # Now create just one version with clear reason
     save_with_version(obj, user, reason=f"{reason}: to v{target_version}")
     return obj
