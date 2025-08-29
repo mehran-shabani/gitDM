@@ -27,11 +27,19 @@ class Migration(migrations.Migration):
                 ('diff', models.JSONField(blank=True, null=True)),
                 ('meta', models.JSONField(blank=True, default=dict)),
                 ('changed_at', models.DateTimeField(default=django.utils.timezone.now)),
-                ('changed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                ('changed_by', models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.PROTECT,
+                    to=settings.AUTH_USER_MODEL
+                )),
             ],
             options={
                 'indexes': [
-                    models.Index(fields=['resource_type', 'resource_id', 'version'], name='records_ver_resourc_8e8f5f_idx'),
+                    models.Index(
+                        fields=['resource_type', 'resource_id', 'version'],
+                        name='records_ver_resourc_8e8f5f_idx'
+                    ),
                     models.Index(fields=['changed_at'], name='records_ver_changed_f3e8f5_idx'),
                 ],
                 'unique_together': {('resource_type', 'resource_id', 'version')},

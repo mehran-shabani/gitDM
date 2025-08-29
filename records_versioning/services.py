@@ -1,6 +1,6 @@
 import threading
 import uuid
-from typing import Any, Dict, Optional
+from typing import Optional
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -19,7 +19,7 @@ RESOURCE_MAP = {
 }
 
 
-def _compute_snapshot(instance: Any) -> Dict[str, Any]:
+def _compute_snapshot(instance: object) -> dict[str, object]:
     """
     یک اسنَپ‌شات (نمایه) از یک نمونه مدل Django می‌سازد و آمادهٔ ذخیره/مقایسه می‌کند.
     
@@ -45,9 +45,9 @@ def _compute_snapshot(instance: Any) -> Dict[str, Any]:
 
 
 def _compute_diff(
-    prev: Optional[Dict[str, Any]], 
-    curr: Dict[str, Any]
-) -> Optional[Dict[str, Dict[str, Any]]]:
+    prev: Optional[dict[str, object]], 
+    curr: dict[str, object]
+) -> Optional[dict[str, dict[str, object]]]:
     """
     یک دیکشنری اختلاف (diff) بین دو snapshot قبلی و جاری تولید می‌کند.
     
@@ -84,8 +84,8 @@ def _compute_diff(
 
 @transaction.atomic
 def save_with_version(
-    instance: Any, 
-    user: Any, 
+    instance: object, 
+    user: object, 
     reason: str = ""
 ) -> None:
     """
@@ -164,11 +164,11 @@ def save_with_version(
 @transaction.atomic
 def revert_to_version(
     resource_type: str, 
-    resource_id: Any, 
+    resource_id: object, 
     target_version: int, 
-    user: Any, 
+    user: object, 
     reason: str = "revert"
-) -> Any:
+) -> object:
     """
     شیء منبع مشخص را به یک نسخهٔ تاریخی بازمی‌گرداند و بازگردانی را 
     به‌عنوان یک نسخهٔ جدید ثبت می‌کند.
@@ -215,7 +215,7 @@ def revert_to_version(
     try:
         app_label, model_name = RESOURCE_MAP[resource_type]
     except KeyError:
-        raise ValueError(f"Unknown resource_type: {resource_type}")
+        raise ValueError(f"Unknown resource_type: {resource_type}") from None
     
     model_cls = apps.get_model(app_label, model_name)
     
