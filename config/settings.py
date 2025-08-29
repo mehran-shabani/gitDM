@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
+from datetime import timedelta
 from django.core.exceptions import ImproperlyConfigured
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -36,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt',
     'drf_spectacular',
     'minio_storage',
     'patients_core',
@@ -87,13 +90,30 @@ DATABASES = {
     }
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+# In config/settings.py
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Diabetes Pilot API',
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Diabetes Pilot API',
+    'DESCRIPTION': 'API for Diabetes Management System. Authentication required for all endpoints. '
+                   'Users are created exclusively through Django admin panel - no public registration available.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api',
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+}
+
+SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 # Redis configuration
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')

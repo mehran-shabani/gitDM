@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Encounter
 
+
 @admin.register(Encounter)
 class EncounterAdmin(admin.ModelAdmin):
     list_display = ('patient', 'occurred_at', 'created_at')

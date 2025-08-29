@@ -1,3 +1,4 @@
+# ruff: noqa: RUF002
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
@@ -5,6 +6,7 @@ import uuid
 
 
 class MedicationOrder(models.Model):
+
     # Frequency choices
     class FrequencyChoices(models.TextChoices):
         ONCE_DAILY = 'QD', 'Once daily'
@@ -67,6 +69,14 @@ class MedicationOrder(models.Model):
             })
 
     def __str__(self) -> str:
-        """نمایش کوتاه: "<نام دارو> for <نام کامل بیمار>"."""
+        """
+        نمایهٔ کوتاه برای MedicationOrder.
+        خروجی: "<نام دارو> for <نام بیمار>".
+        نام بیمار از full_name گرفته می‌شود؛ در غیر این‌صورت str(patient).
+
+        Returns:
+            str: "<name> for <patient_name>".
+        """
         patient_name = getattr(self.patient, "full_name", str(self.patient))
         return f"{self.name} for {patient_name}"
+

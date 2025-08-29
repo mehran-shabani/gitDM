@@ -30,5 +30,5 @@ class AISummary(models.Model):
                 })
 
     def __str__(self) -> str:
-        """نمایش کوتاه برای ادمین: 'AI Summary for <Patient> - <Model>'."""
+        """Admin label: 'AI Summary for <patient> - <model>'."""
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"

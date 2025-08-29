@@ -28,3 +28,4 @@ class RecordVersionAdmin(admin.ModelAdmin):
     ordering = ('-changed_at',)
     list_select_related = ('changed_by',)
     date_hierarchy = 'changed_at'
+
