@@ -2,8 +2,9 @@ from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import Patient
-from .serializers import PatientSerializer
+from .serializers import PatientSerializer, CustomTokenObtainPairSerializer
 
 
 class PatientViewSet(viewsets.ModelViewSet):
@@ -99,3 +100,7 @@ class PatientViewSet(viewsets.ModelViewSet):
             'medications': MedicationOrderSerializer(meds, many=True).data,
             'ai_summaries': AISummarySimpleSerializer(summaries, many=True).data
         })
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer

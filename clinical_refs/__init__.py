@@ -1,1 +1,0 @@
-"""Clinical References Django app."""

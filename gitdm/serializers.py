@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Patient
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import Patient, User
+
+
+class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    username_field = 'email'
 
 
 class PatientSerializer(serializers.ModelSerializer):
