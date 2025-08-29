@@ -1,6 +1,8 @@
 # کدهای الزامی – API
 
-**نکته مهم**: این سیستم فقط از طریق پنل ادمین Django امکان ایجاد کاربر دارد. هیچ endpoint عمومی برای ثبت‌نام وجود ندارد.
+**نکته مهم**: 
+1. این سیستم فقط از طریق پنل ادمین Django امکان ایجاد کاربر دارد. هیچ endpoint عمومی برای ثبت‌نام وجود ندارد.
+2. تمام مدل‌ها از Integer ID (AutoField) استفاده می‌کنند، نه UUID. این برای سازگاری با User model پیش‌فرض Django است.
 
 ## config/settings.py (بخش‌های افزوده/به‌روزشده)
 REST_FRAMEWORK.update({
@@ -12,7 +14,7 @@ REST_FRAMEWORK.update({
     ),
 })
 
-SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000001'
+SYSTEM_USER_ID = 1  # Default system user ID (integer)
 
 ## api/serializers.py (جدید)
 from rest_framework import serializers

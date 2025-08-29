@@ -1,10 +1,9 @@
 from django.db import models
 from django.conf import settings
-import uuid
 
 
 class Encounter(models.Model):
-  id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+  id = models.AutoField(primary_key=True)
   patient = models.ForeignKey('patients_core.Patient', on_delete=models.CASCADE)
   occurred_at = models.DateTimeField()
   subjective = models.TextField(blank=True)

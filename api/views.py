@@ -1,4 +1,4 @@
-from uuid import UUID
+
 from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -14,7 +14,7 @@ from .serializers import (
     MedicationOrderSerializer, ClinicalReferenceSerializer, AISummarySerializer
 )
 
-SYSTEM_USER_ID = UUID(getattr(settings, 'SYSTEM_USER_ID'))
+SYSTEM_USER_ID = getattr(settings, 'SYSTEM_USER_ID', 1)
 
 
 class PatientViewSet(viewsets.ModelViewSet):
