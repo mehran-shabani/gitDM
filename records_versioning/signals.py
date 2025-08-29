@@ -52,6 +52,14 @@ def _create_version_on_save(instance: Any) -> None:
         except User.DoesNotExist:
             pass
     
+# --- top of records_versioning/signals.py ---
+from .services import save_with_version, _thread_state
+...
+
+# --- inside your signal handler (around line 35) ---
+    # اگر عملیات در جریانِ «بازگردانی» یا ساخت نسخه‌ست، سیگنال نباید دوباره نسخه بسازه
+    if getattr(_thread_state, 'in_version', False):
+        return
     save_with_version(instance, user, reason='auto-signal')
 
 
