@@ -171,3 +171,27 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# GapGPT API Configuration
+GAPGPT_API_KEY = os.getenv('GAPGPT_API_KEY')
+GAPGPT_BASE_URL = os.getenv('GAPGPT_BASE_URL', 'https://api.gapgpt.app/v1')
+
+# Fallback to OpenAI for backward compatibility
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+# Check for API key availability
+if not GAPGPT_API_KEY and not OPENAI_API_KEY and not DEBUG:
+    raise ImproperlyConfigured(
+        "Either GAPGPT_API_KEY or OPENAI_API_KEY environment variable is required for production."
+    )
+
+# AI Summarizer Settings
+AI_SUMMARIZER_SETTINGS = {
+    'MODEL': os.getenv('AI_MODEL', 'gpt-4o'),
+    'MAX_TOKENS': int(os.getenv('AI_MAX_TOKENS', '1000')),
+    'TEMPERATURE': float(os.getenv('AI_TEMPERATURE', '0.3')),
+    'USE_GAPGPT': os.getenv('USE_GAPGPT', 'True').lower() in ('true', '1', 'yes'),
+    'SYSTEM_PROMPT': """You are a medical AI assistant specialized in creating concise, accurate summaries of patient medical data. 
+Focus on key clinical information, diagnoses, medications, and important findings. 
+Keep summaries professional, clear, and relevant for healthcare providers."""
+}

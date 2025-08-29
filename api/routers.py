@@ -1,9 +1,8 @@
 from django.urls import path, include
 from django.http import JsonResponse, HttpRequest
-from django.views.decorators.http import require_safe, require_http_methods
+from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
-from django.views.decorators.cache import never_cache
 from api.versions import VersionViewSet
 
 app_name = "api"
@@ -14,7 +13,7 @@ version_list = VersionViewSet.as_view({'get': 'list'})
 version_revert = VersionViewSet.as_view({'post': 'revert'})
 
 @csrf_exempt
-@require_http_methods(["GET", "POST"]) 
+@require_http_methods(["GET", "POST"])
 def resource_view(request: HttpRequest):
     if request.method == "GET":
         return JsonResponse({"status": "ok"}, status=200)

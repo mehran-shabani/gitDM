@@ -9,6 +9,7 @@ from .views import (
     PatientViewSet, EncounterViewSet, LabResultViewSet,
     MedicationOrderViewSet, ClinicalReferenceViewSet
 )
+from ai_summarizer.views import AISummaryViewSet
 from .root_view import api_root
 from .views_export import export_patient
 
@@ -41,6 +42,7 @@ router.register(r'encounters', EncounterViewSet, basename='encounters')
 router.register(r'labs', LabResultViewSet, basename='labs')
 router.register(r'meds', MedicationOrderViewSet, basename='meds')
 router.register(r'refs', ClinicalReferenceViewSet, basename='refs')
+router.register(r'ai-summaries', AISummaryViewSet, basename='ai-summaries')
 
 urlpatterns = [
     path('', api_root, name='api-root'),

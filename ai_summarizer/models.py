@@ -13,6 +13,11 @@ class AISummary(models.Model):
     object_id = models.CharField(max_length=64, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     summary = models.TextField()
+    references = models.ManyToManyField(
+        'clinical_refs.ClinicalReference',
+        blank=True,
+        help_text="Clinical references automatically linked based on summary content"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -25,7 +25,7 @@ class AISummaryResourceTypeFilter(SimpleListFilter):
 @admin.register(AISummary)
 class AISummaryAdmin(admin.ModelAdmin):
     # resource_type یک property نمایشی‌ه و برای list_display اوکیه
-    list_display = ('patient', 'resource_type', 'created_at')
+    list_display = ('patient', 'resource_type', 'references_count', 'created_at')
     # Use real DB field here; custom resource type filter comes via get_list_filter
     list_filter = ('created_at',)
     # Match test spec: use resource_type label for search; admin allows callables/properties
@@ -33,6 +33,25 @@ class AISummaryAdmin(admin.ModelAdmin):
     search_fields = ('patient__full_name', 'content_type__model', 'summary')
     readonly_fields = ('id', 'created_at')
     list_select_related = ('patient', 'content_type')
+    filter_horizontal = ('references',)
+
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('id', 'patient', 'created_at', 'updated_at')
+        }),
+        ('Content', {
+            'fields': ('content_type', 'object_id', 'summary')
+        }),
+        ('Clinical References', {
+            'fields': ('references',),
+            'description': 'Clinical references automatically linked based on summary content'
+        }),
+    )
+
+    def references_count(self, obj):
+        """Show count of linked clinical references"""
+        return obj.references.count()
+    references_count.short_description = "References"
 
     def get_list_filter(self, request):  # type: ignore[override]
         # Ensure at least one filter exists to render the sidebar and result list
