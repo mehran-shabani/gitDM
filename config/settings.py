@@ -42,10 +42,15 @@ INSTALLED_APPS = [
     'storages',
 
     # Your apps
-    'api',
-    'ai_summarizer',
-    'clinical_refs',
-    'patient_core',
+    'gitdm',
+    'intelligence', 
+    'references',
+    'encounters',
+    'laboratory',
+    'pharmacy',
+    'versioning',
+    'security',
+    'gateway',
     
 ]
 
@@ -150,12 +155,12 @@ CELERY_TIMEZONE = 'UTC'
 # Celery Beat: Tehran time jobs (UTC +3:30)
 CELERY_BEAT_SCHEDULE = {
     'summary_task_22_tehran': {
-        'task': 'ai_summarizer.tasks.create_summary_with_references',
+        'task': 'intelligence.tasks.create_summary_with_references',
         'schedule': crontab(minute=30, hour=18),  # 22:00 Tehran
         'args': [1, "Sample content at 22"]
     },
     'summary_task_2230_tehran': {
-        'task': 'ai_summarizer.tasks.create_summary_with_references',
+        'task': 'intelligence.tasks.create_summary_with_references',
         'schedule': crontab(minute=0, hour=19),  # 22:30 Tehran
         'args': [1, "Sample content at 22:30"]
     },
@@ -243,7 +248,7 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-AUTH_USER_MODEL = 'patients_core.User'
+AUTH_USER_MODEL = 'gitdm.User'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # پیش‌فرض
 ]

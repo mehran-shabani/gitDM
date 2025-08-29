@@ -1,15 +1,16 @@
 import json
 import uuid
 import pytest
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
+User = get_user_model()
 
 @pytest.mark.django_db
 def test_token_and_create_patient():
-    User.objects.create_user(username='u1', password='p1')
+    User.objects.create_user(email='u1@test.com', password='p1')
     c = APIClient()
-    r = c.post('/api/token/', {'username': 'u1', 'password': 'p1'}, format='json')
+    r = c.post('/api/token/', {'email': 'u1@test.com', 'password': 'p1'}, format='json')
     assert r.status_code == 200
     assert 'access' in r.data and 'refresh' in r.data
     token = r.data['access']
