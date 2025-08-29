@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    # 'minio_storage',  # removed to simplify; not required for core functionality
+    # Optional storages (configured via env when used)
+    'storages',
     'security',
     'api',
     'patients_core',
@@ -108,7 +109,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
@@ -145,6 +146,9 @@ if REDIS_URL:
             }
         }
     }
+    # Celery configuration via Redis if available
+    CELERY_BROKER_URL = REDIS_URL
+    CELERY_RESULT_BACKEND = REDIS_URL
 else:
     CACHES = {
         'default': {

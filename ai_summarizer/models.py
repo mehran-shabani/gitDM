@@ -7,8 +7,8 @@ from django.core.exceptions import ValidationError
 
 class AISummary(models.Model):
     patient = models.ForeignKey('patients_core.Patient', on_delete=models.CASCADE)
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveBigIntegerField()
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
+    object_id = models.CharField(max_length=64, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')
     summary = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

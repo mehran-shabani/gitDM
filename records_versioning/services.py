@@ -37,8 +37,14 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
     d = model_to_dict(instance)
     # Convert non-JSON-serializable values to strings
     import datetime
+    from decimal import Decimal
     for key, value in list(d.items()):
         if isinstance(value, datetime.datetime):
+            d[key] = value.isoformat()
+        elif isinstance(value, Decimal):
+            # Preserve numeric meaning but ensure JSON-serializable
+            d[key] = float(value)
+        elif isinstance(value, datetime.date):
             d[key] = value.isoformat()
     return d
 

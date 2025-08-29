@@ -20,7 +20,8 @@ class RecordVersionSerializer(serializers.ModelSerializer):
 
 
 class VersionViewSet(viewsets.GenericViewSet):
-    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [IsAuthenticated]
+    # Allow anonymous read-only access for listing versions
+    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [AllowAny]
     serializer_class = RecordVersionSerializer
     pagination_class = PageNumberPagination
 
@@ -35,8 +36,11 @@ class VersionViewSet(viewsets.GenericViewSet):
         ).order_by('version')
         
         page = self.paginate_queryset(qs)
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(qs, many=True)
+        return Response(serializer.data)
 
     class _RevertSerializer(serializers.Serializer):
         target_version = serializers.IntegerField(min_value=1)

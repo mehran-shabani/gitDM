@@ -39,5 +39,7 @@ def api_root(request):
         'documentation': {
             'schema': request.build_absolute_uri('/api/schema/'),
             'swagger': request.build_absolute_uri('/api/docs/'),
+            'redoc': request.build_absolute_uri('/api/redoc/'),
+            'rapidoc': request.build_absolute_uri('/api/rapidoc/'),
         }
     })
