@@ -9,12 +9,6 @@ from api.versions import VersionViewSet
 app_name = "api"
 
 
-@never_cache
-@require_safe
-def health(_request: HttpRequest) -> JsonResponse:
-    """سلامت سرویس: JSON {"status": "ok"} با HTTP 200. بدون کش."""
-    return JsonResponse({"status": "ok"})
-
 # Create version views
 version_list = VersionViewSet.as_view({'get': 'list'})
 version_revert = VersionViewSet.as_view({'post': 'revert'})
@@ -39,7 +33,6 @@ def resource_view(request: HttpRequest):
 
 
 urlpatterns = [
-    path('health/', health, name='health'),
     # Compatibility resource stub for generic tests
     path('v1/resource/', resource_view, name='resource'),
     path(
