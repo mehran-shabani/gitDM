@@ -6,51 +6,51 @@ import pytest
 from patients_core.models import Patient
 from diab_encounters.models import Encounter
 from datetime import datetime
-import uuid
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @pytest.mark.django_db
 def test_patient_create() -> None:
+    doctor = User.objects.create_user(username="doc_test", password="test123")
     p = Patient.objects.create(
         full_name="Ali Test",
-        primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        primary_doctor=doctor,
     )
     assert p.id is not None
     assert p.full_name == "Ali Test"
+    assert p.primary_doctor == doctor
 
 
 @pytest.mark.django_db
 def test_encounter_link() -> None:
-    """
-    آزمایشی که ایجاد و پیوند یک Encounter به یک Patient را بررسی می‌کند.
-
-    این تست یک رکورد Patient می‌سازد و سپس یک Encounter مرتبط با آن را با مقدار
-    occurred_at معین و created_by (UUID) ایجاد می‌کند.
-    آزمون تضمین می‌کند که Encounter به همان شیء Patient اشاره می‌کند
-    و فیلد occurred_at مقداردهی شده است.
-    این تست نیاز به دسترسی به پایگاه‌داده دارد و تغییرات موقتی در دیتابیس ایجاد می‌کند.
-    """
+    """ساخت Encounter لینک‌شده به Patient با created_by معتبر."""
+    doctor = User.objects.create_user(username="doc_enc", password="test123")
+    creator = User.objects.create_user(username="nurse_enc", password="test123")
     p = Patient.objects.create(
         full_name="Ali Test",
-        primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        primary_doctor=doctor,
     )
     e = Encounter.objects.create(
         patient=p,
         occurred_at=datetime.fromisoformat("2025-01-01T10:00:00+00:00"),
-        created_by=uuid.UUID("22222222-2222-2222-2222-222222222222"),
+        created_by=creator,
     )
     assert e.patient == p
     assert e.occurred_at is not None
+    assert e.created_by == creator
 
 
 @pytest.mark.django_db
 def test_patient_missing_required_fields_raises(db: object) -> None:
     # Assuming full_name is required.
     # If model-level validation enforces it, calling full_clean will raise.
+    doctor = User.objects.create_user(username="doc_missing", password="test123")
     p = Patient(
         full_name=None,
-        primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        primary_doctor=doctor,
     )
     with pytest.raises((ValidationError, IntegrityError)):
         # Try full_clean first if available; fall back to save in a transaction
@@ -64,30 +64,34 @@ def test_patient_missing_required_fields_raises(db: object) -> None:
 @pytest.mark.django_db
 def test_encounter_requires_patient_and_occurred_at(db: object) -> None:
     # Attempt to create encounter without patient or occurred_at should fail.
+    creator = User.objects.create_user(username="creator_req", password="test123")
     with pytest.raises(IntegrityError):
         with transaction.atomic():
             Encounter.objects.create(
                 patient=None,
                 occurred_at=None,
-                created_by=uuid.UUID("22222222-2222-2222-2222-222222222222"),
+                created_by=creator,
             )
 
 
 @pytest.mark.django_db
 def test_cascade_delete_patient_deletes_encounters(db: object) -> None:
+    doctor = User.objects.create_user(username="doc_cascade", password="test123")
+    creator1 = User.objects.create_user(username="creator_cascade1", password="test123")
+    creator2 = User.objects.create_user(username="creator_cascade2", password="test123")
     p = Patient.objects.create(
         full_name="Cascade Test",
-        primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        primary_doctor=doctor,
     )
     Encounter.objects.create(
         patient=p,
         occurred_at=datetime.fromisoformat("2025-01-02T12:00:00+00:00"),
-        created_by=uuid.UUID("22222222-2222-2222-2222-222222222222"),
+        created_by=creator1,
     )
     Encounter.objects.create(
         patient=p,
         occurred_at=datetime.fromisoformat("2025-02-03T12:00:00+00:00"),
-        created_by=uuid.UUID("33333333-3333-3333-3333-333333333333"),
+        created_by=creator2,
     )
     pid = p.id
     p.delete()
@@ -98,19 +102,22 @@ def test_cascade_delete_patient_deletes_encounters(db: object) -> None:
 
 @pytest.mark.django_db
 def test_encounter_str_and_ordering_if_defined(db: object) -> None:
+    doctor = User.objects.create_user(username="doc_str", password="test123")
+    creator1 = User.objects.create_user(username="creator_str1", password="test123")
+    creator2 = User.objects.create_user(username="creator_str2", password="test123")
     p = Patient.objects.create(
         full_name="Str Test",
-        primary_doctor_id=uuid.UUID("11111111-1111-1111-1111-111111111111"),
+        primary_doctor=doctor,
     )
     e_newer = Encounter.objects.create(
         patient=p,
         occurred_at=datetime.fromisoformat("2025-04-01T10:00:00+00:00"),
-        created_by=uuid.UUID("44444444-4444-4444-4444-444444444444"),
+        created_by=creator1,
     )
     e_older = Encounter.objects.create(
         patient=p,
         occurred_at=datetime.fromisoformat("2025-03-01T10:00:00+00:00"),
-        created_by=uuid.UUID("55555555-5555-5555-5555-555555555555"),
+        created_by=creator2,
     )
     # __str__ should be a non-empty string if defined
     assert isinstance(str(e_newer), str)
@@ -132,8 +139,10 @@ def test_encounter_str_and_ordering_if_defined(db: object) -> None:
 
 @pytest.mark.django_db
 def test_patient_uuid_fields_accept_valid_uuid(db: object) -> None:
+    doctor = User.objects.create_user(username="doc_uuid", password="test123")
     p = Patient.objects.create(
         full_name="UUID Test",
-        primary_doctor_id=uuid.UUID("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+        primary_doctor=doctor,
     )
-    assert isinstance(p.primary_doctor_id, uuid.UUID)
+    assert p.primary_doctor.id is not None
+    assert p.primary_doctor == doctor

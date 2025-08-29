@@ -14,7 +14,6 @@ class Encounter(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self: "Encounter") -> str:
+    def __str__(self) -> str:
         """Encounter برای <patient> در <occurred_at>."""
-        return f"Encounter for {self.patient.full_name} at {self.occurred_at}"
         return f"Encounter for {self.patient.full_name} at {self.occurred_at}"
