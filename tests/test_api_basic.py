@@ -18,7 +18,7 @@ def test_token_and_create_patient():
         'primary_doctor_id': '00000000-0000-0000-0000-000000000010'
     }
     r2 = c.post('/api/patients/', payload, format='json')
-    assert r2.status_code in (200, 201)
+    assert r2.status_code == 201
     pid = r2.data['id']
     r3 = c.get(f'/api/patients/{pid}/timeline/')
     assert r3.status_code == 200
