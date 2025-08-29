@@ -18,7 +18,7 @@ except Exception:
 
 @pytest.mark.django_db
 class TestProjectUrls:
-    def test_schema_url_resolves(self, settings: object) -> None:
+    def test_schema_url_resolves(self: "TestProjectUrls", settings: object) -> None:
         match = resolve("/api/schema/")
         assert match.func is not None
         # SpectacularAPIView.as_view() sets view_class name
