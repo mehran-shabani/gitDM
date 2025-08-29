@@ -295,6 +295,8 @@ def test_revert_endpoint_performs_revert_and_creates_new_version() -> None:
     ).count()
 
     candidate_paths = [
+        f"/api/versions/Patient/{p.id}/revert/",
+        # مسیرهای قبلی برای سازگاری با دیپلوی‌های دیگر
         f"/api/versioning/Patient/{p.id}/revert/",
         f"/records-versioning/Patient/{p.id}/revert/",
         f"/api/records-versioning/Patient/{p.id}/revert/",
