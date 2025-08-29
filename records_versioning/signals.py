@@ -30,12 +30,7 @@ def _create_version_on_save(instance: object) -> None:
     if user_id:
         user = User.objects.filter(id=user_id).first()
     
-    # If no user found, use system user if configured
-    if user is None and getattr(settings, 'SYSTEM_USER_ID', None):
-        try:
-            user = User.objects.get(id=settings.SYSTEM_USER_ID)
-        except User.DoesNotExist:
-            pass
+    # No system user needed - versioning will work with user=None
     
     save_with_version(instance, user, reason='auto-signal')
 

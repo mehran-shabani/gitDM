@@ -110,24 +110,16 @@ class EncounterViewSet(viewsets.ModelViewSet):
         """
         ایجاد و ذخیره‌ی یک نمونه Encounter و تعیین نویسندهٔ آن.
         
-        این متد هنگام ایجاد (create) یک Encounter، serializer.save() را فراخوانی می‌کند و فیلد مالک/سازنده را تضمینی مقداردهی می‌کند: اگر درخواست‌دهنده احراز هویت شده باشد، شیٔ User مربوطه در created_by قرار می‌گیرد، و در غیر این‌صورت به‌عنوان مقدار جایگزین شناسه‌ی UUID تعریف‌شده در SYSTEM_USER_ID در created_by_id نوشته می‌شود. نتیجهٔ متد ایجاد و ذخیرهٔ شیٔ پایگاه‌داده‌ای Encounter است؛ این روش تضمین می‌کند همیشه یک مقدار مرجع برای سازنده وجود دارد (یا ارجاع به یک User واقعی یا شناسهٔ سیستم).
+        این متد هنگام ایجاد (create) یک Encounter، serializer.save() را فراخوانی می‌کند و فیلد مالک/سازنده را تضمینی مقداردهی می‌کند: اگر درخواست‌دهنده احراز هویت شده باشد، شیٔ User مربوطه در created_by قرار می‌گیرد. چون authentication اجباری است، در صورت عدم احراز هویت PermissionDenied بالا می‌رود.
         """
         user = self.request.user if self.request.user.is_authenticated else None
         if user:
             serializer.save(created_by=user)
             return
 
-        # Fallback به کاربر سیستمی واقعی
-        User = get_user_model()
-        try:
-            system_user = User.objects.get(pk=SYSTEM_USER_ID)
-        except User.DoesNotExist as exc:
-            from django.core.exceptions import ImproperlyConfigured
-            raise ImproperlyConfigured(
-                "SYSTEM_USER_ID not found in the user table. "
-                "Create the system user or set a valid existing UUID."
-            ) from exc
-        serializer.save(created_by=system_user)
+        # Since we require authentication, this should not happen
+        from django.core.exceptions import PermissionDenied
+        raise PermissionDenied("Authentication required to create encounters.")
 
 
 class LabResultViewSet(viewsets.ModelViewSet):
