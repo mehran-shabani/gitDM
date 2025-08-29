@@ -7,6 +7,7 @@ from patients_core.models import Patient
 from diab_encounters.models import Encounter
 from diab_labs.models import LabResult
 from diab_medications.models import MedicationOrder
+from django.contrib.auth import get_user_model
 from clinical_refs.models import ClinicalReference
 from ai_summarizer.models import AISummary
 from .serializers import (
@@ -71,10 +72,26 @@ class PatientViewSet(viewsets.ModelViewSet):
         limit = int(request.query_params.get('limit', 100))
         limit = min(limit, 500)  # Max 500 items per type
         
-        enc = Encounter.objects.filter(patient=p).order_by('-occurred_at')[:limit]
-        labs = LabResult.objects.filter(patient=p).order_by('-taken_at')[:limit]
-        meds = MedicationOrder.objects.filter(patient=p).order_by('-start_date')[:limit]
-        summaries = AISummary.objects.filter(patient=p).order_by('-created_at')[:5]
+        enc = (
+            Encounter.objects.filter(patient=p)
+            .select_related('patient', 'created_by')
+            .order_by('-occurred_at')[:limit]
+        )
+        labs = (
+            LabResult.objects.filter(patient=p)
+            .select_related('patient', 'encounter')
+            .order_by('-taken_at')[:limit]
+        )
+        meds = (
+            MedicationOrder.objects.filter(patient=p)
+            .select_related('patient', 'encounter')
+            .order_by('-start_date')[:limit]
+        )
+        summaries = (
+            AISummary.objects.filter(patient=p)
+            .select_related('patient', 'content_type')
+            .order_by('-created_at')[:5]
+        )
         
         return Response({
             'patient': PatientSerializer(p).data,
@@ -89,7 +106,7 @@ class EncounterViewSet(viewsets.ModelViewSet):
     queryset = Encounter.objects.all().order_by('-occurred_at')
     serializer_class = EncounterSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer) -> None:
         # Use the authenticated user if available, otherwise use system user
         """
         ایجاد و ذخیره‌ی یک نمونه Encounter و تعیین نویسندهٔ آن.
@@ -99,9 +116,19 @@ class EncounterViewSet(viewsets.ModelViewSet):
         user = self.request.user if self.request.user.is_authenticated else None
         if user:
             serializer.save(created_by=user)
-        else:
-            # Fallback to system user ID - this should ideally be a proper User instance
-            serializer.save(created_by_id=SYSTEM_USER_ID)
+            return
+
+        # Fallback به کاربر سیستمی واقعی
+        User = get_user_model()
+        try:
+            system_user = User.objects.get(pk=SYSTEM_USER_ID)
+        except User.DoesNotExist as exc:
+            from django.core.exceptions import ImproperlyConfigured
+            raise ImproperlyConfigured(
+                "SYSTEM_USER_ID not found in the user table. "
+                "Create the system user or set a valid existing UUID."
+            ) from exc
+        serializer.save(created_by=system_user)
 
 
 class LabResultViewSet(viewsets.ModelViewSet):

@@ -70,12 +70,12 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 
 This application uses JWT authentication with admin-only user creation:
 
-- No public signup: users are created through the Django admin panel.
-- JWT tokens: obtain via `/api/token/` and refresh via `/api/token/refresh/`.
-- Secure by design: no public user registration endpoints exist.
-- Admin control: full user lifecycle via Django admin.
+- **No public signup**: Users are created exclusively through Django admin panel
+- **JWT tokens**: Obtain via `/api/token/` (username/password) and refresh via `/api/token/refresh/`
+- **Secure by design**: No public registration endpoints - complete admin control
+- **Django User Model**: Uses Django's `get_user_model()` for user management
 
-For details, see `/doc/phase4/authentication-guide.md`.
+For complete authentication guide, see `/doc/phase4/user-authentication-guide.md`.
 ## 📝 Contributing
 
 - All development should follow the phase-based approach

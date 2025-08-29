@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from __future__ import annotations
 from django.core.exceptions import ValidationError
 import uuid
 
@@ -15,27 +16,6 @@ class AISummary(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property
-    def resource_type(self) -> str:
-        """Backward-compatible property for admin display."""
-        return self.content_type.model
-    
-    resource_type.fget.short_description = "Resource Type"  # type: ignore
-
-    def clean(self) -> None:
-        """
-        بررسی می‌کند که در صورت وجود شیء مرتبط (`content_object`) و داشتن فیلد `patient`، آن بیمار با `self.patient` یکسان باشد.
-        
-        این اعتبارسنجی قبل از ذخیره/اعتبارسنجی مدل اجرا می‌شود و اگر بیمار شیء مرتبط با بیمار رکورد فعلی تطابق نداشته باشد یک `ValidationError` بر روی فیلد 'patient' با پیام مناسب پرتاب می‌کند.
-        """
-        if self.content_object and hasattr(self.content_object, 'patient'):
-            if self.content_object.patient != self.patient:
-                raise ValidationError({
-                    'patient': 'Patient mismatch: The selected patient must match the patient of the related object.'
-                })
-
-    def __str__(self) -> str:
-from __future__ import annotations
-
     def resource_type(self: "AISummary") -> str:
         """
         نام مدل مرتبط با شیء پیوست‌شده را برمی‌گرداند (برای نمایش سازگار با نسخه‌های قبلی در پنل ادمین).
@@ -70,6 +50,5 @@ from __future__ import annotations
         
         این مقدار برای نمایش در لیست‌ها و صفحات ادمین استفاده می‌شود و از فیلدهای `patient.full_name` و `content_type.model` برای ساخت رشته استفاده می‌کند.
         """
+
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
-
-

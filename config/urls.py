@@ -14,9 +14,11 @@ urlpatterns = [
 ]
 
 # Include api.routers if available
-try:
-    from importlib.util import find_spec
-    if find_spec('api.routers') is not None:
+from importlib.util import find_spec
+import logging
+logger = logging.getLogger(__name__)
+if find_spec('api.routers') is not None:
+    try:
         urlpatterns.append(path('', include('api.routers')))
-except ImportError:
-    pass
+    except Exception as exc:  # فقط لاگ کن، قورت نده
+        logger.warning("Skipping api.routers include due to error: %s", exc)
