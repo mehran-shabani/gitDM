@@ -33,8 +33,10 @@ class VersionViewSet(viewsets.GenericViewSet):
         qs = RecordVersion.objects.filter(
             resource_type=resource_type, resource_id=str(resource_id)
         ).order_by('version')
-        serializer = self.get_serializer(qs, many=True)
-        return Response(serializer.data)
+        
+        page = self.paginate_queryset(qs)
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
 
     class _RevertSerializer(serializers.Serializer):
         target_version = serializers.IntegerField(min_value=1)

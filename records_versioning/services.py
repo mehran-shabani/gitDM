@@ -243,7 +243,7 @@ def revert_to_version(
                 rel_model = field.remote_field.model
                 v_inst = rel_model.objects.get(pk=v)
                 setattr(obj, k, v_inst)
-            except Exception:
+            except (rel_model.DoesNotExist, ValueError, TypeError):
                 setattr(obj, k, v)
         else:
             setattr(obj, k, v)

@@ -29,7 +29,7 @@ def resource_view(request: HttpRequest):
     try:
         if request.body:
             data = json.loads(request.body.decode("utf-8"))
-    except Exception:
+    except json.JSONDecodeError:
         data = None
     if not isinstance(data, dict):
         data = request.POST or {}
@@ -41,17 +41,7 @@ def resource_view(request: HttpRequest):
 urlpatterns = [
     path('health/', health, name='health'),
     # Compatibility resource stub for generic tests
-    path('v1/resource/', require_http_methods(["GET", "POST"]) (
-        lambda request: (
-            JsonResponse({"status": "ok"}, status=200)
-            if request.method == "GET"
-            else (
-                JsonResponse({"status": "created"}, status=201)
-                if (getattr(request, 'data', None) or getattr(request, 'POST', {})).get('name')
-                else JsonResponse({"error": "invalid"}, status=400)
-            )
-        )
-    ), name='resource'),
+    path('v1/resource/', resource_view, name='resource'),
     path(
         'versions/<str:resource_type>/<str:resource_id>/',
         version_list,
