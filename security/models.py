@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import uuid
 
 class AuditLog(models.Model):
@@ -21,5 +22,5 @@ class Role(models.Model):
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=16, choices=ROLE_CHOICES)
