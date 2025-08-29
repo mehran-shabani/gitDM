@@ -12,7 +12,7 @@ class RecordVersionAdmin(admin.ModelAdmin):
         'changed_at',
     )
     list_filter = ('resource_type', 'changed_at')
-    search_fields = ('resource_type', 'resource_id', 'meta')
+    search_fields = ('resource_type', 'resource_id', 'changed_by__username')
     readonly_fields = (
         'id',
         'resource_type',
