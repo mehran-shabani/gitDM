@@ -1,0 +1,72 @@
+# Git
+.git
+.gitignore
+.gitguardian.yml
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+*.log
+
+# Documentation
+docs/
+doc/
+*.md
+README.*
+PROJECT_REVIEW.*
+
+# Development files
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.db
+
+# CI/CD
+.github/
+.pre-commit-config.yaml
+.editorconfig
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Static files (generated at runtime)
+staticfiles/
+media/
+
+# Node modules (if any frontend assets)
+node_modules/
