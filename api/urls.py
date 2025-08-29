@@ -5,6 +5,7 @@ from .views import (
     PatientViewSet, EncounterViewSet, LabResultViewSet,
     MedicationOrderViewSet, ClinicalReferenceViewSet
 )
+from .root_view import api_root
 
 router = SimpleRouter()
 router.register(r'patients', PatientViewSet, basename='patients')
@@ -14,6 +15,7 @@ router.register(r'meds', MedicationOrderViewSet, basename='meds')
 router.register(r'refs', ClinicalReferenceViewSet, basename='refs')
 
 urlpatterns = [
+    path('api/', api_root, name='api-root'),
     path('api/', include(router.urls)),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
