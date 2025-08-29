@@ -14,18 +14,8 @@ from django.apps import apps
 
 def _get_model_by_name(name: str) -> None:
     """
-    یک مدل را بر اساس نام کلاس‌ (string) در میان اپ‌های نصب‌شده پیدا و برمی‌گرداند.
-    
-    به‌طور دقیق‌تر، نام کلاس مدل را می‌پذیرد و تمام مدل‌های ثبت‌شده در Django را پیمایش می‌کند تا کلاس مدلی که __name__ آن با مقدار ورودی مطابقت دارد بیابد و آن کلاس مدل (نه یک نمونه) را بازگرداند. این تابع برای جلوگیری از واردات سخت‌کد‌شده مسیرهای ماژول مفید است و امکان استفاده از نام کلاس برای دسترسی به مدل را فراهم می‌کند.
-    
-    Parameters:
-        name (str): نام کلاس مدل مورد نظر (مثلاً "AuditLog" یا "Role").
-    
-    Returns:
-        type: کلاس مدل پیدا شده.
-    
-    Raises:
-        LookupError: اگر هیچ مدلی با نام داده‌شده در اپ‌های نصب‌شده یافت نشود.
+    Resolve a model by its class name across installed apps.
+    Avoids hard-coding import paths for portability across projects.
     """
     for model in apps.get_models():
         if model.__name__ == name:
@@ -81,11 +71,6 @@ class AuditLogModelTests(TestCase):
 
     def test_meta_default_is_not_shared_between_instances(self) -> None:
         # JSONField(default=dict) should create a fresh dict per instance
-        """
-        بررسی می‌کند که مقدار پیش‌فرض فیلد JSONField (`meta`) برای هر نمونه جداگانه است و بین نمونه‌ها به اشتراک گذاشته نمی‌شود.
-        
-        آزمایش برای اطمینان از این که هر بار که یک AuditLog جدید با مقدار پیش‌فرض `meta` ایجاد می‌شود، یک دیکشنری جدید ساخته می‌شود (و نه ارجاع به یک شیء مشترک). با ایجاد دو نمونه، تغییر در `meta` نمونهٔ اول ذخیره و سپس نمونهٔ دوم از دیتابیس تازه‌سازی می‌شود تا تضمین شود `meta` آن همچنان یک دیکشنری خالی است.
-        """
         log1 = AuditLog.objects.create(path="/l1", method="GET", status_code=200)
         log2 = AuditLog.objects.create(path="/l2", method="GET", status_code=200)
 
@@ -100,11 +85,6 @@ class AuditLogModelTests(TestCase):
 
 class RoleModelTests(TestCase):
     def setUp(self) -> None:
-        """
-        یک نمونه‌ی کاربری تستی با نام کاربری "alice" ایجاد می‌کند و در self.user قرار می‌دهد.
-        
-        این متد برای آماده‌سازی پیش‌شرط‌های تست‌های مربوط به مدل Role اجرا می‌شود. کاربر ایجاد شده با رمز عبور "pwd12345" ساخته می‌شود و برای وابستگی‌هایی که نیاز به یک User واقعی دارند (مثلاً ایجاد یا حذف نقش‌ها و بررسی رفتار یک‌به‌یک یا cascade) استفاده می‌شود.
-        """
         self.user = User.objects.create_user(username="alice", password="pwd12345")
 
     def test_role_creation_and_uuid_primary_key(self) -> None:
@@ -142,3 +122,100 @@ class RoleModelTests(TestCase):
         # Deleting the user should cascade and delete the Role
         self.user.delete()
         self.assertFalse(Role.objects.filter(pk=r.pk).exists())
+# Note: pytest + pytest-django; tests use Django's unittest-style TestCase.
+
+class AuditLogModelMoreTests(TestCase):
+    """
+    Additional coverage for AuditLog model focusing on JSON persistence,
+    UUID handling, bulk operations, and partial updates.
+    """
+
+    def test_user_id_accepts_string_uuid(self) -> None:
+        uid = uuid.uuid4()
+        log = AuditLog.objects.create(
+            path="/string-uuid",
+            method="GET",
+            status_code=200,
+            user_id=str(uid),
+        )
+        # UUIDField should coerce string input to UUID
+        self.assertEqual(log.user_id, uid)
+        fetched = AuditLog.objects.get(pk=log.pk)
+        self.assertEqual(fetched.user_id, uid)
+
+    def test_meta_persists_nested_data(self) -> None:
+        payload = {
+            "ip": "127.0.0.1",
+            "headers": {"X-Foo": "Bar"},
+            "list": [1, "a", True],
+        }
+        log = AuditLog.objects.create(
+            path="/meta-nested",
+            method="POST",
+            status_code=201,
+            meta=payload,
+        )
+        log.refresh_from_db()
+        self.assertEqual(log.meta, payload)
+
+    def test_bulk_create_and_meta_defaults(self) -> None:
+        records = [
+            AuditLog(path="/b1", method="GET", status_code=200),
+            AuditLog(path="/b2", method="POST", status_code=201),
+            AuditLog(path="/b3", method="DELETE", status_code=204),
+        ]
+        AuditLog.objects.bulk_create(records)
+        qs = AuditLog.objects.filter(path__in=["/b1", "/b2", "/b3"]).order_by("path")
+        self.assertEqual(qs.count(), 3)
+        for rec in qs:
+            self.assertEqual(rec.meta, {})
+
+    def test_partial_update_fields_and_refresh(self) -> None:
+        log = AuditLog.objects.create(path="/upd", method="GET", status_code=200)
+        # Update integer field only
+        log.status_code = 404
+        log.save(update_fields=["status_code"])
+        log.refresh_from_db()
+        self.assertEqual(log.status_code, 404)
+
+        # Update JSON field only
+        new_meta = {"updated": True, "via": "partial"}
+        log.meta = new_meta
+        log.save(update_fields=["meta"])
+        log.refresh_from_db()
+        self.assertEqual(log.meta, new_meta)
+
+
+class RoleModelMoreTests(TestCase):
+    """
+    Additional coverage for Role model focusing on validation strictness,
+    relational behavior, and multi-user scenarios.
+    """
+
+    def setUp(self) -> None:
+        self.user1 = User.objects.create_user(username="role_u1", password="p")
+        self.user2 = User.objects.create_user(username="role_u2", password="p")
+
+    def test_blank_role_rejected_by_validation(self) -> None:
+        instance = Role(user=self.user1, role="")
+        with self.assertRaises(ValidationError):
+            instance.full_clean()
+
+    def test_role_choice_is_case_sensitive_invalid_capitalization(self) -> None:
+        # Capitalized should be invalid if choices are lowercase
+        instance = Role(user=self.user1, role="Admin")
+        with self.assertRaises(ValidationError):
+            instance.full_clean()
+
+    def test_deleting_role_does_not_delete_user(self) -> None:
+        r = Role.objects.create(user=self.user1, role="viewer")
+        r.delete()
+        # User should remain
+        self.assertTrue(User.objects.filter(pk=self.user1.pk).exists())
+
+    def test_same_role_for_different_users_allowed(self) -> None:
+        r1 = Role.objects.create(user=self.user1, role="doctor")
+        r2 = Role.objects.create(user=self.user2, role="doctor")
+        self.assertEqual(r1.role, "doctor")
+        self.assertEqual(r2.role, "doctor")
+        self.assertNotEqual(r1.user_id, r2.user_id)
