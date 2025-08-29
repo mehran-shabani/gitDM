@@ -37,7 +37,7 @@ def _create_version_on_save(instance: object) -> None:
 
 
 # Patient signal
-@receiver(post_save, sender='core.Patient')
+@receiver(post_save, sender='gitdm.Patient')
 def patient_saved(sender: object, instance: object, created: bool, **kwargs: object) -> None:
     """Signal receiver for post_save on Patient model to create a version."""
     _create_version_on_save(instance)

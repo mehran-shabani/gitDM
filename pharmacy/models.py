@@ -20,7 +20,7 @@ class MedicationOrder(models.Model):
         MONTHLY = 'QM', 'Monthly'
 
     patient = models.ForeignKey(
-        'core.Patient',
+        'gitdm.Patient',
         on_delete=models.CASCADE,
         related_name='medication_orders',
     )

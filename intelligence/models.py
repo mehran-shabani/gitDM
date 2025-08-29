@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 
 class AISummary(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    patient = models.ForeignKey('core.Patient', on_delete=models.CASCADE)
+    patient = models.ForeignKey('gitdm.Patient', on_delete=models.CASCADE)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True)
     object_id = models.CharField(max_length=64, null=True)
     content_object = GenericForeignKey('content_type', 'object_id')

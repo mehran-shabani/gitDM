@@ -64,7 +64,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         from pharmacy.models import MedicationOrder
         from pharmacy.serializers import MedicationOrderSerializer
         from intelligence.models import AISummary
-        from intelligence.serializers import AISummarySerializer
+        from intelligence.serializers import AISummarySimpleSerializer
         
         p = self.get_object()
         # Limit results to prevent performance issues
@@ -97,5 +97,5 @@ class PatientViewSet(viewsets.ModelViewSet):
             'encounters': EncounterSerializer(enc, many=True).data,
             'labs': LabResultSerializer(labs, many=True).data,
             'medications': MedicationOrderSerializer(meds, many=True).data,
-            'ai_summaries': AISummarySerializer(summaries, many=True).data
+            'ai_summaries': AISummarySimpleSerializer(summaries, many=True).data
         })
