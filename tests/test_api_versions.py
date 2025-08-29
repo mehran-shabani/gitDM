@@ -80,7 +80,9 @@ class TestApiVersionPaths:
         "/api/v1/",
         "/api/v2/",
     ])
-    def test_version_index_paths_exist_or_404_clean(self, path: str, db: object) -> None:
+    def test_version_index_paths_exist_or_404_clean(
+        self, path: str, db: object
+    ) -> None:
         """
         Bias for action: check common version roots.
         If not present, ensure a clean 404 without server error.
