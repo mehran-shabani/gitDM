@@ -22,7 +22,11 @@ class AISummary(models.Model):
     resource_type.fget.short_description = "Resource Type"  # type: ignore
 
     def clean(self) -> None:
-        """Validate that content_object's patient matches self.patient if applicable."""
+        """
+        بررسی می‌کند که در صورت وجود شیء مرتبط (`content_object`) و داشتن فیلد `patient`، آن بیمار با `self.patient` یکسان باشد.
+        
+        این اعتبارسنجی قبل از ذخیره/اعتبارسنجی مدل اجرا می‌شود و اگر بیمار شیء مرتبط با بیمار رکورد فعلی تطابق نداشته باشد یک `ValidationError` بر روی فیلد 'patient' با پیام مناسب پرتاب می‌کند.
+        """
         if self.content_object and hasattr(self.content_object, 'patient'):
             if self.content_object.patient != self.patient:
                 raise ValidationError({
@@ -33,11 +37,27 @@ class AISummary(models.Model):
 from __future__ import annotations
 
     def resource_type(self: "AISummary") -> str:
-        """Backward-compatible property for admin display."""
+        """
+        نام مدل مرتبط با شیء پیوست‌شده را برمی‌گرداند (برای نمایش سازگار با نسخه‌های قبلی در پنل ادمین).
+        
+        این متد مقدار `content_type.model` را برمی‌گرداند که نام مدل مربوط به شیء مرتبط را نشان می‌دهد. برای نمایش کوتاه در پنل ادمین و نگه‌داشتن سازگاری با نسخه‌های قبلی کلاس به‌عنوان یک ویژگی بازگشتی استفاده می‌شود.
+        
+        Returns:
+            str: نام مدل مرتبط (معمولاً به صورت حروف کوچک).
+        """
         return self.content_type.model
 
     def clean(self: "AISummary") -> None:
-        """Validate that content_object's patient matches self.patient if applicable."""
+        """
+        یک‌خطی:
+        اعتبارسنجی می‌کند که اگر شیء مرتبط (content_object) دارای فیلد patient باشد، همان بیمارِ AISummary باشد.
+        
+        توضیح تفصیلی:
+        این متد هنگام اعتبارسنجی مدل اجرا می‌شود و در صورت وجود content_object و داشتن صفت `patient`، مقدار آن را با `self.patient` مقایسه می‌کند. در صورت ناهماهنگی بین بیماران، یک ValidationError برای فیلد `patient` بالا می‌برد تا از ذخیره‌سازی یا پردازش داده‌های نامتجانس جلوگیری کند.
+        
+        استثناها:
+        - ValidationError: زمانی که patient مربوط به content_object با patient این AISummary مطابقت نداشته باشد.
+        """
         if self.content_object and hasattr(self.content_object, 'patient'):
             if self.content_object.patient != self.patient:
                 raise ValidationError({
@@ -45,7 +65,11 @@ from __future__ import annotations
                 })
 
     def __str__(self: "AISummary") -> str:
-        """Admin label: 'AI Summary for <patient> - <model>'."""
+        """
+        رشته‌نمایشی مدل برای نمایش در ادمین: یک برچسب قابل خواندن که خلاصهٔ هوش‌مصنوعی را به صورت "AI Summary for <نام کامل بیمار> - <نام مدل مرتبط>" برمی‌گرداند.
+        
+        این مقدار برای نمایش در لیست‌ها و صفحات ادمین استفاده می‌شود و از فیلدهای `patient.full_name` و `content_type.model` برای ساخت رشته استفاده می‌کند.
+        """
         return f"AI Summary for {self.patient.full_name} - {self.content_type.model}"
 
 

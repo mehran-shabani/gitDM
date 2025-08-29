@@ -62,7 +62,11 @@ class MedicationOrder(models.Model):
         ]
 
     def clean(self) -> None:
-        """Validate that end_date is not before start_date."""
+        """
+        بررسی اعتبار داده‌ها و اطمینان از اینکه end_date قبل از start_date نیست.
+        
+        اگر فیلد end_date مقداردهی شده باشد، این متد مقادیر تاریخ‌ها را مقایسه کرده و در صورتی که end_date از start_date کوچک‌تر باشد یک ValidationError بازمی‌گرداند که خطا به‌صورت مرتبط با کلید 'end_date' برگردانده می‌شود (برای نمایش خطا در فرم‌ها یا APIهای مبتنی بر فیلد).
+        """
         if self.end_date and self.end_date < self.start_date:
             raise ValidationError({
                 'end_date': 'End date cannot be before start date.'
@@ -70,12 +74,12 @@ class MedicationOrder(models.Model):
 
     def __str__(self) -> str:
         """
-        نمایهٔ کوتاه برای MedicationOrder.
-        خروجی: "<نام دارو> for <نام بیمار>".
-        نام بیمار از full_name گرفته می‌شود؛ در غیر این‌صورت str(patient).
-
+        یک رشتهٔ کوتاه نمایشی برای MedicationOrder را برمی‌گرداند.
+        
+        فرمت بازگشتی: "<نام دارو> for <نام بیمار>". مقدار <نام بیمار> از ویژگی `full_name` شیٔ مرتبط با فیلد `patient` گرفته می‌شود در صورتی که وجود داشته باشد؛ در غیر این صورت نتیجهٔ `str(self.patient)` استفاده می‌شود. این نمایش برای نمایش خلاصهٔ رکورد در رابط‌های کاربری، لاگ‌ها و انتخاب‌های متنی مناسب است.
+        
         Returns:
-            str: "<name> for <patient_name>".
+            str: رشته‌ای با ساختمان "<name> for <patient_name>".
         """
         patient_name = getattr(self.patient, "full_name", str(self.patient))
         return f"{self.name} for {patient_name}"

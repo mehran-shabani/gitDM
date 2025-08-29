@@ -28,7 +28,11 @@ class ClinicalReference(models.Model):
         ]
 
     def clean(self) -> None:
-        """Validate that year is not in the future."""
+        """
+        بررسی و اعتبارسنجی فیلد `year` مدل: اطمینان می‌دهد مقدار سال بیشتر از یک سال جلوتر از سال جاری نباشد.
+        
+        اگر مقدار `year` بزرگ‌تر از (سال جاری + 1) باشد، یک `ValidationError` برگردانده می‌شود که به صورت ساختاری برای فیلد `'year'` پیام خطا شامل حداکثر سال مجاز را فراهم می‌کند. مقایسه براساس زمان منطقه‌ای سرور با استفاده از `timezone.now().year` انجام می‌شود.
+        """
         if self.year > timezone.now().year + 1:
             raise ValidationError({
                 'year': f'Year cannot be more than one year in the future. Maximum allowed: {timezone.now().year + 1}'
@@ -36,9 +40,9 @@ class ClinicalReference(models.Model):
 
     def __str__(self) -> str:
         """
-        نمایش خوانا برای نمونه ClinicalReference: عنوان و سال در قالب "عنوان (سال).
+        رشتهٔ نمایشی نمونه ClinicalReference را برمی‌گرداند.
         
-        این متد یک رشتهٔ قابلِ نمایش برای نمونهٔ مدل بازمی‌گرداند (مثلاً در رابط مدیریت Django، خروجی shell و نمایش‌های متنی)، به صورت "<title> (<year>)".
+        این متد یک نمایش کوتاه و خوانا برای نمونهٔ مدل فراهم می‌کند که معمولاً در رابط مدیریت Django، خروجی تعاملی (shell) و هرجایی که نمونه به رشته تبدیل می‌شود نمایش داده می‌شود. قالب خروجی دقیقا به صورت "<عنوان> (<سال>)" است؛ عنوان از فیلد title و سال از فیلد year گرفته می‌شود.
         
         Returns:
             str: رشته‌ای حاوی عنوان و سال به قالب "<عنوان> (<سال>)".
