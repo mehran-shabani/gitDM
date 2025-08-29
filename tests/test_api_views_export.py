@@ -16,7 +16,7 @@ from unittest.mock import patch, MagicMock
 from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import AnonymousUser
 
-from doc.phase7.should_coding_code import export_patient
+from api.views_export import export_patient
 
 PATCH_TARGET = "doc.phase7.should_coding_code"  # module path to patch
 
