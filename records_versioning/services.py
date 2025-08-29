@@ -1,4 +1,5 @@
 import threading
+from datetime import datetime, date
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -22,17 +23,22 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
     یک اسنَپ‌شات (نمایه) از یک نمونه مدل Django می‌سازد و آمادهٔ ذخیره/مقایسه می‌کند.
     
     شرح:
-        این تابع از model_to_dict برای تبدیل یک نمونه مدل به دیکشنری استفاده می‌کند.
-        با حذف UUIDها، دیگر نیازی به تبدیل نوع داده‌ای نداریم زیرا از integer IDs استفاده می‌کنیم.
+        این تابع از model_to_dict برای تبدیل یک نمونه مدل به دیکشنری استفاده می‌کند
+        و مقادیر datetime را به رشته تبدیل می‌کند تا برای JSON serialization مناسب شوند.
     
     Parameters:
         instance: نمونهٔ مدل Django یا هر آبجکتی که توسط `model_to_dict` 
                  قابل تبدیل باشد.
     
     Returns:
-        dict: دیکشنریِ فیلدها و مقادیرِ نمونه.
+        dict: دیکشنریِ فیلدها و مقادیرِ نمونه که datetime ها به رشته تبدیل شده‌اند.
     """
-    return model_to_dict(instance)
+    d = model_to_dict(instance)
+    # Convert datetime and date objects to strings for JSON serialization
+    for key, value in d.items():
+        if isinstance(value, (datetime, date)):
+            d[key] = value.isoformat()
+    return d
 
 
 def _compute_diff(
@@ -228,7 +234,13 @@ def revert_to_version(
     for k, v in target.snapshot.items():
         if k in IGNORE_FIELDS:
             continue
-        setattr(obj, k, v)
+        # Handle foreign key fields properly
+        field_name = k
+        if hasattr(obj._meta.get_field(field_name), 'related_model'):
+            # This is a foreign key field, set the _id version
+            setattr(obj, f"{field_name}_id", v)
+        else:
+            setattr(obj, k, v)
     
     # Apply changes without triggering post_save signals
     fields = {k: v for k, v in target.snapshot.items() if k not in IGNORE_FIELDS}

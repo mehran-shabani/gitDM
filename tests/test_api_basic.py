@@ -1,5 +1,4 @@
 import json
-import uuid
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
@@ -7,7 +6,7 @@ from rest_framework.test import APIClient
 
 @pytest.mark.django_db
 def test_token_and_create_patient():
-    User.objects.create_user(username='u1', password='p1')
+    doctor = User.objects.create_user(username='u1', password='p1')
     c = APIClient()
     r = c.post('/api/token/', {'username': 'u1', 'password': 'p1'}, format='json')
     assert r.status_code == 200
@@ -16,7 +15,7 @@ def test_token_and_create_patient():
     c.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')
     payload = {
         'full_name': 'Ali Test',
-        'primary_doctor_id': '00000000-0000-0000-0000-000000000010'
+        'primary_doctor': doctor.id  # Using integer ID instead of UUID
     }
     r2 = c.post('/api/patients/', payload, format='json')
     assert r2.status_code == 201

@@ -1,6 +1,10 @@
 # Development dependencies
 -r requirements.txt
 
+# Testing
+pytest>=8.0
+pytest-django>=4.8
+
 # Pre-commit and linting tools
 pre-commit>=3.5.0
 ruff>=0.1.9

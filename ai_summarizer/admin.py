@@ -4,8 +4,6 @@ from .models import AISummary
 
 @admin.register(AISummary)
 class AISummaryAdmin(admin.ModelAdmin):
-@admin.register(AISummary)
-class AISummaryAdmin(admin.ModelAdmin):
     # resource_type یک property نمایشی‌ه و برای list_display اوکیه
     list_display = ('patient', 'resource_type', 'created_at')
     list_filter = ('content_type', 'created_at')
