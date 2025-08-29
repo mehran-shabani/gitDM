@@ -16,16 +16,7 @@ router = routers.DefaultRouter()
 @never_cache
 @require_safe
 def health(_request: HttpRequest) -> JsonResponse:
-    """
-    بررسی سلامت سادهٔ سرویس — پاسخ JSON {"status": "ok"} با وضعیت HTTP 200.
-    
-    این نما برای درخواست‌های ایمن (فقط GET/HEAD) در نظر گرفته شده و پاسخ آن نباید کش شود.
-    پارامترها:
-        _request (HttpRequest): جسم درخواست ارسالی؛ در این نما استفاده نمی‌شود و فقط برای انطباق با امضای نمای Django پذیرفته شده است.
-    
-    بازگشت:
-        JsonResponse: پاسخ HTTP با بدنه‌ی JSON برابر {"status": "ok"} و کد وضعیت 200.
-    """
+    """سلامت سرویس: JSON {"status": "ok"} با HTTP 200. بدون کش."""
     return JsonResponse({"status": "ok"})
 
 # Create version views
