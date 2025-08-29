@@ -84,7 +84,7 @@ def test_secret_key_required_in_production_raises() -> None:
         # Ensure ALLOWED_HOSTS provided so we isolate SECRET_KEY failure
         "DJANGO_ALLOWED_HOSTS": "example.com",
     }
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(ImproperlyConfigured) as excinfo:
         with fresh_import_with_env(env):
             pass
     # Django's exception class is used
