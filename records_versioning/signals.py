@@ -17,22 +17,22 @@ def _create_version_on_save(instance: object) -> None:
     # Check if we're already in a versioning operation
     if getattr(_thread_state, 'in_version', False):
         return
-    
+
     # Try to get the user from various sources (optimized to avoid DB hits)
     user = None
-    
+
     # Check for user IDs first to avoid unnecessary DB queries
     user_id = (
         getattr(instance, 'created_by_id', None) or
         getattr(instance, 'updated_by_id', None) or
         getattr(instance, 'primary_doctor_id', None)
     )
-    
+
     if user_id:
         user = User.objects.filter(id=user_id).first()
-    
+
     # If no user found, proceed with None (allowed by model)
-    
+
     save_with_version(instance, user, reason='auto-signal')
 
 
@@ -84,3 +84,5 @@ def medication_order_saved(sender: object, instance: object, created: bool, **kw
             )
     except Exception:
         pass
+        
+

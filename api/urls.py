@@ -29,11 +29,11 @@ def readiness(_request: HttpRequest) -> JsonResponse:
         with connections['default'].cursor() as cursor:
             cursor.execute("SELECT 1")
             cursor.fetchone()
-    except Exception:  # pragma: no cover - best-effort
+    except Exception:  
         db_ok = False
         db_error = "Database unavailable"
-    status = 200 if db_ok else 503
-    return JsonResponse({"ready": db_ok, "db": db_ok, "error": db_error}, status=status)
+        status = 200 if db_ok else 503
+        return JsonResponse({"ready": db_ok, "db": db_ok, "error": db_error}, status=status)
 
 router = SimpleRouter()
 router.register(r'patients', PatientViewSet, basename='patients')
