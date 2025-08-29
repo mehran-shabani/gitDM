@@ -1,9 +1,17 @@
-from django.urls import path
+from django.urls import path, include
 from django.http import JsonResponse, HttpRequest
 from django.views.decorators.http import require_safe
 from django.views.decorators.cache import never_cache
+from rest_framework import routers
+from api.versions import VersionViewSet
 
 app_name = "api"
+
+# Create DRF router
+router = routers.DefaultRouter()
+
+# Add version viewset - but don't register it as it has custom routes
+# router.register(r'versions', VersionViewSet, basename='version')
 
 @never_cache
 @require_safe
@@ -11,4 +19,11 @@ def health(_request: HttpRequest) -> JsonResponse:
     """لایونس‌چک ساده: 200 و {"status": "ok"}؛ فقط GET/HEAD و کش غیرفعال."""
     return JsonResponse({"status": "ok"})
 
-urlpatterns = [path('health/', health, name='health')]
+# Create version list view
+version_list = VersionViewSet.as_view({'get': 'list'})
+
+urlpatterns = [
+    path('health/', health, name='health'),
+    path('', include(router.urls)),
+    path('versions/<str:resource_type>/<uuid:resource_id>/', version_list, name='version-list'),
+]

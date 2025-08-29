@@ -1,0 +1,1 @@
+default_app_config = 'records_versioning.apps.RecordsVersioningConfig'
