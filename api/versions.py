@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated, BasePermission, AllowAny
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from django.core.exceptions import ObjectDoesNotExist
 from records_versioning.models import RecordVersion
 from records_versioning.services import revert_to_version, RESOURCE_MAP
@@ -20,9 +20,9 @@ class RecordVersionSerializer(serializers.ModelSerializer):
 
 
 class VersionViewSet(viewsets.GenericViewSet):
-    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [AllowAny]
+    permission_classes: ClassVar[Sequence[Type[BasePermission]]] = [IsAuthenticated]
     serializer_class = RecordVersionSerializer
-    pagination_class = None
+    pagination_class = PageNumberPagination
 
     def list(self, request: Request, resource_type: str, resource_id: Any) -> Response:
         """

@@ -28,7 +28,7 @@ class AISummaryAdmin(admin.ModelAdmin):
     list_display = ('patient', 'resource_type', 'created_at')
     # Keep attribute for test expectations, but override get_list_filter for runtime
     list_filter = ('resource_type', 'created_at')
-    search_fields = ('patient__full_name', 'resource_type', 'summary')
+    search_fields = ('patient__full_name', 'content_type__model', 'summary')
     readonly_fields = ('id', 'created_at')
     list_select_related = ('patient', 'content_type')
 
@@ -43,7 +43,8 @@ class AISummaryAdmin(admin.ModelAdmin):
                 response.render()
             if b"result_list" not in getattr(response, 'content', b''):
                 response.content += b"<!-- result_list -->"
-        except Exception:
+        except (AttributeError, TypeError):
+            # Skip if response doesn't have expected attributes
             pass
         return response
 
