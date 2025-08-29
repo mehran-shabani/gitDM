@@ -1,16 +1,19 @@
 from django.db import models
-from patients_core.models import Patient
-import uuid
 
-class Lab(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='labs')
-    loinc = models.CharField(max_length=20)
-    value = models.FloatField()
-    unit = models.CharField(max_length=50)
+
+class LabResult(models.Model):
+    patient = models.ForeignKey('patients_core.Patient', on_delete=models.CASCADE)
+    encounter = models.ForeignKey(
+        'diab_encounters.Encounter',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    loinc = models.CharField(max_length=40)
+    value = models.DecimalField(max_digits=10, decimal_places=4)
+    unit = models.CharField(max_length=16)
     taken_at = models.DateTimeField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"Lab {self.loinc} for {self.patient.full_name}"
+    def __str__(self) -> str:
+        """نمایش خلاصه: <loinc>: <value> <unit> for <patient>."""
+        return f"{self.loinc}: {self.value} {self.unit} for {self.patient.full_name}"
