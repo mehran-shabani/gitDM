@@ -1,6 +1,5 @@
 import threading
 import uuid
-from typing import Optional
 from django.db import transaction, IntegrityError
 from django.forms.models import model_to_dict
 from django.apps import apps
@@ -45,9 +44,9 @@ def _compute_snapshot(instance: object) -> dict[str, object]:
 
 
 def _compute_diff(
-    prev: Optional[dict[str, object]], 
+    prev: dict[str, object] | None, 
     curr: dict[str, object]
-) -> Optional[dict[str, dict[str, object]]]:
+) -> dict[str, dict[str, object]] | None:
     """
     یک دیکشنری اختلاف (diff) بین دو snapshot قبلی و جاری تولید می‌کند.
     
