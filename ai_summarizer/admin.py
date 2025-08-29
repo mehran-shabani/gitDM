@@ -26,8 +26,8 @@ class AISummaryResourceTypeFilter(SimpleListFilter):
 class AISummaryAdmin(admin.ModelAdmin):
     # resource_type یک property نمایشی‌ه و برای list_display اوکیه
     list_display = ('patient', 'resource_type', 'created_at')
-    # Keep attribute for test expectations, but override get_list_filter for runtime
-    list_filter = ('resource_type', 'created_at')
+    # Use real DB field here; custom resource type filter comes via get_list_filter
+    list_filter = ('created_at',)
     # Match test spec: use resource_type label for search; admin allows callables/properties
 
     search_fields = ('patient__full_name', 'content_type__model', 'summary')
