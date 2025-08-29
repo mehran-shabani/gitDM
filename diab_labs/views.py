@@ -11,7 +11,7 @@ class LabListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         lab = serializer.save()
         # Create version record
-        create_version('Lab', lab.id, lab.__dict__)
+        create_version('Lab', lab.id, serializer.data)
         # Trigger AI summary generation
         generate_ai_summary.delay(lab.patient.id)
 

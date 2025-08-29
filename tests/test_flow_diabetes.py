@@ -26,17 +26,17 @@ def test_full_diabetes_flow():
     # Add encounter
     edata = {"patient":pid,"occurred_at":"2025-01-01T10:00:00Z","subjective":"خستگی","objective":{"bp":"140/90"},"assessment":{"icd10":["E11"]},"plan":{"drug":"metformin"}}
     r3 = c.post('/api/encounters/', edata, format='json')
-    assert r3.status_code in (200,201)
+    assert r3.status_code == 201
 
     # Add lab
     ldata = {"patient":pid,"loinc":"4548-4","value":9.2,"unit":"%","taken_at":"2025-01-01T09:00:00Z"}
     r4 = c.post('/api/labs/', ldata, format='json')
-    assert r4.status_code in (200,201)
+    assert r4.status_code == 201
 
     # Add medication
     mdata = {"patient":pid,"atc":"A10BA02","name":"Metformin","dose":"500mg","frequency":"BID","start_date":"2025-01-01"}
     r5 = c.post('/api/meds/', mdata, format='json')
-    assert r5.status_code in (200,201)
+    assert r5.status_code == 201
 
     # Wait AI summary task (simulate immediate)
     summaries = AISummary.objects.filter(patient_id=pid)
@@ -44,7 +44,7 @@ def test_full_diabetes_flow():
 
     # Versioning check
     versions = RecordVersion.objects.filter(resource_type='Patient',resource_id=pid)
-    assert versions.count()>=1
+    assert versions.count() == 1
 
     # Timeline
     r6 = c.get(f'/api/patients/{pid}/timeline/')

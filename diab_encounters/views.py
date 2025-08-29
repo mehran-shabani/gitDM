@@ -11,7 +11,7 @@ class EncounterListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         encounter = serializer.save()
         # Create version record
-        create_version('Encounter', encounter.id, encounter.__dict__)
+        create_version('Encounter', encounter.id, serializer.data)
         # Trigger AI summary generation
         generate_ai_summary.delay(encounter.patient.id)
 

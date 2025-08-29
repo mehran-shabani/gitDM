@@ -11,7 +11,7 @@ class MedicationListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         medication = serializer.save()
         # Create version record
-        create_version('Medication', medication.id, medication.__dict__)
+        create_version('Medication', medication.id, serializer.data)
         # Trigger AI summary generation
         generate_ai_summary.delay(medication.patient.id)
 
