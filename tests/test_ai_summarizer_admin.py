@@ -12,7 +12,7 @@ from django.urls import reverse
 # Adjust the dotted path below if the app label differs (e.g., "ai_summarizer").
 try:
     from . import admin as app_admin  # when tests package is inside the app
-except Exception:
+except (ImportError, ModuleNotFoundError):
     # Fallback: try to find "<app>.admin" by scanning installed apps lazily
     # Replace 'ai_summarizer' with your actual app label if needed.
     try:
