@@ -1,11 +1,24 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, serializers, pagination
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from records_versioning.models import RecordVersion
 from records_versioning.services import revert_to_version
+import logging
+
+logger = logging.getLogger(__name__)
+
+class RecordVersionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecordVersion
+        fields = ("version", "prev_version", "changed_at", "diff", "meta")
+
 
 class VersionViewSet(viewsets.ViewSet):
-    def list(self, request, resource_type=None, resource_id=None):
+    permission_classes = [IsAuthenticated]
+    
+    def list(self, request, resource_type: str | None = None, resource_id: str | None = None) -> Response:
         """
         لیستی از نسخه‌های یک منبع مشخص را بازمی‌گرداند.
         
@@ -18,24 +31,13 @@ class VersionViewSet(viewsets.ViewSet):
         Returns:
             rest_framework.response.Response: پاسخ HTTP (وضعیت 200) حاوی لیست نسخه‌ها به صورت دیکشنری.
         """
-        qs = RecordVersion.objects.filter(resource_type=resource_type, resource_id=resource_id).order_by('version')
-        data = [{
-            "version": v.version,
-            "prev_version": v.prev_version,
-            "changed_at": v.changed_at,
-            "diff": v.diff,
-            "meta": v.meta,
-        } for v in qs]
-        return Response(data)
+        qs = RecordVersion.objects.filter(
+        resource_type=resource_type, resource_id=resource_id).order_by('version')
+        paginator = pagination.PageNumberPagination()
+        page = paginator.paginate_queryset(qs, request)
+        ser = RecordVersionSerializer(page, many=True)
+        return paginator.get_paginated_response(ser.data)
 
-from rest_framework import viewsets, status, serializers
-from rest_framework.permissions import IsAuthenticated
-from django.core.exceptions import ObjectDoesNotExist
-import logging
-from rest_framework.response import Response
-from rest_framework.decorators import action
-
-logger = logging.getLogger(__name__)
 
 class VersionViewSet(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
