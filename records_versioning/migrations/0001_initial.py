@@ -25,8 +25,13 @@ class Migration(migrations.Migration):
                 ('snapshot', models.JSONField()),
                 ('diff', models.JSONField(blank=True, null=True)),
                 ('meta', models.JSONField(blank=True, default=dict)),
-                ('changed_at', models.DateTimeField(auto_now_add=True)),
-                ('changed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                ('changed_at', models.DateTimeField(auto_now_add=True, db_index=True)),
+                ('changed_by', models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.PROTECT,
+                    to=settings.AUTH_USER_MODEL,
+                )),
             ],
             options={
                 'unique_together': {('resource_type', 'resource_id', 'version')},
