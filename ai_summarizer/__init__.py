@@ -1,1 +1,1 @@
-# AI Summarizer Django App
+"""AI Summarizer Django app."""

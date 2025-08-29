@@ -1,1 +1,1 @@
-# Clinical References Django App
+"""Clinical References Django app."""
