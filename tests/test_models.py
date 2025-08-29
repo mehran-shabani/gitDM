@@ -10,8 +10,10 @@ from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-# Use environment variable for test password, with a secure default
-TEST_PASSWORD = os.environ.get('TEST_USER_PASSWORD', 'TestP@ssw0rd!2024')
+# Use environment variable for test password
+TEST_PASSWORD = os.environ.get('TEST_USER_PASSWORD')
+if not TEST_PASSWORD:
+    raise ValueError("TEST_USER_PASSWORD environment variable must be set for tests")
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

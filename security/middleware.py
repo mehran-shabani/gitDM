@@ -1,5 +1,7 @@
 from .models import AuditLog
-import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 
 class AuditMiddleware:
     def __init__(self, get_response):
@@ -27,11 +29,9 @@ class AuditMiddleware:
         """
         response = self.get_response(request)
         try:
-            # Convert integer user ID to UUID format for auditing
             user_id = None
             if hasattr(request, 'user') and request.user.is_authenticated:
-                # Create a deterministic UUID from user ID for auditing purposes
-                user_id = uuid.uuid5(uuid.NAMESPACE_DNS, f'user-{request.user.id}')
+                user_id = request.user.id
             
             AuditLog.objects.create(
                 user_id=user_id,
@@ -40,6 +40,6 @@ class AuditMiddleware:
                 status_code=response.status_code,
                 meta={"remote_addr": request.META.get('REMOTE_ADDR')}
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error("Failed to create audit log: %s", e)
         return response
