@@ -4,7 +4,7 @@ A version control system for diabetes patients from prediabetes, diabetes manage
 
 ## 🚀 Quick Start with GitHub Codespaces
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/[your-username]/[your-repo-name])
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mehran-shabani/gitDM)
 
 1. Click the button above or use the Code → Codespaces → Create codespace on main
 2. Wait for the environment to set up (takes ~2-3 minutes)
@@ -82,6 +82,8 @@ This project is designed as a continuation of the Helssa healthcare platform, en
    - Django Admin: `admin` / `admin123`
    - MinIO Console: `minioadmin` / `minioadmin`
 
+> ⚠️ **Security Warning**: These credentials are for development only. Never use default credentials in production!
+
 ### Option 2: Local Development with Docker
 
 1. Copy `.env.example` to `.env` and adjust values as needed
@@ -98,10 +100,8 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 
 - Swagger UI: `/api/docs/`
 - ReDoc: `/api/redoc/`
-- RapiDoc: `/api/rapidoc/`
 - OpenAPI Schema: `/api/schema/`
-- Health Check: `/api/health/`
-- Readiness Check: `/api/ready/`
+- Health Check: `/health/`
 
 ## 🔐 Authentication & User Management
 

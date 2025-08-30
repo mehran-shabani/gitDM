@@ -7,14 +7,15 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-# Load .env if present
+# Load .env if present (safer parsing: key is left of first '=', value is the rest)
 if [ -f .env ]; then
   set -a
-  # best-effort load; ignore comments/empty lines
-  while IFS='=' read -r key value; do
-    if [[ -z "$key" ]] || [[ "$key" =~ ^# ]]; then continue; fi
-    export "$key"="${value}"
-  done < <(grep -v '^#' .env | sed '/^$/d')
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" =~ ^# ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    export "$key"="$value"
+  done < .env
   set +a
 fi
 
@@ -22,7 +23,11 @@ fi
 if [ -n "${CODESPACES:-}" ]; then
   echo "🚀 Detected GitHub Codespaces environment"
   # Update ALLOWED_HOSTS in .env for Codespaces
-  sed -i "s/ALLOWED_HOSTS=.*/ALLOWED_HOSTS=localhost,127.0.0.1,*.githubpreview.dev,*.app.github.dev,${CODESPACE_NAME}-8000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}/" .env
+  if grep -q '^ALLOWED_HOSTS=' .env; then
+    sed -i "s|^ALLOWED_HOSTS=.*|ALLOWED_HOSTS=localhost,127.0.0.1,*.githubpreview.dev,*.app.github.dev,${CODESPACE_NAME}-8000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}|" .env
+  else
+    printf "\nALLOWED_HOSTS=localhost,127.0.0.1,*.githubpreview.dev,*.app.github.dev,%s-8000.%s\n" "${CODESPACE_NAME}" "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}" >> .env
+  fi
 fi
 
 # Start services
@@ -31,11 +36,18 @@ docker compose up -d --build
 
 # Wait for PostgreSQL to be ready
 echo "⏳ Waiting for PostgreSQL to be ready..."
-until docker compose exec -T db pg_isready -U ${POSTGRES_USER:-appuser} >/dev/null 2>&1; do
-  echo "PostgreSQL is unavailable - sleeping"
+until docker compose exec -T db pg_isready -U "${POSTGRES_USER:-appuser}" >/dev/null 2>&1; do
+  echo "PostgreSQL is unavailable - sleeping..."
   sleep 2
 done
 echo "✅ PostgreSQL is ready!"
+
+# Wait for web service to be ready
+echo "⏳ Waiting for web service to be ready..."
+until docker compose exec -T web python -c "import sys; print(sys.version)" >/dev/null 2>&1; do
+  echo "web is not ready - sleeping..."
+  sleep 2
+done
 
 # Apply migrations
 echo "🔄 Applying migrations ..."
