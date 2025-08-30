@@ -52,27 +52,11 @@
     }
   },
 
-  "forwardPorts": [8000, 5432, 6379, 9000, 9001],
+  "forwardPorts": [8000],
   
   "portsAttributes": {
     "8000": {
       "label": "Django App",
-      "onAutoForward": "notify"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
-    },
-    "6379": {
-      "label": "Redis",
-      "onAutoForward": "silent"
-    },
-    "9000": {
-      "label": "MinIO API",
-      "onAutoForward": "silent"
-    },
-    "9001": {
-      "label": "MinIO Console",
       "onAutoForward": "notify"
     }
   },

@@ -14,15 +14,6 @@ echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# Wait for database to be ready
-echo "⏳ Waiting for PostgreSQL to be ready..."
-until PGPASSWORD=$POSTGRES_PASSWORD psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -c '\q' 2>/dev/null; do
-  echo "PostgreSQL is unavailable - sleeping"
-  sleep 2
-done
-
-echo "✅ PostgreSQL is ready!"
-
 # Run migrations
 echo "🔄 Running database migrations..."
 python manage.py migrate
@@ -46,4 +37,3 @@ python manage.py collectstatic --noinput
 echo "✨ Development environment setup complete!"
 echo "🌐 Django app will be available at: http://localhost:8000"
 echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
-echo "🗄️ MinIO console: http://localhost:9001 (username: minioadmin, password: minioadmin)"

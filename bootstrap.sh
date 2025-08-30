@@ -34,13 +34,7 @@ fi
 echo "Starting services with docker-compose ..."
 docker compose up -d --build
 
-# Wait for PostgreSQL to be ready
-echo "⏳ Waiting for PostgreSQL to be ready..."
-until docker compose exec -T db pg_isready -U "${POSTGRES_USER:-appuser}" >/dev/null 2>&1; do
-  echo "PostgreSQL is unavailable - sleeping..."
-  sleep 2
-done
-echo "✅ PostgreSQL is ready!"
+# No need to wait for external services in Codespaces setup
 
 # Wait for web service to be ready
 echo "⏳ Waiting for web service to be ready..."
@@ -72,7 +66,6 @@ docker compose exec -T web python manage.py collectstatic --noinput
 echo "✨ All set!"
 echo "🌐 Django app: http://localhost:8000"
 echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
-echo "🗄️ MinIO console: http://localhost:9001 (username: minioadmin, password: minioadmin)"
 
 if [ -n "${CODESPACES:-}" ]; then
   echo ""

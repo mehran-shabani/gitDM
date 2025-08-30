@@ -8,7 +8,6 @@ ENV PYTHONUNBUFFERED 1
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    libpq-dev \
     curl \
     bash \
     && rm -rf /var/lib/apt/lists/*
