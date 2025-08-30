@@ -4,16 +4,14 @@
 
 import os
 import pytest
-from patients_core.models import Patient
-from diab_encounters.models import Encounter
+from gitdm.models import Patient
+from encounters.models import Encounter
 from datetime import datetime
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 
-# Use environment variable for test password
-TEST_PASSWORD = os.environ.get('TEST_USER_PASSWORD')
-if not TEST_PASSWORD:
-    raise ValueError("TEST_USER_PASSWORD environment variable must be set for tests")
+# Use environment variable for test password or default
+TEST_PASSWORD = os.environ.get('TEST_USER_PASSWORD', 'test_password_123')
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

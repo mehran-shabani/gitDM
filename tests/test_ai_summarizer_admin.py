@@ -8,22 +8,8 @@ from django.test import Client, RequestFactory
 from django.urls import reverse
 
 # Import the admin classes under test
-# The admin module under test should reside alongside AISummary model.
-# Adjust the dotted path below if the app label differs (e.g., "ai_summarizer").
-try:
-    from . import admin as app_admin  # when tests package is inside the app
-except (ImportError, ModuleNotFoundError):
-    # Fallback: try to find "<app>.admin" by scanning installed apps lazily
-    # Replace 'ai_summarizer' with your actual app label if needed.
-    try:
-        app_admin = __import__("ai_summarizer.admin", fromlist=["*"])
-    except Exception as err:
-        # Last resort: create a stub module error to help developers fix import path
-        raise ImportError(
-            "Unable to import the app's admin module. "
-            "Ensure the app label is correct (e.g., ai_summarizer.admin) "
-            "or adjust the import in tests/test_ai_summarizer_admin.py."
-        ) from err
+# The AISummary model is in the intelligence app
+from intelligence import admin as app_admin
 
 # Extract classes under test
 AISummaryResourceTypeFilter = app_admin.AISummaryResourceTypeFilter

@@ -2,6 +2,15 @@
 
 A version control system for diabetes patients from prediabetes, diabetes management, treatment, and reducing adverse effects and organopathy control through smart AI agents and cross-platform solutions. This is a segment of the Med3 project from the Helssa healthcare platform.
 
+## 🚀 Quick Start with GitHub Codespaces
+
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mehran-shabani/gitDM)
+
+1. Click the button above or use the Code → Codespaces → Create codespace on main
+2. Wait for the environment to set up (takes ~2-3 minutes)
+3. The application will automatically start with all services configured
+4. Access the application through the forwarded ports in the Ports tab
+
 ## 📁 Project Structure
 
 ```bash
@@ -64,11 +73,35 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 
 ## 🚀 Getting Started
 
+### Option 1: GitHub Codespaces (Recommended for Quick Start)
+
+1. Open in GitHub Codespaces using the button at the top of this README
+2. All services (PostgreSQL, Redis, MinIO) are automatically configured
+3. Access the application through the forwarded ports
+4. Default credentials:
+   - Django Admin: `admin` / `admin123`
+   - MinIO Console: `minioadmin` / `minioadmin`
+
+> ⚠️ **Security Warning**: These credentials are for development only. Never use default credentials in production!
+
+### Option 2: Local Development with Docker
+
+1. Copy `.env.example` to `.env` and adjust values as needed
+2. Run `./bootstrap.sh` to start all services with Docker Compose
+3. Access the application at `http://localhost:8000`
+
+### Option 3: Manual Setup
+
 1. Copy `.env.example` to `.env` and adjust values as needed
 2. Simple stack (SQLite): `./scripts/start-simple.sh` (stop with `./scripts/stop-simple.sh`)
 3. Advanced stack (Postgres, Redis, MinIO): `./scripts/start-advanced.sh` (stop with `./scripts/stop-advanced.sh`)
-4. API docs: Swagger at `/api/docs/`, Redoc at `/api/redoc/`, RapiDoc at `/api/rapidoc/`, schema at `/api/schema/`
-5. Health at `/api/health/`, readiness at `/api/ready/`
+
+### API Documentation
+
+- Swagger UI: `/api/docs/`
+- ReDoc: `/api/redoc/`
+- OpenAPI Schema: `/api/schema/`
+- Health Check: `/health/`
 
 ## 🔐 Authentication & User Management
 

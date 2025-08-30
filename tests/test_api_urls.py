@@ -18,6 +18,7 @@ from django.test import RequestFactory
 # Attempt to locate the API urls module by common patterns.
 # If your module path differs, set API_URLS_MODULE via env or adjust below.
 API_URLS_CANDIDATES = [
+    "gateway.urls",
     "api.urls",
     "apps.api.urls",
     "core.api.urls",
