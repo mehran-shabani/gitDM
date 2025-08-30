@@ -2,9 +2,9 @@ import uuid
 import pytest
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
-from patients_core.models import Patient
-from ai_summarizer.models import AISummary
-from records_versioning.models import RecordVersion
+from gitdm.models import Patient
+from intelligence.models import AISummary
+from versioning.models import RecordVersion
 
 @pytest.mark.django_db
 def test_full_diabetes_flow():

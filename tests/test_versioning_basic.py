@@ -4,9 +4,9 @@ import contextlib
 import importlib
 
 from django.contrib.auth import get_user_model
-from patients_core.models import Patient
-from records_versioning.models import RecordVersion
-from records_versioning.services import revert_to_version
+from gitdm.models import Patient
+from versioning.models import RecordVersion
+from versioning.services import revert_to_version
 
 User = get_user_model()
 
