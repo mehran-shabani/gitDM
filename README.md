@@ -70,6 +70,13 @@ This project is designed as a continuation of the Helssa healthcare platform, en
 4. API docs: Swagger at `/api/docs/`, Redoc at `/api/redoc/`, RapiDoc at `/api/rapidoc/`, schema at `/api/schema/`
 5. Health at `/api/health/`, readiness at `/api/ready/`
 
+## 💻 GitHub Codespaces
+
+- Open this repository in Codespaces. The devcontainer will automatically build and start Postgres, Redis, and MinIO sidecars.
+- If `.env` is missing, it will be generated from `.env.example` during setup.
+- The app listens on port 8000; Codespaces will auto-forward it. Open the forwarded URL to access Django.
+
+
 ## 🔐 Authentication & User Management
 
 This application uses JWT authentication with admin-only user creation:
