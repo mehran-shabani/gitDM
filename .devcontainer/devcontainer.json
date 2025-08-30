@@ -1,0 +1,62 @@
+{
+  "name": "GitDM Django Development",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true
+    }
+  },
+  "runArgs": ["--init"],
+  "mounts": [
+    "source=gitdm-postgres-data,target=/var/lib/postgresql/data,type=volume",
+    "source=gitdm-redis-data,target=/data/redis,type=volume",
+    "source=gitdm-minio-data,target=/data/minio,type=volume"
+  ],
+  "forwardPorts": [8000, 5432, 6379, 9000, 9001],
+  "portsAttributes": {
+    "8000": {
+      "label": "Django App",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL"
+    },
+    "6379": {
+      "label": "Redis"
+    },
+    "9000": {
+      "label": "MinIO API"
+    },
+    "9001": {
+      "label": "MinIO Console",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": "sudo apt update && sudo apt install -y postgresql postgresql-contrib redis-server && pip install -r requirements.txt",
+  "postStartCommand": "./start-codespace.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.flake8",
+        "ms-python.black-formatter",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.vscode-docker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "./venv/bin/python",
+        "python.formatting.provider": "black",
+        "python.linting.enabled": true,
+        "python.linting.flake8Enabled": true,
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/*.pyc": true
+        }
+      }
+    }
+  }
+}

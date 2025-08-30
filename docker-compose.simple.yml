@@ -1,0 +1,23 @@
+# docker-compose.simple.yml - Simple setup with SQLite
+
+version: '3.9'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django-app-simple
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_DEBUG=True
+      - USE_SQLITE=True
+      - DJANGO_ALLOWED_HOSTS=*
+      - DJANGO_SECRET_KEY=django-insecure-dev-key-for-codespace-testing-only
