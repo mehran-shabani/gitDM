@@ -23,7 +23,7 @@ fi
 
 # Test database (SQLite)
 echo -n "Testing database... "
-if python -c "from django.db import connection; cursor = connection.cursor(); cursor.execute('SELECT 1')" 2>/dev/null; then
+if python -c "from django.db import connection; connection.ensure_connection()" 2>/dev/null; then
     echo "✅ OK"
 else
     echo "❌ Failed"
