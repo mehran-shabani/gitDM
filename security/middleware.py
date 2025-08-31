@@ -1,6 +1,5 @@
 from .models import AuditLog
 import logging
-import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -20,21 +19,15 @@ class AuditMiddleware:
         """
         پردازش یک درخواست WSGI/Django: فراخوانی لایه بعدی، ثبت غیرتهاجمی رکورد AuditLog و بازگرداندن پاسخ.
         
-        این متد ابتدا درخواست را به لایه بعدی می‌فرستد و پاسخ دریافتی را بازمی‌گرداند. پس از دریافت پاسخ، تلاش می‌کند یک رکورد AuditLog ایجاد کند که شامل شناسه کاربر (در صورت احراز هویت)، مسیر، متد HTTP، کد وضعیت پاسخ و آدرس کلاینت است. شناسه کاربر به‌صورت UUID تعیین‌پذیر از مقدار عددی id کاربر ساخته می‌شود (uuid5 با namespace NAMESPACE_DNS و رشته‌ی 'user-{id}') تا از افشای شناسه‌های خام جلوگیری شود. هر گونه خطا در فرایند ثبت لاگ نادیده گرفته می‌شود تا عملکرد میدلور روی جریان پاسخ‌دهی تاثیری نداشته باشد.
-        
-        Parameters:
-            request: شیء درخواست Django که حداقل صفات موردنیاز (`path`, `method`, `META`, و در صورت وجود `user`) را دارد.
-        
-        Returns:
-            response: شیء پاسخ بازگشتی از لایه بعدی (همان شیء‌ای که از `self.get_response(request)` دریافت شده).
+        این متد ابتدا درخواست را به لایه بعدی می‌فرستد و پاسخ دریافتی را بازمی‌گرداند. پس از دریافت پاسخ، تلاش می‌کند یک رکورد AuditLog ایجاد کند که شامل شناسه کاربر (در صورت احراز هویت)، مسیر، متد HTTP، کد وضعیت پاسخ و آدرس کلاینت است. شناسه کاربر به‌صورت عددی ذخیره می‌شود.
         """
         response = self.get_response(request)
         try:
-            user_uuid = None
+            user_id = None
             if hasattr(request, 'user') and getattr(request.user, 'is_authenticated', False):
-                user_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, f"user-{request.user.id}")
+                user_id = request.user.id
             AuditLog.objects.create(
-                user_id=str(user_uuid) if user_uuid else None,
+                user_id=str(user_id) if user_id is not None else None,
                 path=request.path,
                 method=request.method,
                 status_code=response.status_code,

@@ -95,7 +95,7 @@ class CreateAISummarySerializer(serializers.Serializer):
 
 class RegenerateAISummarySerializer(serializers.Serializer):
     """Serializer for regenerating existing AI summaries"""
-    summary_id = serializers.UUIDField()
+    summary_id = serializers.CharField()
     content = serializers.CharField(
         help_text="New content to summarize"
     )
