@@ -36,4 +36,8 @@ python manage.py collectstatic --noinput
 
 echo "✨ Development environment setup complete!"
 echo "🌐 Django app will be available at: http://localhost:8000"
-echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
+if [ "${VERBOSE_CREDENTIALS:-}" = "1" ]; then
+  echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
+else
+  echo "🔐 Admin panel: http://localhost:8000/admin"
+fi
