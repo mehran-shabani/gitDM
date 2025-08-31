@@ -1,6 +1,6 @@
-# GitHub Codespaces Setup - Django Default Configuration
+# GitHub Codespaces Setup - Simplified Django Configuration
 
-This document summarizes the changes made to configure the project for GitHub Codespaces using Django defaults only.
+This document describes the simplified configuration for running the project in GitHub Codespaces with Django defaults (SQLite, local static/media). External services like PostgreSQL, Redis, and MinIO are not used in this mode.
 
 ## Changes Made
 
@@ -12,21 +12,12 @@ This document summarizes the changes made to configure the project for GitHub Co
 - **Added GitHub Codespaces specific settings** for ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
 
 ### 2. Dependencies (`requirements.txt`)
-Removed the following packages:
-- `psycopg2-binary` (PostgreSQL driver)
-- `redis` and `django-redis` (Redis cache)
-- `django-storages`, `boto3`, and `django-minio-storage` (MinIO/S3 storage)
-
-Kept:
-- Django core packages
-- REST framework and authentication
-- Celery (for future use, but won't work without a broker)
-- Testing packages
+The dependency set keeps Django, DRF, JWT, and Spectacular. Celery libraries are present for future use but are inactive without a broker in Codespaces.
 
 ### 3. Docker Configuration
-- **docker-compose.yml**: Simplified to only run the web service
-- **Dockerfile**: Removed PostgreSQL development libraries
-- **bootstrap.sh**: Removed wait steps for external services
+- **docker-compose.yml**: Single `web` service (SQLite + Django)
+- **Dockerfile**: Python base with app dependencies
+- **bootstrap.sh**: Starts `web`, applies migrations, creates admin, collects static
 
 ### 4. Development Container (`.devcontainer/`)
 - **devcontainer.json**: Removed port forwarding for PostgreSQL, Redis, and MinIO
@@ -38,18 +29,20 @@ Kept:
 - **codespaces-test.yml**: Removed PostgreSQL and Redis service containers
 
 ### 6. Environment Variables (`.env.example`)
-Simplified to include only:
-- Django settings (DEBUG, SECRET_KEY, ALLOWED_HOSTS)
-- GitHub Codespaces flag
-- AI settings (optional)
-- Django superuser credentials
+An example file is provided at project root. Copy to `.env` if needed:
+
+```bash
+cp .env.example .env
+```
+
+Contains placeholders for Django settings and optional external services (PostgreSQL/Redis/MinIO) for non-Codespaces deployments.
 
 ## Usage in GitHub Codespaces
 
 1. Open the repository in GitHub Codespaces
 2. The environment will automatically set up using SQLite
 3. Migrations will run automatically
-4. A superuser will be created (username: `admin`, password: `admin123`)
+4. A superuser is created (username: `admin`, password: `admin123`)
 5. The Django development server will be available at the forwarded port
    - In Codespaces: `https://${CODESPACE_NAME}-8000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
    - Local: `http://localhost:8000`
@@ -57,5 +50,5 @@ Simplified to include only:
 
 - All data is stored in SQLite (`db.sqlite3`)
 - Static and media files are stored locally in the filesystem
-- Celery tasks won't work without setting up a message broker
-- This configuration is optimized for development in GitHub Codespaces only
+- Celery tasks do not run without a message broker
+- This setup is optimized for development in GitHub Codespaces

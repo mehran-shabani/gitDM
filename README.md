@@ -1,129 +1,86 @@
 # GitDM - Diabetes Management System
 
-A version control system for diabetes patients from prediabetes, diabetes management, treatment, and reducing adverse effects and organopathy control through smart AI agents and cross-platform solutions. This is a segment of the Med3 project from the Helssa healthcare platform.
+A version control system for diabetes patients across the care journey, powered by Django REST Framework and AI-assisted tooling. This repository is part of the Med3 project within the Helssa platform.
 
-## 🚀 Quick Start with GitHub Codespaces
+## 🚀 Quick Start (GitHub Codespaces)
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/mehran-shabani/gitDM)
 
-1. Click the button above or use the Code → Codespaces → Create codespace on main
-2. Wait for the environment to set up (takes ~2-3 minutes)
-3. The application will automatically start with all services configured
-4. Access the application through the forwarded ports in the Ports tab
-
-## 📁 Project Structure
-
-```bash
-/
-├── doc/                          # Documentation organized by phases
-│   ├── phase1/                   # Setup & Infrastructure
-│   ├── phase2/                   # Data Models & Relationships
-│   ├── phase3/                   # Versioning & Append-only Design
-│   ├── phase4/                   # API & Authentication
-│   ├── phase5/                   # AI Integration & Processing
-│   ├── phase6/                   # Clinical References & Knowledge
-│   ├── phase7/                   # Security & RBAC
-│   └── phase8/                   # Testing & Integration Flow
-├── cursoragent/                  # AI Agent configurations
-├── gemini/                       # Gemini AI agent setup
-├── examples/                     # Example configurations and outputs
-├── .ai-review-config.yaml        # AI review configuration
-├── .coderabbitai.yaml           # CodeRabbit AI configuration
-└── AI-AGENTS-README.md          # AI agents documentation
-```
-
-## 🎯 Phase Documentation Structure
-
-Each phase directory (`doc/phase1/` through `doc/phase8/`) contains:
-
-- `should-*.md` files: Implementation requirements and specifications
-- `suggestion-*.md` files: Optional recommendations and best practices
-- `AGENT.MD`: Phase-specific AI agent instructions
-- Log files and build reports
-- Review summaries and compatibility reports
-
-## 🤖 AI Review System
-
-This project uses automated AI review agents for code quality and architecture compliance:
-
-- **CodeRabbit**: Technical code review and compliance checking
-- **Gemini**: High-level architecture analysis and strategic recommendations
-
-### Configuration Files
-
-- `.ai-review-config.yaml`: General AI review settings
-- `.coderabbitai.yaml`: CodeRabbit-specific configuration
-- `gemini/gemini.md`: Gemini agent instructions
-
-## 🔗 Helssa Integration
-
-This project is designed as a continuation of the Helssa healthcare platform, ensuring:
-
-- **Namespace Compatibility**: All components follow Helssa naming conventions
-- **API Consistency**: Endpoints and data structures align with existing Helssa APIs
-- **Migration Safety**: Backward compatibility with existing Helssa data
-- **Security Model**: Integration with Helssa's RBAC and audit systems
-
-## 📋 Development Workflow
-
-1. **Phase-based Development**: Each feature is developed in phases (phase1-phase8)
-2. **AI-Assisted Review**: All pull requests are automatically reviewed by AI agents
-3. **Documentation-Driven**: Implementation follows `should-*.md` specifications
-4. **Helssa Compliance**: All changes maintain compatibility with the Helssa platform
-
-## 🚀 Getting Started
-
-### Option 1: GitHub Codespaces (Recommended for Quick Start)
-
-1. Open in GitHub Codespaces using the button at the top of this README
-2. All services (PostgreSQL, Redis, MinIO) are automatically configured
-3. Access the application through the forwarded ports
-4. Default credentials:
+1. Open a Codespace using the button above
+2. Wait ~2–3 minutes for automatic setup (SQLite, migrations, static)
+3. Access the app via the forwarded port 8000
+4. Default credentials (auto-created for dev):
    - Django Admin: `admin` / `admin123`
-   - MinIO Console: `minioadmin` / `minioadmin`
 
-> ⚠️ **Security Warning**: These credentials are for development only. Never use default credentials in production!
+Note: Codespaces uses SQLite and local storage by default. External services (PostgreSQL/Redis/MinIO) are not started in this mode.
 
-### Option 2: Local Development with Docker
+## 💻 Local Development (Docker)
 
-1. Copy `.env.example` to `.env` and adjust values as needed
-2. Run `./bootstrap.sh` to start all services with Docker Compose
-3. Access the application at `http://localhost:8000`
+1. Copy `.env.example` to `.env`
+2. Start the stack:
+   - `./bootstrap.sh`
+3. Open `http://localhost:8000`
 
-### Option 3: Manual Setup
+The Docker stack runs a single `web` service (SQLite + Django). The script applies migrations, collects static files, and ensures an admin user exists.
 
-1. Copy `.env.example` to `.env` and adjust values as needed
-2. Simple stack (SQLite): `./scripts/start-simple.sh` (stop with `./scripts/stop-simple.sh`)
-3. Advanced stack (Postgres, Redis, MinIO): `./scripts/start-advanced.sh` (stop with `./scripts/stop-advanced.sh`)
+## 🧑‍💻 Manual (without Docker)
 
-### API Documentation
+1. `python -m venv .venv && source .venv/bin/activate`
+2. `pip install -r requirements.txt`
+3. `cp .env.example .env`
+4. `python manage.py migrate`
+5. `python manage.py runserver`
+
+## 📚 API & Docs
 
 - Swagger UI: `/api/docs/`
 - ReDoc: `/api/redoc/`
 - OpenAPI Schema: `/api/schema/`
 - Health Check: `/health/`
+- API root: `/api/`
 
-## 🔐 Authentication & User Management
+### Authentication
 
-This application uses JWT authentication with admin-only user creation:
+- Obtain token: `/api/token/`
+- Refresh token: `/api/token/refresh/`
 
-- **No public signup**: Users are created exclusively through Django admin panel
-- **JWT tokens**: Obtain via `/api/token/` (username/password) and refresh via `/api/token/refresh/`
-- **Secure by design**: No public registration endpoints - complete admin control
-- **Django User Model**: Uses Django's `get_user_model()` for user management
+## 📁 Project Structure (key parts)
 
-For complete authentication guide, see `/doc/phase4/user-authentication-guide.md`.
+```bash
+/
+├── config/            # Project settings and URLs
+├── gateway/           # API routers and health endpoint
+├── gitdm/             # Core domain (User/Patient and related views)
+├── encounters/        # Encounter app
+├── intelligence/      # AI summarization app
+├── laboratory/        # Lab results
+├── pharmacy/          # Medications
+├── references/        # Clinical references
+├── versioning/        # Append-only versioning
+├── security/          # Security-related utilities
+├── cursoragent/       # Agent instructions and coding rules
+├── tests/             # Test suite (pytest/pytest-django)
+├── .devcontainer/     # Codespaces setup scripts
+├── docker/            # Docker-related helpers (if any)
+├── scripts/           # Helper scripts
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── pyproject.toml     # Ruff configuration
+```
+
+## 🔗 Helssa Note
+
+This project aligns with Helssa conventions where applicable. Backward compatibility and naming consistency are kept in mind during development.
 
 ## 📝 Contributing
 
-- All development should follow the phase-based approach
-- Reference the appropriate `should-*.md` files for implementation requirements
-- AI agents will review all pull requests for compliance
-- Maintain compatibility with Helssa platform standards
-- Set up pre-commit hooks before contributing (see `docs/development/pre-commit.md`)
+- Run tests: `pytest -v`
+- Linting is configured via `pyproject.toml` for Ruff; use it if installed
+- Follow clear commit messages and small, focused pull requests
 
 ## 📖 Additional Documentation
 
-- **AI Agents**: See `AI-AGENTS-README.md` for detailed AI review system documentation
-- **Examples**: Check `/examples/` for sample configurations and outputs
-- **Phase Details**: Each `/doc/phaseX/` directory contains comprehensive phase documentation
+- `CODESPACES_SETUP.md` – details of the simplified Codespaces stack
+- `.devcontainer/README.md` – development container workflow
+- `cursoragent/AGENT.MD` – agent execution guide
