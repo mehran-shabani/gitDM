@@ -3,7 +3,7 @@ from django.conf import settings
 
 
 class Encounter(models.Model):
-    patient = models.ForeignKey('gitdm.Patient', on_delete=models.CASCADE)
+    patient = models.ForeignKey('gitdm.PatientProfile', on_delete=models.CASCADE)
     occurred_at = models.DateTimeField()
     subjective = models.TextField(blank=True)
     objective = models.JSONField(default=dict)

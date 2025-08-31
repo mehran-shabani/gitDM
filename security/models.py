@@ -4,7 +4,7 @@ import uuid
 
 class AuditLog(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user_id = models.IntegerField(null=True, blank=True)
+    user_id = models.CharField(max_length=64, null=True, blank=True)
     path = models.CharField(max_length=200)
     method = models.CharField(max_length=10)
     status_code = models.IntegerField()

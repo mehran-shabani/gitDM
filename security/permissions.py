@@ -23,7 +23,8 @@ class IsAdmin(BasePermission):
         Notes:
             اگر `request.user.role` موجود باشد اما برابر None یا شی‌ای بدون صفت `role` باشد، دسترسی به `request.user.role.role` ممکن است AttributeError تولید کند.
         """
-        return hasattr(request.user,'role') and request.user.role.role == Role.ADMIN
+        role_obj = getattr(request.user, 'role', None)
+        return getattr(role_obj, 'role', None) == Role.ADMIN
 
 class IsDoctor(BasePermission):
     def has_permission(self, request, view):
@@ -32,4 +33,5 @@ class IsDoctor(BasePermission):
         
         تابع یک مقدار بولی بازمی‌گرداند: True اگر شیء request.user دارای صفت `role` بوده و مقدار `request.user.role.role` دقیقاً برابر رشته `'doctor'` باشد، در غیر این صورت False. این تابع برای استفاده در مجوزهای DRF طراحی شده تا دسترسی را فقط به کاربران با نقش دکتر اجازه دهد.
         """
-        return hasattr(request.user,'role') and request.user.role.role == Role.DOCTOR
+        role_obj = getattr(request.user, 'role', None)
+        return getattr(role_obj, 'role', None) == Role.DOCTOR

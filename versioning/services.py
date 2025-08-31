@@ -10,7 +10,7 @@ _thread_state = threading.local()
 IGNORE_FIELDS = {"id", "pk", "created_at", "updated_at"}
 
 RESOURCE_MAP = {
-    'Patient': ('gitdm', 'Patient'),
+    'Patient': ('gitdm', 'PatientProfile'),
     'Encounter': ('encounters', 'Encounter'),
     'LabResult': ('laboratory', 'LabResult'),
     'MedicationOrder': ('pharmacy', 'MedicationOrder'),

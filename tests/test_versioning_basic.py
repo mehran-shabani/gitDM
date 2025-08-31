@@ -4,7 +4,7 @@ import contextlib
 import importlib
 
 from django.contrib.auth import get_user_model
-from gitdm.models import Patient
+from gitdm.models import PatientProfile
 from versioning.models import RecordVersion
 from versioning.services import revert_to_version
 
@@ -14,9 +14,9 @@ User = get_user_model()
 @pytest.mark.django_db
 def test_version_increments_on_save() -> None:
     # Create a test user (doctor)
-    doctor = User.objects.create_user(username="testdoctor", password="testpass")
+    doctor = User.objects.create_user(email="testdoctor@example.com", password="testpass")
 
-    p = Patient.objects.create(full_name="Test P", primary_doctor=doctor)
+    p = PatientProfile.objects.create(full_name="Test P", user=doctor, primary_doctor=doctor)
     v1 = RecordVersion.objects.filter(
         resource_type="Patient",
         resource_id=str(p.id),
@@ -36,10 +36,10 @@ def test_version_increments_on_save() -> None:
 @pytest.mark.django_db
 def test_revert_creates_new_version() -> None:
     # Create test users
-    doctor = User.objects.create_user(username="doctor", password="testpass")
-    admin = User.objects.create_user(username="admin", password="testpass")
+    doctor = User.objects.create_user(email="doctor@example.com", password="testpass")
+    admin = User.objects.create_user(email="admin@example.com", password="testpass")
 
-    p = Patient.objects.create(full_name="Patient A", primary_doctor=doctor)
+    p = PatientProfile.objects.create(full_name="Patient A", primary_doctor=doctor)
     p.full_name = "Patient B"
     p.save()
     # revert to v1
@@ -50,7 +50,7 @@ def test_revert_creates_new_version() -> None:
         version=3,
     )
     assert v3.prev_version == 2
-    p2 = Patient.objects.get(id=p.id)
+    p2 = PatientProfile.objects.get(id=p.id)
     assert p2.full_name == "Patient A"
 
 
@@ -71,9 +71,9 @@ def _drf_available() -> bool:
 @pytest.mark.django_db
 def test_revert_to_nonexistent_version_raises() -> None:
     # Arrange
-    doctor = User.objects.create_user(username="doc_x", password="p")
-    admin = User.objects.create_user(username="admin_x", password="p")
-    p = Patient.objects.create(full_name="Alpha", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_x@example.com", password="p")
+    admin = User.objects.create_user(email="admin_x@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Alpha", user=doctor, primary_doctor=doctor)
     # Act + Assert
     with pytest.raises(RecordVersion.DoesNotExist):
         # Expecting service to raise when target version does not exist (e.g., v99)
@@ -82,9 +82,9 @@ def test_revert_to_nonexistent_version_raises() -> None:
 
 @pytest.mark.django_db
 def test_revert_with_invalid_resource_type_raises() -> None:
-    doctor = User.objects.create_user(username="doc_y", password="p")
-    admin = User.objects.create_user(username="admin_y", password="p")
-    p = Patient.objects.create(full_name="Bravo", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_y@example.com", password="p")
+    admin = User.objects.create_user(email="admin_y@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Bravo", user=doctor, primary_doctor=doctor)
     with pytest.raises(ValueError):
         revert_to_version("UnknownResource", p.id, 1, admin)
 
@@ -92,9 +92,9 @@ def test_revert_with_invalid_resource_type_raises() -> None:
 @pytest.mark.django_db
 def test_revert_to_version_one_creates_next_version_and_restores_fields() -> None:
     # Arrange
-    doctor = User.objects.create_user(username="doc_z", password="p")
-    admin = User.objects.create_user(username="admin_z", password="p")
-    p = Patient.objects.create(full_name="Charlie", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_z@example.com", password="p")
+    admin = User.objects.create_user(email="admin_z@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Charlie", user=doctor, primary_doctor=doctor)
     p.full_name = "Charlie Updated"
     p.save()
 
@@ -128,9 +128,9 @@ def test_revert_to_version_one_creates_next_version_and_restores_fields() -> Non
 
 @pytest.mark.django_db
 def test_revert_rejects_invalid_version_numbers() -> None:
-    doctor = User.objects.create_user(username="doc_w", password="p")
-    admin = User.objects.create_user(username="admin_w", password="p")
-    p = Patient.objects.create(full_name="Delta", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_w@example.com", password="p")
+    admin = User.objects.create_user(email="admin_w@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Delta", user=doctor, primary_doctor=doctor)
 
     for bad_version in (0, -1, None):
         with pytest.raises(ValueError):
@@ -145,16 +145,16 @@ def test_revert_rejects_invalid_version_numbers() -> None:
 @pytest.mark.django_db
 def test_revert_requires_existing_resource() -> None:
     import uuid
-    admin = User.objects.create_user(username="admin_missing", password="p")
+    admin = User.objects.create_user(email="admin_missing@example.com", password="p")
     # Non-existent Patient id
-    with pytest.raises(Patient.DoesNotExist):
+    with pytest.raises(PatientProfile.DoesNotExist):
         revert_to_version("Patient", uuid.uuid4(), 1, admin)
 
 
 @pytest.mark.django_db
 def test_versioning_tracked_fields_are_in_diff() -> None:
-    doctor = User.objects.create_user(username="doc_diff", password="p")
-    p = Patient.objects.create(full_name="Echo", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_diff@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Echo", user=doctor, primary_doctor=doctor)
     # Update multiple fields if available; fallback to single field
     p.full_name = "Echo Prime"
     p.save()
@@ -179,8 +179,8 @@ def test_versioning_tracked_fields_are_in_diff() -> None:
 
 @pytest.mark.django_db
 def test_recordversion_has_monotonic_versions() -> None:
-    doctor = User.objects.create_user(username="doc_mon", password="p")
-    p = Patient.objects.create(full_name="Foxtrot", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_mon@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Foxtrot", user=doctor, primary_doctor=doctor)
     for i in range(3):
         p.full_name = f"Foxtrot {i}"
         p.save()
@@ -199,9 +199,9 @@ def test_recordversion_has_monotonic_versions() -> None:
 
 @pytest.mark.django_db
 def test_service_is_atomic_and_creates_single_new_version() -> None:
-    doctor = User.objects.create_user(username="doc_atomic", password="p")
-    admin = User.objects.create_user(username="admin_atomic", password="p")
-    p = Patient.objects.create(full_name="Golf", primary_doctor=doctor)
+    doctor = User.objects.create_user(email="doc_atomic@example.com", password="p")
+    admin = User.objects.create_user(email="admin_atomic@example.com", password="p")
+    p = PatientProfile.objects.create(full_name="Golf", user=doctor, primary_doctor=doctor)
     p.full_name = "Golf v2"
     p.save()
 
@@ -238,10 +238,10 @@ def test_versions_history_endpoint_lists_versions() -> None:
     # This test assumes an endpoint like
     # /api/versioning/<resource_type>/<resource_id>/history/
     client = APIClient()
-    doctor = User.objects.create_user(username="doc_api", password="p")
+    doctor = User.objects.create_user(email="doc_api@example.com", password="p")
     client.force_authenticate(user=doctor)
 
-    p = Patient.objects.create(full_name="Hotel", primary_doctor=doctor)
+    p = PatientProfile.objects.create(full_name="Hotel", user=doctor, primary_doctor=doctor)
     p.full_name = "Hotel v2"
     p.save()
 
@@ -279,15 +279,15 @@ def test_revert_endpoint_performs_revert_and_creates_new_version() -> None:
     # Assumes an endpoint like POST
     # /api/versioning/<resource_type>/<resource_id>/revert/
     client = APIClient()
-    doctor = User.objects.create_user(username="doc_api2", password="p")
+    doctor = User.objects.create_user(email="doc_api2@example.com", password="p")
     admin = User.objects.create_user(
-        username="admin_api2",
+        email="admin_api2@example.com",
         password="p",
         is_staff=True,
     )
     client.force_authenticate(user=admin)
 
-    p = Patient.objects.create(full_name="India", primary_doctor=doctor)
+    p = PatientProfile.objects.create(full_name="India", user=doctor, primary_doctor=doctor)
     p.full_name = "India v2"
     p.save()
 

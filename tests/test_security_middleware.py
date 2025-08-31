@@ -22,6 +22,17 @@ from unittest.mock import Mock, patch
 import pytest
 from typing import Optional, Callable, Any
 
+from datetime import datetime
+import uuid
+
+import pytest
+from django.contrib.auth import get_user_model
+from django.test import RequestFactory
+
+from security.middleware import RequestLoggingMiddleware
+
+User = get_user_model()
+
 # Try to import Django test utilities if available.
 # Tests will skip Django-specific cases when not present.
 try:

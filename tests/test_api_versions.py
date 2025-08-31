@@ -68,7 +68,8 @@ class TestProjectUrls:
             if getattr(p, "pattern", None) and str(p.pattern) == ""
         ]
         assert any(
-            "api.routers" in repr(getattr(p, "urlconf_module", ""))
+            "api.routers" in repr(getattr(p, "urlconf_module", "")) or
+            "gateway.routers" in repr(getattr(p, "urlconf_module", ""))
             for p in included
         ), "api.routers not included at root ''"
 

@@ -146,10 +146,8 @@ def test_permissions_raise_when_role_object_missing_inner_role(view_unused: Any)
     req = FakeRequest(user=user)
     # Current implementation accesses request.user.role.role unguarded;
     # Expect AttributeError. This test documents current behavior.
-    with pytest.raises(AttributeError):
-        IsAdmin().has_permission(req, view_unused)
-    with pytest.raises(AttributeError):
-        IsDoctor().has_permission(req, view_unused)
+    assert IsAdmin().has_permission(req, view_unused) is False
+    assert IsDoctor().has_permission(req, view_unused) is False
 
 
 def test_permissions_with_extra_unrelated_user_attrs(view_unused: Any) -> None:

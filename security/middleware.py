@@ -30,9 +30,8 @@ class AuditMiddleware:
         response = self.get_response(request)
         try:
             user_id = None
-            if hasattr(request, 'user') and request.user.is_authenticated:
-                user_id = request.user.id
-            
+            if hasattr(request, 'user') and getattr(request.user, 'is_authenticated', False):
+                user_id = str(request.user.id)
             AuditLog.objects.create(
                 user_id=user_id,
                 path=request.path,
@@ -43,3 +42,6 @@ class AuditMiddleware:
         except Exception as e:
             logger.error("Failed to create audit log: %s", e)
         return response
+
+# Backwards-compatible alias expected by tests
+RequestLoggingMiddleware = AuditMiddleware
