@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from django.core.exceptions import ImproperlyConfigured
-from celery.schedules import crontab
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,6 +21,20 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1']
 
+# GitHub Codespaces specific settings
+if os.getenv('CODESPACES', 'false').lower() == 'true':
+    ALLOWED_HOSTS.extend([
+        f"{os.getenv('CODESPACE_NAME')}-8000.{os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')}",
+        'localhost',
+        '127.0.0.1',
+        '[::1]',
+    ])
+    CSRF_TRUSTED_ORIGINS = [
+        f"https://{os.getenv('CODESPACE_NAME')}-8000.{os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')}",
+    ]
+    # Force debug in codespaces for development
+    DEBUG = True
+
 # ------------------------
 # Installed Apps
 # ------------------------
@@ -37,9 +51,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_celery_beat',
-
-    # Optional
-    'storages',
 
     # Your apps
     'gitdm',
@@ -94,77 +105,29 @@ TEMPLATES = [{
 # ------------------------
 # Database
 # ------------------------
-USE_SQLITE = os.getenv('USE_SQLITE', 'True' if DEBUG else 'False').lower() in ('true', '1', 'yes')
-
-if USE_SQLITE:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+# Using SQLite for GitHub Codespaces
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('POSTGRES_DB', 'appdb'),
-            'USER': os.getenv('POSTGRES_USER', 'appuser'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'apppass'),
-            'HOST': os.getenv('POSTGRES_HOST', 'db'),
-            'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        }
-    }
+}
 
 # ------------------------
-# Redis Cache
+# Cache - Django Default
 # ------------------------
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
-REDIS_DB_CACHE = 0
-
 CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_CACHE}",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "PASSWORD": REDIS_PASSWORD,
-        },
-        "KEY_PREFIX": "django",
-        "TIMEOUT": 60 * 15,
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
     }
 }
 
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
-
 # ------------------------
-# Celery
+# Celery - Disabled for Codespaces
 # ------------------------
-REDIS_DB_BROKER = 1
-REDIS_DB_RESULT = 2
-CELERY_BROKER_URL = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_BROKER}"
-CELERY_RESULT_BACKEND = f"redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB_RESULT}"
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_ENABLE_UTC = True
-CELERY_TIMEZONE = 'UTC'
-
-# Celery Beat: Tehran time jobs (UTC +3:30)
-CELERY_BEAT_SCHEDULE = {
-    'summary_task_22_tehran': {
-        'task': 'intelligence.tasks.create_summary_with_references',
-        'schedule': crontab(minute=30, hour=18),  # 22:00 Tehran
-        'args': [1, "Sample content at 22"]
-    },
-    'summary_task_2230_tehran': {
-        'task': 'intelligence.tasks.create_summary_with_references',
-        'schedule': crontab(minute=0, hour=19),  # 22:30 Tehran
-        'args': [1, "Sample content at 22:30"]
-    },
-}
+# Celery is disabled in Codespaces environment
+# To enable Celery, you need to set up a message broker
 
 # ------------------------
 # REST Framework
@@ -200,26 +163,12 @@ SIMPLE_JWT = {
 }
 
 # ------------------------
-# MinIO Storage
+# Static and Media Files - Django Default
 # ------------------------
-USE_MINIO = os.getenv('USE_MINIO', 'False').lower() in ('true', '1', 'yes')
-
-if USE_MINIO:
-    DEFAULT_FILE_STORAGE = 'minio_storage.storage.MinioMediaStorage'
-    STATICFILES_STORAGE = 'minio_storage.storage.MinioStaticStorage'
-
-    MINIO_STORAGE_ENDPOINT = os.getenv('MINIO_ENDPOINT', 'localhost:9000')
-    MINIO_STORAGE_ACCESS_KEY = os.getenv('MINIO_ACCESS_KEY')
-    MINIO_STORAGE_SECRET_KEY = os.getenv('MINIO_SECRET_KEY')
-    MINIO_STORAGE_MEDIA_BUCKET_NAME = os.getenv('MINIO_MEDIA_BUCKET', 'media')
-    MINIO_STORAGE_STATIC_BUCKET_NAME = os.getenv('MINIO_STATIC_BUCKET', 'static')
-    MINIO_STORAGE_USE_HTTPS = os.getenv('MINIO_USE_HTTPS', 'False').lower() in ('true', '1', 'yes')
-    MINIO_STORAGE_IGNORE_CERT_CHECK = not MINIO_STORAGE_USE_HTTPS
-else:
-    STATIC_URL = '/static/'
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # ------------------------
 # AI Summarization
