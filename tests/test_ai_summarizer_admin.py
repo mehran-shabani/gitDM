@@ -36,10 +36,10 @@ def make_superuser(**extra):
     - tuple: (user_instance, password) — نمونه مدل کاربر ایجادشده و گذرواژه‌ای که برای ایجاد استفاده شده است.
     """
     user_model = get_user_model()
-    username = extra.pop("username", "admin")
     email = extra.pop("email", "admin@example.com")
     password = extra.pop("password", "pass1234")
-    user = user_model.objects.create_superuser(username=username, email=email, password=password, **extra)
+    # Custom user uses email as username field
+    user = user_model.objects.create_superuser(email=email, password=password, **extra)
     return user, password
 
 def create_ai_summary(patient=None, model_label="note", created_at=None):
@@ -134,8 +134,8 @@ def test_list_display_contains_expected_columns():
 
 def test_get_list_filter_overrides_and_includes_custom_filter():
     ma = AISummaryAdmin(AISummary, admin.site)
-    # The attribute exists for expectations but runtime list_filter comes from get_list_filter
-    assert ("created_at",) == ma.list_filter
+    # The runtime list_filter comes from get_list_filter; attribute can be empty
+    assert ma.list_filter == ()
     resolved = ma.get_list_filter(request=None)
     # Expect custom filter class and created_at
     assert isinstance(resolved, (list, tuple))
@@ -196,7 +196,7 @@ def test_changelist_view_renders_with_result_list_marker(client):
     # Create superuser and login to access admin
     user, password = make_superuser()
     client = Client()
-    assert client.login(username=user.username, password=password)
+    client.force_login(user)
     # Seed at least one record to avoid empty queryset edge-cases
     create_ai_summary(model_label="rendercheck")
 
@@ -219,7 +219,7 @@ def test_changelist_view_handles_non_renderable_response_gracefully(monkeypatch)
         یک پاسخ شبیه‌سازی‌شدهٔ غیرقابل‌رندر برای جایگزینی متد changelist_view در تست‌ها بازمی‌گرداند.
         
         توضیح کامل:
-        این تابع یک پیاده‌سازی سادهٔ جایگزین برای متد admin.changelist_view است که همیشه یک نمونهٔ NoRenderResponse را بازمی‌گرداند. برای تست سناریوهایی استفاده می‌شود که در آن نمای تغییرات (changelist) به‌جای یک HttpResponse قابل رندر، یک شیئی بازمی‌گرداند که هیچ متد یا محتوای قابل‌ریندری ندارد تا رفتار کد میزبان هنگام دریافت پاسخ‌های غیرمعمول بررسی شود.
+        این تابع یک پیاده‌سازی سادهٔ جایگزین برای متد admin.changelist_view است که همیشه یک NoRenderResponse را بازمی‌گرداند. برای تست سناریوهایی استفاده می‌شود که در آن نمای تغییرات (changelist) به‌جای یک HttpResponse قابل رندر، یک شیئی بازمی‌گرداند که هیچ متد یا محتوای قابل‌ریندری ندارد تا رفتار کد میزبان هنگام دریافت پاسخ‌های غیرمعمول بررسی شود.
         
         پارامترها:
             request: شیٔ درخواست Django — توسط این تابع استفاده نمی‌شود (فقط برای امضا سازگار است).
@@ -241,7 +241,7 @@ def test_changelist_view_handles_non_renderable_response_gracefully(monkeypatch)
 
     rf = RequestFactory()
     req = rf.get("/")
-    req.user, _ = make_superuser(username="x2", email="x2@example.com")
+    req.user, _ = make_superuser(email="x2@example.com")
     # Patch super().changelist_view to return NoRenderResponse for this call
     orig_super = app_admin.AISummaryAdmin.changelist_view
 
@@ -288,9 +288,9 @@ def test_created_at_filter_and_date_range_behaviour(client):
     نکته اجرایی:
     تست فرض می‌کند امکان تعیین دستی فیلد `created_at` هنگام ایجاد AISummary فراهم است؛ در صورت غیرفعال بودن این قابلیت، بخش مربوط به مقادیر زمانی قابل تنظیم ممکن است معنادار نباشد.
     """
-    user, password = make_superuser(username="dater", email="dater@example.com")
+    user, password = make_superuser(email="dater@example.com")
     client = Client()
-    assert client.login(username=user.username, password=password)
+    client.force_login(user)
 
     # Create two records with different created_at dates if field allows manual set
     now = datetime.now(timezone.utc)

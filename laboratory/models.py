@@ -2,7 +2,7 @@ from django.db import models
 
 
 class LabResult(models.Model):
-    patient = models.ForeignKey('gitdm.Patient', on_delete=models.CASCADE)
+    patient = models.ForeignKey('gitdm.PatientProfile', on_delete=models.CASCADE)
     encounter = models.ForeignKey(
         'encounters.Encounter',
         null=True,

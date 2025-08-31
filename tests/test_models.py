@@ -4,7 +4,7 @@
 
 import os
 import pytest
-from gitdm.models import Patient
+from gitdm.models import PatientProfile
 from encounters.models import Encounter
 from datetime import datetime
 from django.core.exceptions import ValidationError
@@ -18,9 +18,10 @@ User = get_user_model()
 
 @pytest.mark.django_db
 def test_patient_create() -> None:
-    doctor = User.objects.create_user(username="doc_test", password=TEST_PASSWORD)
-    p = Patient.objects.create(
+    doctor = User.objects.create_user(email="doc_test@example.com", password=TEST_PASSWORD)
+    p = PatientProfile.objects.create(
         full_name="Ali Test",
+        user=doctor,  # For tests, reuse doctor as the underlying user for simplicity
         primary_doctor=doctor,
     )
     assert p.id is not None
@@ -31,10 +32,11 @@ def test_patient_create() -> None:
 @pytest.mark.django_db
 def test_encounter_link() -> None:
     """Create an Encounter linked to a Patient with valid created_by user."""
-    doctor = User.objects.create_user(username="doc_enc", password=TEST_PASSWORD)
-    creator = User.objects.create_user(username="nurse_enc", password=TEST_PASSWORD)
-    p = Patient.objects.create(
+    doctor = User.objects.create_user(email="doc_enc@example.com", password=TEST_PASSWORD)
+    creator = User.objects.create_user(email="nurse_enc@example.com", password=TEST_PASSWORD)
+    p = PatientProfile.objects.create(
         full_name="Ali Test",
+        user=doctor,
         primary_doctor=doctor,
     )
     e = Encounter.objects.create(
@@ -51,9 +53,10 @@ def test_encounter_link() -> None:
 def test_patient_missing_required_fields_raises(db: object) -> None:
     # Assuming full_name is required.
     # If model-level validation enforces it, calling full_clean will raise.
-    doctor = User.objects.create_user(username="doc_missing", password=TEST_PASSWORD)
-    p = Patient(
+    doctor = User.objects.create_user(email="doc_missing@example.com", password=TEST_PASSWORD)
+    p = PatientProfile(
         full_name=None,
+        user=doctor,
         primary_doctor=doctor,
     )
     with pytest.raises((ValidationError, IntegrityError)):
@@ -68,7 +71,7 @@ def test_patient_missing_required_fields_raises(db: object) -> None:
 @pytest.mark.django_db
 def test_encounter_requires_patient_and_occurred_at(db: object) -> None:
     # Attempt to create encounter without patient or occurred_at should fail.
-    creator = User.objects.create_user(username="creator_req", password=TEST_PASSWORD)
+    creator = User.objects.create_user(email="creator_req@example.com", password=TEST_PASSWORD)
     with pytest.raises(IntegrityError):
         with transaction.atomic():
             Encounter.objects.create(
@@ -80,11 +83,12 @@ def test_encounter_requires_patient_and_occurred_at(db: object) -> None:
 
 @pytest.mark.django_db
 def test_cascade_delete_patient_deletes_encounters(db: object) -> None:
-    doctor = User.objects.create_user(username="doc_cascade", password=TEST_PASSWORD)
-    creator1 = User.objects.create_user(username="creator_cascade1", password=TEST_PASSWORD)
-    creator2 = User.objects.create_user(username="creator_cascade2", password=TEST_PASSWORD)
-    p = Patient.objects.create(
+    doctor = User.objects.create_user(email="doc_cascade@example.com", password=TEST_PASSWORD)
+    creator1 = User.objects.create_user(email="creator_cascade1@example.com", password=TEST_PASSWORD)
+    creator2 = User.objects.create_user(email="creator_cascade2@example.com", password=TEST_PASSWORD)
+    p = PatientProfile.objects.create(
         full_name="Cascade Test",
+        user=doctor,
         primary_doctor=doctor,
     )
     Encounter.objects.create(
@@ -106,11 +110,12 @@ def test_cascade_delete_patient_deletes_encounters(db: object) -> None:
 
 @pytest.mark.django_db
 def test_encounter_str_and_ordering_if_defined(db: object) -> None:
-    doctor = User.objects.create_user(username="doc_str", password=TEST_PASSWORD)
-    creator1 = User.objects.create_user(username="creator_str1", password=TEST_PASSWORD)
-    creator2 = User.objects.create_user(username="creator_str2", password=TEST_PASSWORD)
-    p = Patient.objects.create(
+    doctor = User.objects.create_user(email="doc_str@example.com", password=TEST_PASSWORD)
+    creator1 = User.objects.create_user(email="creator_str1@example.com", password=TEST_PASSWORD)
+    creator2 = User.objects.create_user(email="creator_str2@example.com", password=TEST_PASSWORD)
+    p = PatientProfile.objects.create(
         full_name="Str Test",
+        user=doctor,
         primary_doctor=doctor,
     )
     e_newer = Encounter.objects.create(
@@ -143,9 +148,10 @@ def test_encounter_str_and_ordering_if_defined(db: object) -> None:
 
 @pytest.mark.django_db
 def test_patient_uuid_fields_accept_valid_uuid(db: object) -> None:
-    doctor = User.objects.create_user(username="doc_uuid", password=TEST_PASSWORD)
-    p = Patient.objects.create(
+    doctor = User.objects.create_user(email="doc_uuid@example.com", password=TEST_PASSWORD)
+    p = PatientProfile.objects.create(
         full_name="UUID Test",
+        user=doctor,
         primary_doctor=doctor,
     )
     assert p.primary_doctor.id is not None

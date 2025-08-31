@@ -78,7 +78,6 @@ class _BaseAdminTestCase(TestCase):
         user_model = get_user_model()
         # Use deterministic credentials
         self.admin_user = user_model.objects.create_superuser(
-            username="admin_test_user",
             email="admin_test_user@example.com",
             password="securepass123",
         )

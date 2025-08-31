@@ -10,7 +10,7 @@ _thread_state = threading.local()
 IGNORE_FIELDS = {"id", "pk", "created_at", "updated_at"}
 
 RESOURCE_MAP = {
-    'Patient': ('gitdm', 'Patient'),
+    'Patient': ('gitdm', 'PatientProfile'),
     'Encounter': ('encounters', 'Encounter'),
     'LabResult': ('laboratory', 'LabResult'),
     'MedicationOrder': ('pharmacy', 'MedicationOrder'),
@@ -132,7 +132,9 @@ def save_with_version(
         return
     _thread_state.in_version = True
     try:
-        rtype = instance.__class__.__name__
+        # Normalize resource type names for historical compatibility
+        cls_name = instance.__class__.__name__
+        rtype = RESOURCE_TYPE_ALIASES.get(cls_name, cls_name)
         rid = str(instance.pk)
         curr = _compute_snapshot(instance)
 

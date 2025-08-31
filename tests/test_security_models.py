@@ -8,9 +8,11 @@ import uuid
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.apps import apps
 
+
+User = get_user_model()
 
 def _get_model_by_name(name: str) -> None:
     """
@@ -61,9 +63,9 @@ class AuditLogModelTests(TestCase):
             path="/submit",
             method="POST",
             status_code=201,
-            user_id=uid,
+            user_id=str(uid),
         )
-        self.assertEqual(log.user_id, uid)
+        self.assertEqual(str(log.user_id), str(uid))
 
     def test_path_max_length_validation(self) -> None:
         # max_length for path is 200; 201 should fail on full_clean
@@ -80,7 +82,6 @@ class AuditLogModelTests(TestCase):
             log.full_clean()
 
     def test_meta_default_is_not_shared_between_instances(self) -> None:
-        # JSONField(default=dict) should create a fresh dict per instance
         """
         بررسی می‌کند که مقدار پیش‌فرض فیلد JSONField (`meta`) برای هر نمونه جداگانه است و بین نمونه‌ها به اشتراک گذاشته نمی‌شود.
         
@@ -105,20 +106,20 @@ class RoleModelTests(TestCase):
         
         این متد برای آماده‌سازی پیش‌شرط‌های تست‌های مربوط به مدل Role اجرا می‌شود. کاربر ایجاد شده با رمز عبور "pwd12345" ساخته می‌شود و برای وابستگی‌هایی که نیاز به یک User واقعی دارند (مثلاً ایجاد یا حذف نقش‌ها و بررسی رفتار یک‌به‌یک یا cascade) استفاده می‌شود.
         """
-        self.user = User.objects.create_user(username="alice", password="pwd12345")
+        self.user = User.objects.create_user(email="alice@example.com", password="pwd12345")
 
     def test_role_creation_and_uuid_primary_key(self) -> None:
         r = Role.objects.create(user=self.user, role="admin")
-        # id is a UUIDField primary key
-        self.assertIsInstance(r.id, uuid.UUID)
+        # id is an integer (BigAutoField)
+        self.assertIsInstance(r.id, int)
         self.assertEqual(r.role, "admin")
-        self.assertEqual(str(r.user.username), "alice")
+        self.assertEqual(str(self.user.email), "alice@example.com")
 
     def test_role_choices_accept_only_defined_values(self) -> None:
         # Valid choices: admin, doctor, viewer
         for choice in ("admin", "doctor", "viewer"):
             with self.subTest(choice=choice):
-                u = User.objects.create_user(username=f"user_{choice}", password="x")
+                u = User.objects.create_user(email=f"user_{choice}@example.com", password="x")
                 instance = Role(user=u, role=choice)
                 # Should validate successfully
                 instance.full_clean()
@@ -126,7 +127,7 @@ class RoleModelTests(TestCase):
                 self.assertEqual(instance.role, choice)
 
     def test_invalid_role_choice_raises_validation_error(self) -> None:
-        u = User.objects.create_user(username="bob", password="pwd")
+        u = User.objects.create_user(email="bob@example.com", password="pwd")
         instance = Role(user=u, role="invalid")
         with self.assertRaises(ValidationError):
             instance.full_clean()

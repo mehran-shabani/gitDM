@@ -3,14 +3,19 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
-from .models import Patient
+from .models import PatientProfile
 from .serializers import PatientSerializer, CustomTokenObtainPairSerializer
 
 
 class PatientViewSet(viewsets.ModelViewSet):
-    queryset = Patient.objects.all().order_by('-created_at')
+    queryset = PatientProfile.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx['request'] = self.request
+        return ctx
 
     def get_queryset(self):
         """
@@ -25,7 +30,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         if not user.is_authenticated:
-            return Patient.objects.none()
+            return PatientProfile.objects.none()
         if getattr(user, "is_superuser", False):
             return super().get_queryset()
         return super().get_queryset().filter(primary_doctor=user)
@@ -42,14 +47,14 @@ class PatientViewSet(viewsets.ModelViewSet):
         جزئیات:
         - این اکشن برای یک بیمار مشخص (بر پایه pk/URL) اجرا می‌شود و مجموعه‌های مرتبط را جداگانه واکشی و سریالایز می‌کند.
         - محدودیت‌ها:
-          - پارامتر کوئری `limit` تعیین‌کننده حداکثر تعداد آیتم‌ها برای هر یک از نوع‌های Encounter، LabResult و MedicationOrder است. مقدار پیش‌فرض 100 و بیشینه مجاز 500 است (اگر مقدار بزرگ‌تر ارسال شود به 500 تقلیل می‌یابد).
-          - AISummaryها مستقل از `limit` همواره تا 5 مورد اخیر (بر اساس `created_at` نزولی) محدود می‌شوند.
+        - پارامتر کوئری `limit` تعیین‌کننده حداکثر تعداد آیتم‌ها برای هر یک از نوع‌های Encounter، LabResult و MedicationOrder است. مقدار پیش‌فرض 100 و بیشینه مجاز 500 است (اگر مقدار بزرگ‌تر ارسال شود به 500 تقلیل می‌یابد).
+        - AISummaryها مستقل از `limit` همواره تا 5 مورد اخیر (بر اساس `created_at` نزولی) محدود می‌شوند.
         - داده‌های بازگردانده شده:
-          - patient: داده سریالایزشدهٔ بیمار
-          - encounters: لیست سریالایزشدهٔ Encounterها مرتب‌شده بر اساس `occurred_at` نزولی (تا `limit`)
-          - labs: لیست سریالایزشدهٔ LabResultها مرتب‌شده بر اساس `taken_at` نزولی (تا `limit`)
-          - medications: لیست سریالایزشدهٔ MedicationOrderها مرتب‌شده بر اساس `start_date` نزولی (تا `limit`)
-          - ai_summaries: لیست سریالایزشدهٔ AISummaryها (حداکثر 5 مورد، مرتب بر اساس `created_at` نزولی)
+        - patient: داده سریالایزشدهٔ بیمار
+        - encounters: لیست سریالایزشدهٔ Encounterها مرتب‌شده بر اساس `occured_at` نزولی (تا `limit`)
+        - labs: لیست سریالایزشدهٔ LabResultها مرتب‌شده بر اساس `taken_at` نزولی (تا `limit`)
+        - medications: لیست سریالایزشدهٔ MedicationOrderها مرتب‌شده بر اساس `start_date` نزولی (تا `limit`)
+        - ai_summaries: لیست سریالایزشدهٔ AISummaryها (حداکثر 5 مورد، مرتب بر اساس `created_at` نزولی)
         
         نکات مرتبط با هوش‌مصنوعی و پردازش:
         - AISummaryها خروجی‌های تحلیلی/خلاصه‌سازی هستند که ممکن است بر پایه پردازش‌های خودکار، مدل‌های زبانی یا آنالیزهای بالینی تولید شده باشند؛ این موارد مکمل داده‌های خام بالینی هستند و برای نمایش خلاصهٔ وضعیت یا نکات مهم بیمار ارائه می‌شوند.
@@ -94,7 +99,7 @@ class PatientViewSet(viewsets.ModelViewSet):
         )
         
         return Response({
-            'patient': PatientSerializer(p).data,
+            'patient': PatientSerializer(p, context={'request': request}).data,
             'encounters': EncounterSerializer(enc, many=True).data,
             'labs': LabResultSerializer(labs, many=True).data,
             'medications': MedicationOrderSerializer(meds, many=True).data,

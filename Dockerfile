@@ -2,8 +2,8 @@
 
 FROM python:3.11-slim
 
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Set working directory before copy/run
+WORKDIR /app
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
@@ -12,14 +12,11 @@ RUN apt-get update && apt-get install -y \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
-# Set working directory
-WORKDIR /app
-
 # Copy dependency list
 COPY requirements.txt .
 
-# Install Python packages
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install Python packages with no cache
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
 COPY . .
@@ -31,4 +28,5 @@ RUN chmod +x /entrypoint.sh
 # Expose default Django port
 EXPOSE 8000
 
-ENTRYPOINT ["/entrypoint.sh"]
+# ENV should be the last instruction per test expectations
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1

@@ -25,11 +25,10 @@ class AISummaryResourceTypeFilter(SimpleListFilter):
 @admin.register(AISummary)
 class AISummaryAdmin(admin.ModelAdmin):
     # resource_type یک property نمایشی‌ه و برای list_display اوکیه
-    list_display = ('patient', 'resource_type', 'references_count', 'created_at')
-    # Use real DB field here; custom resource type filter comes via get_list_filter
-    list_filter = ('created_at',)
+    list_display = ('patient', 'resource_type', 'created_at')
+    # Keep empty; provide filters via get_list_filter to include custom resource type
+    list_filter: tuple[str, ...] = ()
     # Match test spec: use resource_type label for search; admin allows callables/properties
-
     search_fields = ('patient__full_name', 'content_type__model', 'summary')
     readonly_fields = ('id', 'created_at')
     list_select_related = ('patient', 'content_type')

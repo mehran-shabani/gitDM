@@ -25,10 +25,10 @@ def test_imports():
     
     # Test model imports
     try:
-        from gitdm.models import Patient
-        print("✓ gitdm.models.Patient import successful")
+        from gitdm.models import PatientProfile
+        print("✓ gitdm.models.PatientProfile import successful")
     except ImportError as e:
-        errors.append(f"✗ gitdm.models.Patient import failed: {e}")
+        errors.append(f"✗ gitdm.models.PatientProfile import failed: {e}")
     
     try:
         from encounters.models import Encounter
