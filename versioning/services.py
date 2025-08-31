@@ -132,7 +132,9 @@ def save_with_version(
         return
     _thread_state.in_version = True
     try:
-        rtype = instance.__class__.__name__
+        # Normalize resource type names for historical compatibility
+        cls_name = instance.__class__.__name__
+        rtype = 'Patient' if cls_name == 'PatientProfile' else cls_name
         rid = str(instance.pk)
         curr = _compute_snapshot(instance)
 

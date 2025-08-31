@@ -11,8 +11,9 @@ from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
 from intelligence.views import AISummaryViewSet
 from .views import health
-from versioning import views as version_views
 from api.views_export import export_patient
+from versioning import views as version_views
+from django.http import JsonResponse
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
@@ -23,9 +24,14 @@ router.register(r'meds', MedicationOrderViewSet)
 router.register(r'refs', ClinicalReferenceViewSet)
 router.register(r'ai-summaries', AISummaryViewSet)
 
+
+def api_root_view(request):
+    return JsonResponse({"status": "ok"})
+
 # The API URLs are now determined automatically by the router
 urlpatterns = [
-    path('', include(router.urls), name='api-root'),
+    path('', include(router.urls)),
+    path('', api_root_view, name='api-root'),
     path('health/', health, name='api-health'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
