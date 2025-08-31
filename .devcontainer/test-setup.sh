@@ -14,7 +14,7 @@ fi
 
 # Test migrations
 echo -n "Testing migrations... "
-if python manage.py showmigrations | grep -q '\[X\]'; then
+if python manage.py migrate --check --noinput >/dev/null 2>&1; then
     echo "✅ OK"
 else
     echo "❌ Failed"
