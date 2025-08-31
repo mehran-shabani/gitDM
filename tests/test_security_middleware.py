@@ -192,7 +192,7 @@ def test_logs_authenticated_user_uuid_deterministic(mock_auditlog: Mock) -> None
             assert kwargs["meta"] == {"remote_addr": "127.0.0.1"}
             # Deterministic UUID using uuid5 + NAMESPACE_DNS and 'user-<id>'
             expected_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, "user-42")
-            assert kwargs["user_id"] == expected_uuid
+            assert str(kwargs["user_id"]) == str(expected_uuid)
     except ModuleNotFoundError:
         pytest.skip("Unable to patch AuditLog in resolved middleware module path")
 

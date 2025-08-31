@@ -1,5 +1,6 @@
 from .models import AuditLog
 import logging
+import uuid
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +30,11 @@ class AuditMiddleware:
         """
         response = self.get_response(request)
         try:
-            user_id = None
+            user_uuid = None
             if hasattr(request, 'user') and getattr(request.user, 'is_authenticated', False):
-                user_id = str(request.user.id)
+                user_uuid = uuid.uuid5(uuid.NAMESPACE_DNS, f"user-{request.user.id}")
             AuditLog.objects.create(
-                user_id=user_id,
+                user_id=str(user_uuid) if user_uuid else None,
                 path=request.path,
                 method=request.method,
                 status_code=response.status_code,

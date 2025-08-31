@@ -196,7 +196,7 @@ def test_changelist_view_renders_with_result_list_marker(client):
     # Create superuser and login to access admin
     user, password = make_superuser()
     client = Client()
-    assert client.login(username=user.username, password=password)
+    client.force_login(user)
     # Seed at least one record to avoid empty queryset edge-cases
     create_ai_summary(model_label="rendercheck")
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import uuid
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -123,7 +124,11 @@ class PatientProfile(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="patient_profile",
+        null=True,
+        blank=True,
     )
+
+    full_name = models.CharField(max_length=120, blank=True, default="")
 
     national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
     dob = models.DateField(null=True, blank=True)
@@ -150,11 +155,11 @@ class PatientProfile(models.Model):
         ]
 
     def __str__(self) -> str:
-        return self.user.get_full_name() or self.user.email
-
-    @property
-    def full_name(self) -> str:
-        return self.user.get_full_name()
+        if self.full_name:
+            return self.full_name
+        if self.user:
+            return self.user.get_full_name() or self.user.email
+        return "Patient"
 
     @property
     def age(self):
@@ -165,11 +170,11 @@ class PatientProfile(models.Model):
 
     def clean(self):
         # Patient’s user must actually be a patient
-        if not getattr(self.user, "is_patient", False):
+        if self.user and not getattr(self.user, "is_patient", False):
             raise ValidationError("Connected user must have is_patient=True for PatientProfile.")
         # Primary doctor consistency
         if self.primary_doctor:
             if not getattr(self.primary_doctor, "is_doctor", False):
                 raise ValidationError("primary_doctor must be a user with is_doctor=True.")
-            if self.primary_doctor_id == self.user_id:
+            if self.user_id and self.primary_doctor_id == self.user_id:
                 raise ValidationError("A patient cannot assign themselves as their doctor.")
