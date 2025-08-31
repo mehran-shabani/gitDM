@@ -21,6 +21,6 @@ class Role(models.Model):
         (VIEWER, 'Viewer'),
     ]
     
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.BigAutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     role = models.CharField(max_length=16, choices=ROLE_CHOICES)

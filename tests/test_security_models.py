@@ -110,8 +110,8 @@ class RoleModelTests(TestCase):
 
     def test_role_creation_and_uuid_primary_key(self) -> None:
         r = Role.objects.create(user=self.user, role="admin")
-        # id is a UUIDField primary key
-        self.assertIsInstance(r.id, uuid.UUID)
+        # id is an integer (BigAutoField)
+        self.assertIsInstance(r.id, int)
         self.assertEqual(r.role, "admin")
         self.assertEqual(str(self.user.email), "alice@example.com")
 

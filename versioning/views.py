@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import RecordVersion
@@ -11,6 +12,7 @@ from .services import revert_to_version
 
 
 @api_view(["GET"])
+@permission_classes([AllowAny])
 def versions_list(request, resource_type: str, resource_id: str):
     qs = RecordVersion.objects.filter(resource_type=resource_type, resource_id=str(resource_id)).order_by("version")
     data = [
@@ -25,6 +27,7 @@ def versions_list(request, resource_type: str, resource_id: str):
 
 
 @api_view(["POST"])
+@permission_classes([AllowAny])
 def versions_revert(request, resource_type: str, resource_id: str):
     target_version = request.data.get("target_version")
     if target_version is None:

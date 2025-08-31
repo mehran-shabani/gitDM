@@ -241,7 +241,7 @@ def test_changelist_view_handles_non_renderable_response_gracefully(monkeypatch)
 
     rf = RequestFactory()
     req = rf.get("/")
-    req.user, _ = make_superuser(username="x2", email="x2@example.com")
+    req.user, _ = make_superuser(email="x2@example.com")
     # Patch super().changelist_view to return NoRenderResponse for this call
     orig_super = app_admin.AISummaryAdmin.changelist_view
 
@@ -288,9 +288,9 @@ def test_created_at_filter_and_date_range_behaviour(client):
     نکته اجرایی:
     تست فرض می‌کند امکان تعیین دستی فیلد `created_at` هنگام ایجاد AISummary فراهم است؛ در صورت غیرفعال بودن این قابلیت، بخش مربوط به مقادیر زمانی قابل تنظیم ممکن است معنادار نباشد.
     """
-    user, password = make_superuser(username="dater", email="dater@example.com")
+    user, password = make_superuser(email="dater@example.com")
     client = Client()
-    assert client.login(username=user.username, password=password)
+    client.force_login(user)
 
     # Create two records with different created_at dates if field allows manual set
     now = datetime.now(timezone.utc)

@@ -31,7 +31,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair_api'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_api'),
-    path('versions/<str:resource_type>/<uuid:resource_id>/', version_views.versions_list),
-    path('versions/<str:resource_type>/<uuid:resource_id>/revert/', version_views.versions_revert),
-    path('export/patient/<uuid:pk>/', export_patient, name='export_patient'),
+    path('versions/<str:resource_type>/<str:resource_id>/', version_views.versions_list),
+    path('versions/<str:resource_type>/<str:resource_id>/revert/', version_views.versions_revert),
+    path('export/patient/<str:pk>/', export_patient, name='export_patient'),
 ]
