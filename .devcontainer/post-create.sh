@@ -40,4 +40,5 @@ if [ "${VERBOSE_CREDENTIALS:-}" = "1" ]; then
   echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
 else
   echo "🔐 Admin panel: http://localhost:8000/admin"
+  echo "👉 برای تغییر پسورد ادمین: python manage.py changepassword admin"
 fi
