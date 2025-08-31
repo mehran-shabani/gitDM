@@ -51,7 +51,8 @@ Simplified to include only:
 3. Migrations will run automatically
 4. A superuser will be created (username: `admin`, password: `admin123`)
 5. The Django development server will be available at the forwarded port
-
+   - In Codespaces: `https://${CODESPACE_NAME}-8000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}`
+   - Local: `http://localhost:8000`
 ## Notes
 
 - All data is stored in SQLite (`db.sqlite3`)
