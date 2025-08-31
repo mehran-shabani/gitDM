@@ -134,7 +134,7 @@ def save_with_version(
     try:
         # Normalize resource type names for historical compatibility
         cls_name = instance.__class__.__name__
-        rtype = 'Patient' if cls_name == 'PatientProfile' else cls_name
+        rtype = RESOURCE_TYPE_ALIASES.get(cls_name, cls_name)
         rid = str(instance.pk)
         curr = _compute_snapshot(instance)
 
