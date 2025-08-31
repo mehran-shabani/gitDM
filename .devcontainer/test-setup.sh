@@ -32,7 +32,7 @@ fi
 
 # Test superuser exists
 echo -n "Testing superuser... "
-if python -c "from django.contrib.auth import get_user_model; User = get_user_model(); exit(0 if User.objects.filter(username='admin').exists() else 1)" 2>/dev/null; then
+if python -c "import sys; from django.contrib.auth import get_user_model; User = get_user_model(); sys.exit(0 if User.objects.filter(username='admin').exists() else 1)" 2>/dev/null; then
     echo "✅ OK"
 else
     echo "❌ Failed"
