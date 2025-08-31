@@ -13,9 +13,7 @@ from intelligence.views import AISummaryViewSet
 from .views import health
 from api.views_export import export_patient
 from versioning import views as version_views
-# gateway/urls.py
-
--from django.http import JsonResponse
+from django.http import JsonResponse
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
