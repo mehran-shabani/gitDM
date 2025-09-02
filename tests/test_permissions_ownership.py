@@ -67,7 +67,7 @@ def test_user_cannot_access_other_users_patient_and_related() -> None:
 
 @pytest.mark.django_db
 def test_versions_endpoints_owner_only() -> None:
-    from versioning.models import RecordVersion
+<!-- Removed unused import -->
     user_model = get_user_model()
     a = user_model.objects.create_user(email="own_a@example.com", password="p", is_doctor=True)
     b = user_model.objects.create_user(email="own_b@example.com", password="p", is_doctor=True)
