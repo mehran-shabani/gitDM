@@ -9,7 +9,7 @@ from security.permissions import IsOwnerDoctorOrReadOnly
 class EncounterViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet):
     queryset = Encounter.objects.all().order_by('-occurred_at')
     serializer_class = EncounterSerializer
-    permission_classes = [IsOwnerDoctorOrReadOnly]
+    permission_classes = (IsOwnerDoctorOrReadOnly,)
 
     def perform_create(self, serializer) -> None:
         """
