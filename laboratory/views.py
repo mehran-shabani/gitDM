@@ -7,7 +7,7 @@ from security.permissions import IsOwnerDoctorOrReadOnly
 
 
 class LabResultViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet):
-    queryset = LabResult.objects.all().order_by('-taken_at')
+    queryset = LabResult.objects.select_related('patient', 'encounter').order_by('-taken_at')
     serializer_class = LabResultSerializer
     permission_classes = [IsOwnerDoctorOrReadOnly]
 
