@@ -19,11 +19,10 @@ def versions_list(request, resource_type: str, resource_id: str):
     qs = (RecordVersion.objects
           .filter(resource_type=resource_type, resource_id=str(resource_id))
           .order_by("version"))
-    # If there are no versions, return empty list without ownership enforcement
+    # Enforce ownership regardless of count to avoid metadata leakage
+    _assert_user_owns_resource(request.user, resource_type, resource_id)
     if not qs.exists():
         return Response([], status=status.HTTP_200_OK)
-    # Otherwise, enforce ownership of the underlying resource
-    _assert_user_owns_resource(request.user, resource_type, resource_id)
     data = [
         {
             "version": rv.version,
