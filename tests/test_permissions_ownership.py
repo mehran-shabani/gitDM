@@ -92,11 +92,10 @@ def test_versions_endpoints_owner_only() -> None:
 
 @pytest.mark.django_db
 def test_export_owner_only_responses() -> None:
-    User = get_user_model()
-    a = User.objects.create_user(email="exp_a@example.com", password="p")
-    b = User.objects.create_user(email="exp_b@example.com", password="p")
+    user_model = get_user_model()
+    a = user_model.objects.create_user(email="exp_a@example.com", password="p", is_doctor=True)
+    b = user_model.objects.create_user(email="exp_b@example.com", password="p", is_doctor=True)
     pa = PatientProfile.objects.create(full_name="PA", primary_doctor=a)
-
     c = APIClient()
 
     # Unauthenticated -> 401
