@@ -8,6 +8,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.db.models import Q
+from .validators import validate_national_id, validate_medical_code, validate_age_range
 
 
 class UserManager(BaseUserManager):
@@ -87,13 +88,32 @@ class DoctorProfile(models.Model):
     """
     Extra fields for doctors (optional; exists only if user.is_doctor=True).
     """
+    class DoctorRole(models.TextChoices):
+        GENERAL = 'GENERAL', 'پزشک عمومی'
+        ENDOCRINOLOGIST = 'ENDO', 'متخصص غدد'
+        CARDIOLOGIST = 'CARDIO', 'متخصص قلب'
+        OPHTHALMOLOGIST = 'OPHTHAL', 'متخصص چشم'
+        ADMIN = 'ADMIN', 'مدیر سیستم'
+    
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="doctor_profile",
     )
-    medical_code = models.CharField(max_length=32, blank=True, db_index=True)
+    medical_code = models.CharField(
+        max_length=32, 
+        blank=True, 
+        db_index=True,
+        validators=[validate_medical_code],
+        help_text="کد نظام پزشکی"
+    )
     specialty = models.CharField(max_length=120, blank=True)
+    role = models.CharField(
+        max_length=20,
+        choices=DoctorRole.choices,
+        default=DoctorRole.GENERAL,
+        help_text="نقش پزشک در سیستم"
+    )
 
     class Meta:
         verbose_name = "Doctor Profile"
@@ -130,8 +150,20 @@ class PatientProfile(models.Model):
 
     full_name = models.CharField(max_length=120, blank=True, default="")
 
-    national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    dob = models.DateField(null=True, blank=True)
+    national_id = models.CharField(
+        max_length=20, 
+        unique=True, 
+        null=True, 
+        blank=True,
+        validators=[validate_national_id],
+        help_text="کد ملی 10 رقمی"
+    )
+    dob = models.DateField(
+        null=True, 
+        blank=True,
+        validators=[validate_age_range],
+        help_text="تاریخ تولد"
+    )
     sex = models.CharField(max_length=10, choices=Sex.choices, null=True, blank=True)
 
     # Assign primary doctor by referencing User (limited to is_doctor=True)

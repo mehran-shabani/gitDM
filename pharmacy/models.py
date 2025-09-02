@@ -2,6 +2,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
+from gitdm.validators import validate_medication_dose
 
 
 class MedicationOrder(models.Model):
@@ -42,7 +43,11 @@ class MedicationOrder(models.Model):
         help_text='ATC classification code (e.g., A10BA02 for Metformin)'
     )
     name = models.CharField(max_length=100)
-    dose = models.CharField(max_length=50)
+    dose = models.CharField(
+        max_length=50,
+        validators=[validate_medication_dose],
+        help_text="دوز دارو (مثال: 500mg, 1.5g, 10units)"
+    )
     frequency = models.CharField(
         max_length=50,
         choices=FrequencyChoices.choices,
