@@ -11,11 +11,11 @@
     },
     "servers": [
         {
-            "url": "not-exists-example.com",
+            "url": "no-server-example.com",
             "description": "Production server with not exists path api"
         },
         {
-            "url": "https://api.medogram.ir",
+            "url": "https:/api.golddrop.ir",
             "description": "Development server with root path api"
         }
     ],
