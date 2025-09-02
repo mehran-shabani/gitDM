@@ -5,6 +5,7 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_safe
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenRefreshView
+
 from gitdm.views import CustomTokenObtainPairView
 
 from .schema_views import SpectacularAPIView
