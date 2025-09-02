@@ -66,9 +66,9 @@ def _assert_user_owns_resource(user, resource_type: str, resource_id: str) -> No
         return
     try:
         app_label, model_name = RESOURCE_MAP[resource_type]
-    except KeyError:
+    except KeyError as err:
         # Unknown type -> deny
-        raise PermissionDenied("Unknown resource type.")
+        raise PermissionDenied("Unknown resource type.") from None
     model_cls = apps.get_model(app_label, model_name)
     try:
         if model_name == "PatientProfile":
