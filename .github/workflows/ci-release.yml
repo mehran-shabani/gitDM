@@ -1,0 +1,120 @@
+name: CI and Release
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Prepare env file (if needed)
+        run: |
+          if [ -f .env.example ]; then
+            cp .env.example .env
+          else
+            printf "DJANGO_DEBUG=True\nDJANGO_SECRET_KEY=dev\n" > .env
+          fi
+
+      - name: Run pytest
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings
+          PYTHONPATH: .
+        run: |
+          pytest -v --tb=short
+
+  release:
+    name: Package and release
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.tests.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout (with tags)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install zip tool
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+
+      - name: Determine next tag
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          last_tag=$(git tag -l 'v*' --sort=-v:refname | head -n 1 || true)
+          if [ -z "$last_tag" ]; then
+            last_tag="v0.0.0"
+          fi
+          base=${last_tag#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$base"
+          MAJOR=${MAJOR:-0}
+          MINOR=${MINOR:-0}
+          PATCH=${PATCH:-0}
+          if ! [[ $MAJOR =~ ^[0-9]+$ && $MINOR =~ ^[0-9]+$ && $PATCH =~ ^[0-9]+$ ]]; then
+            MAJOR=0; MINOR=0; PATCH=0
+          fi
+          new_tag="v${MAJOR}.${MINOR}.$((PATCH+1))"
+          echo "New tag: $new_tag (from $last_tag)"
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git tag -a "$new_tag" -m "ci: release $new_tag"
+          git push origin "$new_tag"
+          echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build release zip (only Django project files)
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/package
+          cp manage.py dist/package/
+          cp requirements.txt dist/package/
+          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security gateway api; do
+            if [ -d "$d" ]; then
+              cp -r "$d" dist/package/
+            fi
+          done
+          (cd dist/package && zip -r "../django-project-${{ steps.bump.outputs.new_tag }}.zip" .)
+          echo "zip_path=dist/django-project-${{ steps.bump.outputs.new_tag }}.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.bump.outputs.new_tag }}
+          name: Release ${{ steps.bump.outputs.new_tag }}
+          body: |
+            Automated release for ${{ steps.bump.outputs.new_tag }}.
+            Contents: Django project directories, manage.py, requirements.txt.
+          files: ${{ steps.build.outputs.zip_path }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
