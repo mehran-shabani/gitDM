@@ -18,12 +18,14 @@ class EncounterViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet)
         این متد هنگام ایجاد (create) یک Encounter، serializer.save() را فراخوانی می‌کند و فیلد created_by را با کاربر احراز هویت شده مقداردهی می‌کند.
         چون این ViewSet از تنظیمات پیش‌فرض DRF استفاده می‌کند که نیازمند احراز هویت است، کاربر همیشه احراز هویت شده خواهد بود.
         """
-        # Ensure patient belongs to current doctor
+        # Ensure patient belongs to current doctor (superusers bypass)
+        if getattr(self.request.user, "is_superuser", False):
+            serializer.save(created_by=self.request.user)
+            return
         patient = serializer.validated_data.get("patient")
         if patient is not None and getattr(patient, "primary_doctor", None) != self.request.user:
             raise PermissionDenied("You do not have permission to add records for this patient.")
         serializer.save(created_by=self.request.user)
-
     def perform_update(self, serializer) -> None:
         patient = serializer.validated_data.get("patient")
         if patient is not None and getattr(patient, "primary_doctor", None) != self.request.user:
