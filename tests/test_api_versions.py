@@ -127,8 +127,8 @@ class TestVersionEndpoints:
         from uuid import uuid4
         client = APIClient()
         from django.contrib.auth import get_user_model
-        User = get_user_model()
-        u = User.objects.create_user(email="vrevert@example.com", password="p")
+        user_model = get_user_model()
+        u = user_model.objects.create_user(email="vrevert@example.com", password="p")
         client.force_authenticate(user=u)
         resp = client.post(
             f"/api/versions/Patient/{uuid4()}/revert/", 
