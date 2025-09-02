@@ -13,10 +13,9 @@ class LabResultViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet)
 
     def perform_create(self, serializer) -> None:
         user = self.request.user
+        self.enforce_patient_ownership(serializer, "You do not have permission to add records for this patient.")
         patient = serializer.validated_data.get("patient")
         encounter = serializer.validated_data.get("encounter")
-        if patient is not None and getattr(patient, "primary_doctor", None) != user:
-            raise PermissionDenied("You do not have permission to add records for this patient.")
         if encounter is not None:
             enc_patient = getattr(encounter, "patient", None)
             if enc_patient is not None and enc_patient != patient:
@@ -27,6 +26,9 @@ class LabResultViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet)
 
     def perform_update(self, serializer) -> None:
         user = self.request.user
+        # enforce using provided patient if present; otherwise instance.patient
+        if "patient" in serializer.validated_data:
+            self.enforce_patient_ownership(serializer, "You do not have permission to modify records for this patient.")
         patient = serializer.validated_data.get(
             "patient",
             getattr(serializer.instance, "patient", None)
@@ -35,8 +37,6 @@ class LabResultViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet)
             "encounter",
             getattr(serializer.instance, "encounter", None)
         )
-        if patient is not None and getattr(patient, "primary_doctor", None) != user:
-            raise PermissionDenied("You do not have permission to modify records for this patient.")
         if encounter is not None:
             enc_patient = getattr(encounter, "patient", None)
             if enc_patient is not None and enc_patient != patient:

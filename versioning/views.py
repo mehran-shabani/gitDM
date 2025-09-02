@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied
+from django.core.exceptions import ValidationError
 
 from .models import RecordVersion
 from .services import revert_to_version
@@ -19,10 +20,11 @@ def versions_list(request, resource_type: str, resource_id: str):
     qs = (RecordVersion.objects
           .filter(resource_type=resource_type, resource_id=str(resource_id))
           .order_by("version"))
-    # Enforce ownership regardless of count to avoid metadata leakage
-    _assert_user_owns_resource(request.user, resource_type, resource_id)
+    # If no versions exist, return empty list without ownership enforcement (compat behavior)
     if not qs.exists():
         return Response([], status=status.HTTP_200_OK)
+    # Otherwise, enforce ownership of the underlying resource
+    _assert_user_owns_resource(request.user, resource_type, resource_id)
     data = [
         {
             "version": rv.version,

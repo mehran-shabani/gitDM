@@ -1,4 +1,5 @@
 from django.db.models import QuerySet
+from rest_framework.exceptions import PermissionDenied
 
 
 class OwnedByCurrentDoctorQuerysetMixin:
@@ -18,4 +19,10 @@ class OwnedByCurrentDoctorQuerysetMixin:
             return base_qs
         # The related lookup path patient__primary_doctor matches models in this project
         return base_qs.filter(patient__primary_doctor=user)
+
+    def enforce_patient_ownership(self, serializer, msg: str | None = None) -> None:
+        """Raise PermissionDenied if serializer.patient is not owned by current user."""
+        patient = serializer.validated_data.get("patient")
+        if patient is not None and getattr(patient, "primary_doctor", None) != self.request.user:
+            raise PermissionDenied(msg or "You do not have permission to modify records for this patient.")
 

@@ -2,7 +2,7 @@ from django.http import JsonResponse, HttpResponseNotFound
 from django.views.decorators.http import require_GET
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import NotFound
 from gitdm.models import PatientProfile
 
 
@@ -14,8 +14,6 @@ def export_patient(request, pk):
         patient = PatientProfile.objects.get(pk=pk)
     except PatientProfile.DoesNotExist:
         return HttpResponseNotFound()
-
-from rest_framework.exceptions import NotFound
 
     # Enforce ownership: only the primary_doctor can export
     user = getattr(request, "user", None)

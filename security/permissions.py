@@ -1,6 +1,5 @@
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from django.http import HttpRequest
-from typing import Any
 from .models import Role
 
 class IsAdmin(BasePermission):
@@ -49,12 +48,12 @@ class IsOwnerDoctorOrReadOnly(BasePermission):
       `patient` attribute whose `primary_doctor` equals `request.user`.
     """
 
-    def has_permission(self, request: HttpRequest, view: Any) -> bool:  # type: ignore[override]
+    def has_permission(self, request: HttpRequest, view: object) -> bool:  # type: ignore[override]
         # Base gate is handled by default IsAuthenticated in settings; allow here.
         # For POST without object, object-level check happens in has_object_permission.
         return True
 
-    def has_object_permission(self, request: HttpRequest, view: Any, obj: Any) -> bool:  # type: ignore[override]
+    def has_object_permission(self, request: HttpRequest, view: object, obj: object) -> bool:  # type: ignore[override]
         if request.method in SAFE_METHODS:
             return True
         patient = getattr(obj, "patient", None)
