@@ -19,23 +19,26 @@ This directory contains the configuration for running this Django application in
 ## 🔐 Default Credentials
 
 ### Django Admin
+
 - **URL**: `/admin`
 - **Username**: `admin`
 - **Password**: `admin123`
 
 ### MinIO Console
+
 - **URL**: Port 9001
 - **Username**: `minioadmin`
 - **Password**: `minioadmin`
 
 ### PostgreSQL
+
 - **Database**: `appdb`
 - **Username**: `appuser`
 - **Password**: `apppass`
 
 ## 📁 File Structure
 
-```
+```bash
 .devcontainer/
 ├── devcontainer.json    # Main configuration file
 ├── post-create.sh       # Script that runs after container creation
