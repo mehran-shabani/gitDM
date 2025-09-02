@@ -76,6 +76,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Request audit logging (safe to enable; errors are swallowed inside middleware)
+    'security.middleware.AuditMiddleware',
 ]
 
 # ------------------------

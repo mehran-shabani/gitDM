@@ -16,6 +16,15 @@ RESOURCE_MAP = {
     'MedicationOrder': ('pharmacy', 'MedicationOrder'),
 }
 
+# Optional aliases for backward compatibility or model name normalization
+# If a model class name appears under a different label historically, map it here.
+RESOURCE_TYPE_ALIASES = {
+    'PatientProfile': 'Patient',
+    'Encounter': 'Encounter',
+    'LabResult': 'LabResult',
+    'MedicationOrder': 'MedicationOrder',
+}
+
 
 def _compute_snapshot(instance: object) -> dict[str, object]:
     """
