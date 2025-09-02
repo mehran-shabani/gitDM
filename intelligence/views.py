@@ -2,6 +2,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.throttling import ScopedRateThrottle
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 import logging
@@ -40,6 +41,8 @@ class AISummaryViewSet(viewsets.ModelViewSet):
     """ViewSet for AI summaries with GapGPT/OpenAI integration"""
     queryset = AISummary.objects.all().select_related('patient', 'content_type')
     permission_classes = [IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'ai'
 
     def get_serializer_class(self):
         """Return appropriate serializer based on action"""
@@ -54,6 +57,9 @@ class AISummaryViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         patient_id = self.request.query_params.get('patient_id')
 
+        user = getattr(self.request, 'user', None)
+        if user and not getattr(user, 'is_superuser', False):
+            queryset = queryset.filter(patient__primary_doctor=user)
         if patient_id:
             queryset = queryset.filter(patient_id=patient_id)
 

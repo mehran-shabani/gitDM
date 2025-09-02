@@ -11,6 +11,7 @@ from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
 from intelligence.views import AISummaryViewSet
 from .views import health
+from rest_framework.throttling import ScopedRateThrottle
 from api.views_export import export_patient
 from versioning import views as version_views
 from django.http import JsonResponse
