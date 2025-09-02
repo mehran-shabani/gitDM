@@ -10,7 +10,10 @@ from laboratory.views import LabResultViewSet
 from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
 from intelligence.views import AISummaryViewSet
+from notifications.views import NotificationViewSet, NotificationPreferenceViewSet
+from medical_files.views import MedicalFileViewSet
 from .views import health
+from .analytics import doctor_dashboard, patient_analytics
 from api.views_export import export_patient
 from versioning import views as version_views
 from django.http import JsonResponse
@@ -23,6 +26,9 @@ router.register(r'labs', LabResultViewSet)
 router.register(r'meds', MedicationOrderViewSet)
 router.register(r'refs', ClinicalReferenceViewSet)
 router.register(r'ai-summaries', AISummaryViewSet)
+router.register(r'notifications', NotificationViewSet, basename='notification')
+router.register(r'notification-preferences', NotificationPreferenceViewSet, basename='notification-preference')
+router.register(r'medical-files', MedicalFileViewSet, basename='medical-file')
 
 
 def api_root_view(request):
@@ -40,4 +46,6 @@ urlpatterns = [
     path('versions/<str:resource_type>/<str:resource_id>/', version_views.versions_list),
     path('versions/<str:resource_type>/<str:resource_id>/revert/', version_views.versions_revert),
     path('export/patient/<str:pk>/', export_patient, name='export_patient'),
+    path('analytics/dashboard/', doctor_dashboard, name='doctor_dashboard'),
+    path('analytics/patient/<str:patient_id>/', patient_analytics, name='patient_analytics'),
 ]

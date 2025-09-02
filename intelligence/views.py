@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 import logging
 
 from .models import AISummary
@@ -59,8 +61,9 @@ class AISummaryViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by('-created_at')
 
+    @method_decorator(ratelimit(key='user', rate='10/hour', method='POST'))
     def create(self, request, *args, **kwargs):
-        """Create AI summary with enhanced response"""
+        """Create AI summary with enhanced response (Rate limited: 10 per hour)"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -81,8 +84,9 @@ class AISummaryViewSet(viewsets.ModelViewSet):
         request=RegenerateAISummarySerializer
     )
     @action(detail=True, methods=['post'], url_path='regenerate')
+    @method_decorator(ratelimit(key='user', rate='5/hour', method='POST'))
     def regenerate_summary(self, request, pk=None):
-        """Regenerate AI summary for existing record"""
+        """Regenerate AI summary for existing record (Rate limited: 5 per hour)"""
         summary = self.get_object()
         serializer = RegenerateAISummarySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

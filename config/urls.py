@@ -5,6 +5,8 @@ from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_safe
 from drf_spectacular.views import SpectacularRedocView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static
 
 from gitdm.views import CustomTokenObtainPairView
 
@@ -35,3 +37,7 @@ urlpatterns = [
     path('', include('gateway.routers')),
     path('', include('api.routers')),
 ]
+
+# Serve media files in development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
