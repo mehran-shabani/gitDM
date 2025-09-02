@@ -15,12 +15,14 @@ def export_patient(request, pk):
     except PatientProfile.DoesNotExist:
         return HttpResponseNotFound()
 
+from rest_framework.exceptions import PermissionDenied, NotFound
+
     # Enforce ownership: only the primary_doctor can export
     user = getattr(request, "user", None)
     if not getattr(user, "is_superuser", False):
         if getattr(patient, "primary_doctor", None) != user:
-            raise PermissionDenied("You do not have permission to export this patient.")
-
+            # Avoid leaking existence of the patient to non-owners
+            raise NotFound()
     data = {
         "patient": {
             "id": patient.id,
