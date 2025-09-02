@@ -68,11 +68,10 @@ def test_user_cannot_access_other_users_patient_and_related() -> None:
 @pytest.mark.django_db
 def test_versions_endpoints_owner_only() -> None:
     from versioning.models import RecordVersion
-    User = get_user_model()
-    a = User.objects.create_user(email="own_a@example.com", password="p")
-    b = User.objects.create_user(email="own_b@example.com", password="p")
+    user_model = get_user_model()
+    a = user_model.objects.create_user(email="own_a@example.com", password="p", is_doctor=True)
+    b = user_model.objects.create_user(email="own_b@example.com", password="p", is_doctor=True)
     pa = PatientProfile.objects.create(full_name="PA", primary_doctor=a)
-
     c = APIClient()
     c.force_authenticate(user=b)
 
