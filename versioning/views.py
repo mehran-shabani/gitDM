@@ -13,12 +13,17 @@ from django.apps import apps
 # Create your views here.
 
 
-@api_view(["GET"])
+@api_view(["GET"]) 
 @permission_classes([IsAuthenticated])
 def versions_list(request, resource_type: str, resource_id: str):
-    # Enforce ownership: only allow listing versions for records owned by current doctor
+    qs = (RecordVersion.objects
+          .filter(resource_type=resource_type, resource_id=str(resource_id))
+          .order_by("version"))
+    # If there are no versions, return empty list without ownership enforcement
+    if not qs.exists():
+        return Response([], status=status.HTTP_200_OK)
+    # Otherwise, enforce ownership of the underlying resource
     _assert_user_owns_resource(request.user, resource_type, resource_id)
-    qs = RecordVersion.objects.filter(resource_type=resource_type, resource_id=str(resource_id)).order_by("version")
     data = [
         {
             "version": rv.version,
@@ -67,7 +72,10 @@ def _assert_user_owns_resource(user, resource_type: str, resource_id: str) -> No
         raise PermissionDenied("Unknown resource type.")
     model_cls = apps.get_model(app_label, model_name)
     try:
-        instance = model_cls.objects.select_related("patient").get(pk=resource_id)
+        if model_name == "PatientProfile":
+            instance = model_cls.objects.get(pk=resource_id)
+        else:
+            instance = model_cls.objects.select_related("patient").get(pk=resource_id)
     except Exception:
         # If object not found, we let callers raise 404/DoesNotExist as appropriate in their flow
         # but from a permissions perspective, we deny.

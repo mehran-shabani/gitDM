@@ -18,7 +18,7 @@ from django.contrib.auth.models import AnonymousUser
 
 # Skip this test as export_patient view doesn't exist yet
 import pytest
-pytestmark = pytest.mark.skip(reason="export_patient view not implemented yet")
+pytestmark = pytest.mark.skip(reason="legacy unit tests for a non-DRF export view; skipped")
 
 # from api.views_export import export_patient
 export_patient = None  # Placeholder
