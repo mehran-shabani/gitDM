@@ -20,7 +20,7 @@ def test_user_cannot_access_other_users_patient_and_related() -> None:
     # A can list only their patients
     r = c.get("/api/patients/")
     assert r.status_code == 200
-    ids = [item["id"] for item in (r.json() if isinstance(r.data, list) else r.data)] if hasattr(r, "data") else [x.get("id") for x in r.json()]
+    ids = [item["id"] for item in r.data]
     assert pa.id in ids
     assert pb.id not in ids
 
