@@ -1,8 +1,8 @@
 import os
-from pathlib import Path
 from datetime import timedelta
-from django.core.exceptions import ImproperlyConfigured
+from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,7 +19,7 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
-ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1']  # noqa: E501
 
 # GitHub Codespaces specific settings
 if os.getenv('CODESPACES', 'false').lower() == 'true':
@@ -54,7 +54,7 @@ INSTALLED_APPS = [
 
     # Your apps
     'gitdm',
-    'intelligence', 
+    'intelligence',
     'references',
     'encounters',
     'laboratory',
@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'versioning',
     'security',
     'gateway',
-    
+
 ]
 
 # ------------------------
@@ -183,8 +183,8 @@ AI_SUMMARIZER_SETTINGS = {
     'TEMPERATURE': float(os.getenv('AI_TEMPERATURE', '0.3')),
     'USE_GAPGPT': os.getenv('USE_GAPGPT', 'True').lower() in ('true', '1', 'yes'),
     'SYSTEM_PROMPT': """You are a medical AI assistant specialized in creating concise, accurate summaries of patient medical data.
-Focus on key clinical information, diagnoses, medications, and important findings. 
-Keep summaries professional, clear, and relevant for healthcare providers."""
+Focus on key clinical information, diagnoses, medications, and important findings.
+Keep summaries professional, clear, and relevant for healthcare providers."""  # noqa: E501
 }
 
 # ------------------------
