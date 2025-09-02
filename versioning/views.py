@@ -76,11 +76,20 @@ def _assert_user_owns_resource(user, resource_type: str, resource_id: str) -> No
             instance = model_cls.objects.get(pk=resource_id)
         else:
             instance = model_cls.objects.select_related("patient").get(pk=resource_id)
-    except Exception:
+++ b/versioning/views.py
+@@ 1,5 +1,6 @@
+ from django.apps import apps
+from django.core.exceptions import ValidationError
+ 
+     try:
+         # … some lookup or validation code …
+-    except Exception:
+-        # If object not found, we let callers raise 404/DoesNotExist as appropriate in their flow
+-        # but from a permissions perspective, we deny.
+    except (model_cls.DoesNotExist, ValidationError, ValueError, TypeError) as err:
         # If object not found, we let callers raise 404/DoesNotExist as appropriate in their flow
         # but from a permissions perspective, we deny.
-        raise PermissionDenied("Resource not accessible.")
-
+        raise PermissionDenied("Resource not accessible.") from None
     if model_name == "PatientProfile":
         primary_doctor = getattr(instance, "primary_doctor", None)
     else:
