@@ -27,6 +27,9 @@ class EncounterViewSet(OwnedByCurrentDoctorQuerysetMixin, viewsets.ModelViewSet)
             raise PermissionDenied("You do not have permission to add records for this patient.")
         serializer.save(created_by=self.request.user)
     def perform_update(self, serializer) -> None:
+        if getattr(self.request.user, "is_superuser", False):
+            serializer.save()
+            return
         patient = serializer.validated_data.get("patient")
         if patient is not None and getattr(patient, "primary_doctor", None) != self.request.user:
             raise PermissionDenied("You do not have permission to modify records for this patient.")
