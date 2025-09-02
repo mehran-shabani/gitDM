@@ -27,7 +27,7 @@ GitDM یک سامانهٔ مدیریت و نسخه‌بندی داده‌های 
 
 فایل نمونهٔ زیر برای محیط‌های خارج از Codespaces پیشنهاد می‌شود:
 
-```
+```python
 # Django
 DJANGO_SECRET_KEY=your-secret-key-here
 DJANGO_DEBUG=True
@@ -69,7 +69,7 @@ MINIO_STATIC_BUCKET=static
 
 نمونه درخواست دریافت توکن:
 
-```
+```bash
 curl -X POST http://localhost:8000/api/token/ \
   -H 'Content-Type: application/json' \
   -d '{"email": "user@example.com", "password": "pass"}'
@@ -77,7 +77,7 @@ curl -X POST http://localhost:8000/api/token/ \
 
 درخواست‌های محافظت‌شده باید هدر زیر را داشته باشند:
 
-```
+```bash
 Authorization: Bearer <ACCESS_TOKEN>
 ```
 
@@ -146,7 +146,7 @@ Authorization: Bearer <ACCESS_TOKEN>
 
 ### نمونهٔ گردش احراز هویت و ایجاد بیمار
 
-```
+```bash
 # ایجاد کاربر و دریافت توکن (مثال)
 curl -X POST http://localhost:8000/api/token/ \
   -H 'Content-Type: application/json' \
@@ -179,7 +179,7 @@ curl -H 'Authorization: Bearer <TOKEN>' \
 
 ## 📁 ساختار پروژه (خلاصه)
 
-```
+```bash
 config/        تنظیمات پروژه و URLها
 gateway/       ثبت روترها و اندپوینت‌های سطح ریشهٔ API
 gitdm/         دامنهٔ اصلی (کاربر/بیمار) و ViewSetهای مرتبط
