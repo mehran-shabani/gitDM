@@ -8,4 +8,7 @@ class ReminderAdmin(admin.ModelAdmin):
     list_filter = ('reminder_type', 'status', 'priority')
     search_fields = ('title', 'description', 'patient__full_name')
     readonly_fields = ('created_at', 'completed_at')
+    list_select_related = ('patient', 'created_by')
+    autocomplete_fields = ('patient', 'created_by')
+    date_hierarchy = 'due_at'
 
