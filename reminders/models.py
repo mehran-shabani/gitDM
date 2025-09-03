@@ -101,11 +101,17 @@ class Reminder(models.Model):
         return self.due_at <= now
 
     def complete(self) -> None:
-        if self.status not in (self.Status.COMPLETED, self.Status.CANCELLED):
-            self.status = self.Status.COMPLETED
-            self.completed_at = timezone.now()
-            self.save(update_fields=['status', 'completed_at'])
-
+        updated = Reminder.objects.filter(
+            pk=self.pk
+        ).exclude(
+            status__in=[self.Status.COMPLETED, self.Status.CANCELLED]
+        ).update(
+            status=self.Status.COMPLETED,
+            completed_at=timezone.now(),
+            snooze_until=None
+        )
+        if updated:
+            self.refresh_from_db(fields=['status', 'completed_at', 'snooze_until'])
     def snooze(self, until: timezone.datetime) -> None:
         self.snooze_until = until
         self.save(update_fields=['snooze_until'])
