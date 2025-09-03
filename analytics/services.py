@@ -5,11 +5,10 @@ from django.db.models import Avg, Count, Sum, Q, F, Max, Min, StdDev
 from django.utils import timezone
 from django.core.cache import cache
 
-from encounters.models import Patient, Encounter
-from laboratory.models import LabTest, LabResult
-from pharmacy.models import Medication
+from encounters.models import Encounter
+from laboratory.models import LabResult
+from pharmacy.models import MedicationOrder as Medication
 from notifications.models import ClinicalAlert
-from security.models import DoctorProfile
 from .models import PatientAnalytics, DoctorAnalytics, SystemAnalytics
 
 
@@ -50,6 +49,10 @@ class AnalyticsService:
         return start_date, end_date
 
 
+from gitdm.models import PatientProfile as Patient
+from gitdm.models import DoctorProfile
+
+
 class PatientAnalyticsService:
     """سرویس تحلیل داده‌های بیماران"""
     
@@ -73,9 +76,9 @@ class PatientAnalyticsService:
         
         # محاسبه آمارهای قند خون
         glucose_results = LabResult.objects.filter(
-            test__patient=patient,
-            test__test_type__in=['FBS', 'RBS', 'PPBS'],
-            test__test_date__range=[start_date, end_date]
+            patient=patient,
+            loinc__in=['2345-7', '2339-0', '1558-6'],
+            taken_at__range=[start_date, end_date]
         ).values_list('value', flat=True)
         
         if glucose_results:
@@ -87,9 +90,9 @@ class PatientAnalyticsService:
             
             # محاسبه روند قند خون
             previous_period_glucose = LabResult.objects.filter(
-                test__patient=patient,
-                test__test_type__in=['FBS', 'RBS', 'PPBS'],
-                test__test_date__range=[start_date - timedelta(days=30), start_date]
+                patient=patient,
+                loinc__in=['2345-7', '2339-0', '1558-6'],
+                taken_at__range=[start_date - timedelta(days=30), start_date]
             ).aggregate(avg=Avg('value'))['avg']
             
             if previous_period_glucose:
@@ -100,9 +103,9 @@ class PatientAnalyticsService:
         
         # محاسبه آمارهای HbA1c
         hba1c_results = LabResult.objects.filter(
-            test__patient=patient,
-            test__test_type='HBA1C',
-            test__test_date__range=[start_date - timedelta(days=90), end_date]
+            patient=patient,
+            loinc__in=['4548-4', '17856-6'],
+            taken_at__range=[start_date - timedelta(days=90), end_date]
         ).values_list('value', flat=True)
         
         if hba1c_results:
@@ -111,9 +114,9 @@ class PatientAnalyticsService:
             
             # محاسبه روند HbA1c
             previous_hba1c = LabResult.objects.filter(
-                test__patient=patient,
-                test__test_type='HBA1C',
-                test__test_date__range=[start_date - timedelta(days=180), start_date - timedelta(days=90)]
+                patient=patient,
+                loinc__in=['4548-4', '17856-6'],
+                taken_at__range=[start_date - timedelta(days=180), start_date - timedelta(days=90)]
             ).aggregate(avg=Avg('value'))['avg']
             
             if previous_hba1c:
@@ -124,12 +127,7 @@ class PatientAnalyticsService:
                 )
         
         # محاسبه آمارهای فشار خون
-        bp_encounters = Encounter.objects.filter(
-            patient=patient,
-            encounter_date__range=[start_date, end_date]
-        ).exclude(
-            vital_signs__systolic_bp__isnull=True
-        ).values('vital_signs__systolic_bp', 'vital_signs__diastolic_bp')
+        bp_encounters = []  # Encounter model does not store vitals in this project
         
         if bp_encounters:
             systolic_values = [e['vital_signs__systolic_bp'] for e in bp_encounters if e['vital_signs__systolic_bp']]
@@ -143,17 +141,17 @@ class PatientAnalyticsService:
         # شمارش‌ها
         analytics.encounters_count = Encounter.objects.filter(
             patient=patient,
-            encounter_date__range=[start_date, end_date]
+            occurred_at__range=[start_date, end_date]
         ).count()
         
         analytics.medications_count = Medication.objects.filter(
             patient=patient,
-            prescribed_date__range=[start_date, end_date]
+            start_date__range=[start_date, end_date]
         ).count()
         
-        analytics.lab_tests_count = LabTest.objects.filter(
+        analytics.lab_tests_count = LabResult.objects.filter(
             patient=patient,
-            test_date__range=[start_date, end_date]
+            taken_at__range=[start_date, end_date]
         ).count()
         
         analytics.alerts_count = ClinicalAlert.objects.filter(
@@ -175,7 +173,7 @@ class PatientAnalyticsService:
         expected_encounters = 1  # حداقل یک ویزیت در ماه
         actual_encounters = Encounter.objects.filter(
             patient=patient,
-            encounter_date__range=[start_date, end_date]
+            occurred_at__range=[start_date, end_date]
         ).count()
         
         if actual_encounters < expected_encounters:
@@ -183,13 +181,13 @@ class PatientAnalyticsService:
         
         # کاهش امتیاز برای آزمایش‌های انجام نشده
         # فرض: حداقل یک آزمایش HbA1c در 3 ماه
-        last_hba1c = LabTest.objects.filter(
+        last_hba1c = LabResult.objects.filter(
             patient=patient,
-            test_type='HBA1C'
-        ).order_by('-test_date').first()
+            loinc__in=['4548-4', '17856-6']
+        ).order_by('-taken_at').first()
         
         if last_hba1c:
-            days_since_last_hba1c = (timezone.now().date() - last_hba1c.test_date).days
+            days_since_last_hba1c = (timezone.now().date() - last_hba1c.taken_at.date()).days
             if days_since_last_hba1c > 90:
                 score -= 15
         else:
@@ -211,10 +209,10 @@ class PatientAnalyticsService:
         start_date, end_date = self.analytics_service.get_date_range(period)
         
         results = LabResult.objects.filter(
-            test__patient=patient,
-            test__test_type__in=['FBS', 'RBS', 'PPBS'],
-            test__test_date__range=[start_date, end_date]
-        ).select_related('test').order_by('test__test_date')
+            patient=patient,
+            loinc__in=['2345-7', '2339-0', '1558-6'],
+            taken_at__range=[start_date, end_date]
+        ).order_by('taken_at')
         
         labels = []
         fbs_data = []
@@ -222,17 +220,18 @@ class PatientAnalyticsService:
         ppbs_data = []
         
         for result in results:
-            date_str = result.test.test_date.strftime('%Y-%m-%d')
+            date_str = result.taken_at.strftime('%Y-%m-%d')
             if date_str not in labels:
                 labels.append(date_str)
             
             value = float(result.value) if result.value else 0
             
-            if result.test.test_type == 'FBS':
+            # Map LOINC codes to display labels
+            if result.loinc == '2345-7':  # FBS example
                 fbs_data.append({'x': date_str, 'y': value})
-            elif result.test.test_type == 'RBS':
+            elif result.loinc == '2339-0':  # RBS example
                 rbs_data.append({'x': date_str, 'y': value})
-            elif result.test.test_type == 'PPBS':
+            elif result.loinc == '1558-6':  # PPBS example
                 ppbs_data.append({'x': date_str, 'y': value})
         
         return {
@@ -294,15 +293,15 @@ class PatientAnalyticsService:
         start_date = end_date - timedelta(days=365)
         
         results = LabResult.objects.filter(
-            test__patient=patient,
-            test__test_type='HBA1C',
-            test__test_date__range=[start_date, end_date]
-        ).select_related('test').order_by('test__test_date')
+            patient=patient,
+            loinc__in=['4548-4', '17856-6'],
+            taken_at__range=[start_date, end_date]
+        ).order_by('taken_at')
         
         data = []
         for result in results:
             data.append({
-                'x': result.test.test_date.strftime('%Y-%m-%d'),
+                'x': result.taken_at.strftime('%Y-%m-%d'),
                 'y': float(result.value) if result.value else 0
             })
         
@@ -384,7 +383,7 @@ class DoctorAnalyticsService:
         
         # بیماران فعال (حداقل یک ویزیت در 3 ماه گذشته)
         active_patients = all_patients.filter(
-            encounters__encounter_date__gte=end_date - timedelta(days=90)
+            encounters__occurred_at__gte=end_date - timedelta(days=90)
         ).distinct()
         analytics.active_patients = active_patients.count()
         
@@ -395,8 +394,8 @@ class DoctorAnalyticsService:
         
         # آمار ویزیت‌ها
         analytics.total_encounters = Encounter.objects.filter(
-            doctor=doctor,
-            encounter_date__range=[start_date, end_date]
+            created_by=doctor.user,
+            occurred_at__range=[start_date, end_date]
         ).count()
         
         if analytics.active_patients > 0:
@@ -404,10 +403,10 @@ class DoctorAnalyticsService:
         
         # میانگین HbA1c بیماران
         recent_hba1c = LabResult.objects.filter(
-            test__patient__in=active_patients,
-            test__test_type='HBA1C',
-            test__test_date__gte=end_date - timedelta(days=90)
-        ).values('test__patient').annotate(
+            patient__in=active_patients,
+            loinc__in=['4548-4', '17856-6'],
+            taken_at__gte=end_date - timedelta(days=90)
+        ).values('patient').annotate(
             latest_value=Max('value')
         )
         
@@ -551,8 +550,8 @@ class SystemAnalyticsService:
         User = get_user_model()
         
         analytics.total_users = User.objects.filter(is_active=True).count()
-        analytics.total_doctors = DoctorProfile.objects.filter(is_active=True).count()
-        analytics.total_patients = Patient.objects.filter(is_active=True).count()
+        analytics.total_doctors = DoctorProfile.objects.count()
+        analytics.total_patients = Patient.objects.count()
         
         # کاربران فعال (ورود در 30 روز گذشته)
         analytics.active_users = User.objects.filter(
@@ -566,14 +565,14 @@ class SystemAnalyticsService:
         
         # آمار داده‌ها
         analytics.total_encounters = Encounter.objects.count()
-        analytics.total_lab_tests = LabTest.objects.count()
+        analytics.total_lab_tests = LabResult.objects.count()
         analytics.total_medications = Medication.objects.count()
         analytics.total_alerts = ClinicalAlert.objects.count()
         
         # میانگین HbA1c سیستم
         recent_hba1c = LabResult.objects.filter(
-            test__test_type='HBA1C',
-            test__test_date__gte=target_date - timedelta(days=90)
+            loinc__in=['4548-4', '17856-6'],
+            taken_at__gte=target_date - timedelta(days=90)
         ).values_list('value', flat=True)
         
         if recent_hba1c:
@@ -632,8 +631,8 @@ class SystemAnalyticsService:
         }
         
         recent_results = LabResult.objects.filter(
-            test__test_type='HBA1C',
-            test__test_date__gte=today - timedelta(days=90)
+            loinc__in=['4548-4', '17856-6'],
+            taken_at__gte=today - timedelta(days=90)
         ).values_list('value', flat=True)
         
         for value in recent_results:
@@ -666,10 +665,10 @@ class SystemAnalyticsService:
         data = {
             'total_patients': today_analytics.total_patients,
             'active_patients': Patient.objects.filter(
-                encounters__encounter_date__gte=today - timedelta(days=30)
+                encounters__occurred_at__gte=today - timedelta(days=30)
             ).distinct().count(),
             'total_encounters_today': Encounter.objects.filter(
-                encounter_date=today
+                occurred_at=today
             ).count(),
             'pending_alerts': ClinicalAlert.objects.filter(
                 is_acknowledged=False

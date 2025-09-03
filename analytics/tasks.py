@@ -1,5 +1,4 @@
 from celery import shared_task
-from celery.schedules import crontab
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from datetime import timedelta
@@ -7,8 +6,8 @@ from datetime import timedelta
 from .models import Report, PatientAnalytics, DoctorAnalytics, SystemAnalytics
 from .services import PatientAnalyticsService, DoctorAnalyticsService, SystemAnalyticsService
 from .report_service import ReportGenerationService
-from encounters.models import Patient
-from security.models import DoctorProfile
+from gitdm.models import PatientProfile as Patient
+from gitdm.models import DoctorProfile
 
 User = get_user_model()
 
@@ -52,11 +51,11 @@ def calculate_daily_analytics():
 def generate_scheduled_reports():
     """تولید گزارش‌های زمان‌بندی شده"""
     # گزارش‌های ماهانه برای پزشکان
-    if timezone.now().day == 1:  # اول هر ماه
+    if timezone.now().day == 1:
         generate_monthly_doctor_reports.delay()
     
     # گزارش‌های هفتگی سیستم
-    if timezone.now().weekday() == 0:  # دوشنبه‌ها
+    if timezone.now().weekday() == 0:
         generate_weekly_system_report.delay()
     
     return "Scheduled reports generation triggered"
@@ -176,9 +175,10 @@ def check_critical_values():
     for analytics in recent_analytics:
         # بررسی HbA1c بحرانی
         if analytics.avg_hba1c and analytics.avg_hba1c > 10:
+            from notifications.models import ClinicalAlert
             alert, created = ClinicalAlert.objects.get_or_create(
                 patient=analytics.patient,
-                alert_type='critical_hba1c',
+                alert_type='HIGH_HBA1C',
                 severity='critical',
                 defaults={
                     'message': f'HbA1c بحرانی: {analytics.avg_hba1c}% - نیاز به اقدام فوری',
@@ -191,9 +191,10 @@ def check_critical_values():
         # بررسی قند خون بحرانی
         if analytics.avg_glucose:
             if analytics.avg_glucose < 50 or analytics.avg_glucose > 400:
+                from notifications.models import ClinicalAlert
                 alert, created = ClinicalAlert.objects.get_or_create(
                     patient=analytics.patient,
-                    alert_type='critical_glucose',
+                    alert_type='HIGH_GLUCOSE' if analytics.avg_glucose > 400 else 'LOW_GLUCOSE',
                     severity='critical',
                     defaults={
                         'message': f'قند خون بحرانی: {analytics.avg_glucose} mg/dL',
@@ -206,24 +207,4 @@ def check_critical_values():
     return f"Created {alerts_created} critical alerts"
 
 
-# Celery Beat Schedule
-from celery.schedules import crontab
-
-CELERY_BEAT_SCHEDULE = {
-    'calculate-daily-analytics': {
-        'task': 'analytics.tasks.calculate_daily_analytics',
-        'schedule': crontab(hour=2, minute=0),  # هر روز ساعت 2 صبح
-    },
-    'generate-scheduled-reports': {
-        'task': 'analytics.tasks.generate_scheduled_reports',
-        'schedule': crontab(hour=8, minute=0),  # هر روز ساعت 8 صبح
-    },
-    'cleanup-old-analytics': {
-        'task': 'analytics.tasks.cleanup_old_analytics',
-        'schedule': crontab(day_of_week=0, hour=3, minute=0),  # یکشنبه‌ها ساعت 3 صبح
-    },
-    'check-critical-values': {
-        'task': 'analytics.tasks.check_critical_values',
-        'schedule': crontab(minute='*/30'),  # هر 30 دقیقه
-    },
-}
+# Celery beat schedule moved to env-driven settings if needed

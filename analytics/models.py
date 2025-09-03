@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
-from encounters.models import Patient
-from security.models import DoctorProfile
 
 User = get_user_model()
 
@@ -18,7 +16,7 @@ class PatientAnalytics(models.Model):
     ]
     
     patient = models.ForeignKey(
-        Patient,
+        'gitdm.PatientProfile',
         on_delete=models.CASCADE,
         related_name='analytics',
         verbose_name='بیمار'
@@ -141,7 +139,7 @@ class DoctorAnalytics(models.Model):
     """مدل برای ذخیره آمارهای تحلیلی پزشکان"""
     
     doctor = models.ForeignKey(
-        DoctorProfile,
+        'gitdm.DoctorProfile',
         on_delete=models.CASCADE,
         related_name='analytics',
         verbose_name='پزشک'
@@ -391,7 +389,7 @@ class Report(models.Model):
     )
     
     patient = models.ForeignKey(
-        Patient,
+        'gitdm.PatientProfile',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -400,7 +398,7 @@ class Report(models.Model):
     )
     
     doctor = models.ForeignKey(
-        DoctorProfile,
+        'gitdm.DoctorProfile',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
