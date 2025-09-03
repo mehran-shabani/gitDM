@@ -6,12 +6,19 @@ from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view
 import logging
 
-from .models import AISummary
+from .models import AISummary, BaselineMetrics, PatternAnalysis, AnomalyDetection, PatternAlert
 from .serializers import (
     AISummarySerializer,
     CreateAISummarySerializer,
     RegenerateAISummarySerializer,
-    AISummaryListSerializer
+    AISummaryListSerializer,
+    BaselineMetricsSerializer,
+    PatternAnalysisSerializer,
+    AnomalyDetectionSerializer,
+    PatternAlertSerializer,
+    AnomalyAcknowledgeSerializer,
+    PatternAlertResolveSerializer,
+    PatternAnalysisRequestSerializer
 )
 from .tasks import generate_summary_for_existing_record
 
@@ -210,4 +217,274 @@ class AISummaryViewSet(viewsets.ModelViewSet):
             return Response({
                 'status': 'error',
                 'message': f'Reference linking test failed: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List pattern analyses",
+        description="List all pattern analyses with optional filtering by patient and pattern type"
+    ),
+    retrieve=extend_schema(
+        summary="Get pattern analysis",
+        description="Retrieve a specific pattern analysis by ID"
+    )
+)
+class PatternAnalysisViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for pattern analysis results"""
+    queryset = PatternAnalysis.objects.all().select_related('patient')
+    serializer_class = PatternAnalysisSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter queryset based on user permissions"""
+        queryset = super().get_queryset()
+        
+        # Filter by patient if specified
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+        
+        # Filter by pattern type if specified
+        pattern_type = self.request.query_params.get('pattern_type')
+        if pattern_type:
+            queryset = queryset.filter(pattern_type=pattern_type)
+        
+        return queryset
+    
+    @extend_schema(
+        summary="Request new pattern analysis",
+        description="Trigger new pattern analysis for specified patient and pattern types"
+    )
+    @action(detail=False, methods=['post'])
+    def analyze(self, request):
+        """Trigger new pattern analysis"""
+        serializer = PatternAnalysisRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            from .services import PatternAnalysisService, BaselineCalculationService
+            
+            patient_id = serializer.validated_data['patient_id']
+            pattern_types = serializer.validated_data['pattern_types']
+            months_back = serializer.validated_data['months_back']
+            
+            results = []
+            
+            # محاسبه baseline metrics اگر وجود نداشته باشد
+            try:
+                BaselineCalculationService.calculate_baseline_metrics(patient_id, months_back)
+            except Exception as e:
+                logger.error(f"Failed to calculate baseline metrics: {e}")
+            
+            # تحلیل انواع مختلف الگو
+            for pattern_type in pattern_types:
+                try:
+                    if pattern_type == PatternAnalysis.PatternType.GLUCOSE_TREND:
+                        analysis = PatternAnalysisService.analyze_glucose_trend(patient_id, months_back)
+                    elif pattern_type == PatternAnalysis.PatternType.MEDICATION_ADHERENCE:
+                        analysis = PatternAnalysisService.analyze_medication_adherence(patient_id, months_back)
+                    else:
+                        continue
+                    
+                    if analysis:
+                        results.append(PatternAnalysisSerializer(analysis).data)
+                        
+                except Exception as e:
+                    logger.error(f"Pattern analysis failed for {pattern_type}: {e}")
+            
+            return Response({
+                'status': 'success',
+                'analyses_created': len(results),
+                'results': results
+            })
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List anomaly detections",
+        description="List all detected anomalies with optional filtering"
+    ),
+    retrieve=extend_schema(
+        summary="Get anomaly detection",
+        description="Retrieve a specific anomaly detection by ID"
+    )
+)
+class AnomalyDetectionViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for anomaly detection results"""
+    queryset = AnomalyDetection.objects.all().select_related('patient', 'acknowledged_by')
+    serializer_class = AnomalyDetectionSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter queryset based on parameters"""
+        queryset = super().get_queryset()
+        
+        # Filter by patient
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+        
+        # Filter by severity
+        severity = self.request.query_params.get('severity')
+        if severity:
+            queryset = queryset.filter(severity_level=severity)
+        
+        # Filter by acknowledgment status
+        acknowledged = self.request.query_params.get('acknowledged')
+        if acknowledged is not None:
+            is_acknowledged = acknowledged.lower() in ['true', '1', 'yes']
+            queryset = queryset.filter(is_acknowledged=is_acknowledged)
+        
+        return queryset
+    
+    @extend_schema(
+        summary="Acknowledge anomaly",
+        description="Mark an anomaly as acknowledged by the current user"
+    )
+    @action(detail=True, methods=['post'])
+    def acknowledge(self, request, pk=None):
+        """Acknowledge an anomaly"""
+        anomaly = self.get_object()
+        serializer = AnomalyAcknowledgeSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            from django.utils import timezone
+            
+            anomaly.is_acknowledged = True
+            anomaly.acknowledged_by = request.user
+            anomaly.acknowledged_at = timezone.now()
+            anomaly.save()
+            
+            return Response({
+                'status': 'success',
+                'message': 'Anomaly acknowledged successfully'
+            })
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List pattern alerts",
+        description="List all pattern-based alerts with filtering options"
+    ),
+    retrieve=extend_schema(
+        summary="Get pattern alert",
+        description="Retrieve a specific pattern alert by ID"
+    )
+)
+class PatternAlertViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for pattern-based alerts"""
+    queryset = PatternAlert.objects.all().select_related('patient', 'resolved_by')
+    serializer_class = PatternAlertSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter queryset based on parameters"""
+        queryset = super().get_queryset()
+        
+        # Filter by patient
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+        
+        # Filter by priority
+        priority = self.request.query_params.get('priority')
+        if priority:
+            queryset = queryset.filter(priority=priority)
+        
+        # Filter by active status
+        active_only = self.request.query_params.get('active_only')
+        if active_only and active_only.lower() in ['true', '1', 'yes']:
+            queryset = queryset.filter(is_active=True, is_resolved=False)
+        
+        return queryset
+    
+    @extend_schema(
+        summary="Resolve pattern alert",
+        description="Mark a pattern alert as resolved"
+    )
+    @action(detail=True, methods=['post'])
+    def resolve(self, request, pk=None):
+        """Resolve a pattern alert"""
+        alert = self.get_object()
+        serializer = PatternAlertResolveSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            from django.utils import timezone
+            
+            alert.is_resolved = True
+            alert.resolved_by = request.user
+            alert.resolved_at = timezone.now()
+            alert.resolution_notes = serializer.validated_data['resolution_notes']
+            alert.is_active = False
+            alert.save()
+            
+            return Response({
+                'status': 'success',
+                'message': 'Alert resolved successfully'
+            })
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="List baseline metrics",
+        description="List baseline metrics for patients"
+    ),
+    retrieve=extend_schema(
+        summary="Get baseline metrics",
+        description="Retrieve baseline metrics for a specific patient"
+    )
+)
+class BaselineMetricsViewSet(viewsets.ReadOnlyModelViewSet):
+    """ViewSet for baseline metrics"""
+    queryset = BaselineMetrics.objects.all().select_related('patient')
+    serializer_class = BaselineMetricsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        """Filter by patient if specified"""
+        queryset = super().get_queryset()
+        
+        patient_id = self.request.query_params.get('patient_id')
+        if patient_id:
+            queryset = queryset.filter(patient_id=patient_id)
+        
+        return queryset
+    
+    @extend_schema(
+        summary="Calculate baseline metrics",
+        description="Calculate or recalculate baseline metrics for a patient"
+    )
+    @action(detail=False, methods=['post'])
+    def calculate(self, request):
+        """Calculate baseline metrics for a patient"""
+        patient_id = request.data.get('patient_id')
+        months_back = request.data.get('months_back', 12)
+        
+        if not patient_id:
+            return Response({
+                'error': 'patient_id is required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            from .services import BaselineCalculationService
+            
+            baseline = BaselineCalculationService.calculate_baseline_metrics(
+                patient_id=patient_id,
+                months_back=months_back
+            )
+            
+            return Response({
+                'status': 'success',
+                'baseline_metrics': BaselineMetricsSerializer(baseline).data
+            })
+            
+        except Exception as e:
+            logger.error(f"Baseline calculation failed: {e}")
+            return Response({
+                'error': f'Baseline calculation failed: {str(e)}'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

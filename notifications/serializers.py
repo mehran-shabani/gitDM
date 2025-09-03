@@ -1,5 +1,15 @@
 from rest_framework import serializers
-from .models import Notification, ClinicalAlert
+from .models import Notification, ClinicalAlert, SmartReminder, ReminderPattern, ReminderSchedule, ReminderResponse
+
+# Import smart reminder serializers
+from .smart_reminder_serializers import (
+    SmartReminderSerializer,
+    ReminderPatternSerializer,
+    ReminderScheduleSerializer,
+    ReminderResponseSerializer,
+    SmartReminderCreateSerializer,
+    ReminderStatisticsSerializer
+)
 
 
 class NotificationSerializer(serializers.ModelSerializer):

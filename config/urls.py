@@ -31,6 +31,8 @@ urlpatterns = [
     # JWT aliases (ensure availability even if api.urls not loaded)
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # Include timeline URLs
+    path('timeline/', include('timeline.urls')),
     # Include gateway.routers and api.routers for root-level API endpoints
     path('', include('gateway.routers')),
     path('', include('api.routers')),
