@@ -58,11 +58,20 @@ class Reminder(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['due_at', 'id']
-        indexes = [
+        ordering = ('due_at', 'id')
+        indexes = (
             models.Index(fields=['patient', 'status']),
             models.Index(fields=['due_at']),
             models.Index(fields=['reminder_type']),
+        )
+        constraints = [
+            models.CheckConstraint(
+                name='completed_requires_timestamp',
+                check=(
+                    models.Q(status='COMPLETED', completed_at__isnull=False) |
+                    models.Q(~models.Q(status='COMPLETED'), completed_at__isnull=True)
+                ),
+            ),
         ]
 
     def __str__(self) -> str:
