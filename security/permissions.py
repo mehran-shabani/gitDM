@@ -1,4 +1,5 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+from django.http import HttpRequest
 from .models import Role
 
 class IsAdmin(BasePermission):
@@ -35,3 +36,28 @@ class IsDoctor(BasePermission):
         """
         role_obj = getattr(request.user, 'role', None)
         return getattr(role_obj, 'role', None) == Role.DOCTOR
+
+
+class IsOwnerDoctorOrReadOnly(BasePermission):
+    """
+    Write access only if the requesting user is the patient's primary_doctor.
+
+    - Read-only methods (GET, HEAD, OPTIONS): allowed for authenticated users; actual
+      queryset scoping should be handled in the view's get_queryset.
+    - Write methods (POST, PUT, PATCH, DELETE): allowed only when the object has a
+      `patient` attribute whose `primary_doctor` equals `request.user`.
+    """
+
+    def has_permission(self, request: HttpRequest, view: object) -> bool:  # type: ignore[override]
+        # Base gate is handled by default IsAuthenticated in settings; allow here.
+        # For POST without object, object-level check happens in has_object_permission.
+        return True
+
+    def has_object_permission(self, request: HttpRequest, view: object, obj: object) -> bool:  # type: ignore[override]
+        if request.method in SAFE_METHODS:
+            return True
+        patient = getattr(obj, "patient", None)
+        if patient is None:
+            return False
+        primary_doctor = getattr(patient, "primary_doctor", None)
+        return primary_doctor == getattr(request, "user", None)

@@ -16,6 +16,14 @@ RESOURCE_MAP = {
     'MedicationOrder': ('pharmacy', 'MedicationOrder'),
 }
 
+# Normalize model class names to resource_type values stored in RecordVersion
+RESOURCE_TYPE_ALIASES = {
+    'PatientProfile': 'Patient',
+    'Encounter': 'Encounter',
+    'LabResult': 'LabResult',
+    'MedicationOrder': 'MedicationOrder',
+}
+
 
 def _compute_snapshot(instance: object) -> dict[str, object]:
     """

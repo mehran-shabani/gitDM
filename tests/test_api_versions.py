@@ -112,6 +112,11 @@ class TestVersionEndpoints:
     def test_versions_list_empty_ok(self) -> None:
         from uuid import uuid4
         client = APIClient()
+        # Authenticate a dummy user (no ownership object exists, but the endpoint should still return 200 with empty list)
+        from django.contrib.auth import get_user_model
+        user_model = get_user_model()
+        u = user_model.objects.create_user(email="vlist@example.com", password="p")
+        client.force_authenticate(user=u)
         resp = client.get(f"/api/versions/Patient/{uuid4()}/")
         assert resp.status_code == 200
         data = resp.json()
@@ -121,6 +126,10 @@ class TestVersionEndpoints:
     def test_versions_revert_missing_target_version_400(self) -> None:
         from uuid import uuid4
         client = APIClient()
+        from django.contrib.auth import get_user_model
+        user_model = get_user_model()
+        u = user_model.objects.create_user(email="vrevert@example.com", password="p")
+        client.force_authenticate(user=u)
         resp = client.post(
             f"/api/versions/Patient/{uuid4()}/revert/", 
             data={}, 
