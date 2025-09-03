@@ -28,6 +28,12 @@ class Reminder(models.Model):
         COMPLETED = 'COMPLETED', 'Completed'
         CANCELLED = 'CANCELLED', 'Cancelled'
 
+    class Priority(models.TextChoices):
+        LOW = 'LOW', 'Low'
+        MEDIUM = 'MEDIUM', 'Medium'
+        HIGH = 'HIGH', 'High'
+        URGENT = 'URGENT', 'Urgent'
+
     patient = models.ForeignKey('gitdm.PatientProfile', on_delete=models.CASCADE, related_name='reminders')
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -44,13 +50,8 @@ class Reminder(models.Model):
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
     priority = models.CharField(
         max_length=10,
-        choices=[
-            ('LOW', 'Low'),
-            ('MEDIUM', 'Medium'),
-            ('HIGH', 'High'),
-            ('URGENT', 'Urgent'),
-        ],
-        default='MEDIUM'
+        choices=Priority.choices,
+        default=Priority.MEDIUM,
     )
     completed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
