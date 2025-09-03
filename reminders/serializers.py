@@ -3,7 +3,12 @@ from .models import Reminder
 
 
 class ReminderSerializer(serializers.ModelSerializer):
-    patient_name = serializers.CharField(source='patient.full_name', read_only=True)
+    # Replace the direct CharField with a SerializerMethodField to handle empty names
+    patient_name = serializers.SerializerMethodField(read_only=True)
+
+    def get_patient_name(self, obj):
+        # Use full_name if available, otherwise fall back to the model’s __str__
+        return obj.patient.full_name or str(obj.patient)
     is_due = serializers.BooleanField(read_only=True)
 
     class Meta:
