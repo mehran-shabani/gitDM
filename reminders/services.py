@@ -1,10 +1,13 @@
 from __future__ import annotations
 import logging
 from datetime import timedelta
-from typing import Dict, List
+from typing import Final
+from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from gitdm.models import PatientProfile
+from notifications.models import Notification
 from notifications.services import NotificationService
 from .models import Reminder
 
@@ -13,7 +16,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-DEFAULT_CADENCE_DAYS: Dict[str, int] = {
+DEFAULT_CADENCE_DAYS: Final[dict[str, int]] = {
     Reminder.ReminderType.HBA1C: 90,
     Reminder.ReminderType.FBS: 30,
     Reminder.ReminderType.TWO_HPP: 30,
@@ -37,12 +40,12 @@ def get_next_due_date(last_anchor: timezone.datetime, reminder_type: str) -> tim
     return last_anchor + timedelta(days=days)
 
 
-def ensure_upcoming_reminders(patient: PatientProfile, created_by: User | None = None) -> List[Reminder]:
+def ensure_upcoming_reminders(patient: PatientProfile, created_by: User | None = None) -> list[Reminder]:
     """
     Ensure at least one upcoming reminder exists for each known type.
     If none exists (pending/scheduled in future or pending past due), create one anchored to now.
     """
-    created: List[Reminder] = []
+    created: list[Reminder] = []
     now = timezone.now()
     for rtype in DEFAULT_CADENCE_DAYS.keys():
         q = Reminder.objects.filter(patient=patient, reminder_type=rtype).order_by('-due_at')
@@ -75,26 +78,36 @@ def send_due_notifications(patient: PatientProfile, recipient: User) -> int:
     Create Notification entries for all due reminders of a patient.
     Returns the count of notifications created.
     """
-    due = Reminder.objects.filter(
-        patient=patient,
-        status=Reminder.Status.PENDING,
-        due_at__lte=timezone.now()
-    )
-    count = 0
-    for r in due:
-        NotificationService.create_notification(
-            recipient=recipient,
-            title=r.title,
-            message=r.description or f"Reminder is due: {r.reminder_type}",
-            notification_type='REMINDER',
-            priority='HIGH' if r.priority in ('HIGH', 'URGENT') else 'MEDIUM',
-            patient_id=str(patient.id),
-            resource_type='reminder',
-            resource_id=str(r.id),
-            expires_at=None,
+    now = timezone.now()
+    qs = (
+        Reminder.objects.select_for_update(skip_locked=True)
+        .filter(
+            patient=patient,
+            status=Reminder.Status.PENDING,
+            due_at__lte=now,
         )
-        r.status = Reminder.Status.SENT
-        r.save(update_fields=['status'])
-        count += 1
-    return count
+        .filter(Q(snooze_until__isnull=True) | Q(snooze_until__lte=now))
+        .order_by('due_at')
+    )
+
+    sent_ids: list[int] = []
+    with transaction.atomic():
+        for r in qs:
+            NotificationService.create_notification(
+                recipient=recipient,
+                title=r.title,
+                message=r.description or f"Reminder is due: {r.reminder_type}",
+                notification_type=Notification.NotificationType.REMINDER,
+                priority='HIGH' if r.priority in ('HIGH', 'URGENT') else 'MEDIUM',
+                patient_id=str(patient.id),
+                resource_type='reminder',
+                resource_id=str(r.id),
+                expires_at=None,
+            )
+            sent_ids.append(r.id)
+
+        if sent_ids:
+            Reminder.objects.filter(id__in=sent_ids).update(status=Reminder.Status.SENT)
+
+    return len(sent_ids)
 

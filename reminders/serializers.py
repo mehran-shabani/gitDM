@@ -13,14 +13,12 @@ class ReminderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reminder
-class Meta:
-    model = Reminder
-    fields = (
-        'id', 'patient', 'patient_name', 'reminder_type', 'title', 'description',
-        'due_at', 'snooze_until', 'status', 'priority', 'completed_at', 'created_at',
-        'is_due', 'created_by',
-    )
-    read_only_fields = (
-        'id', 'completed_at', 'created_at', 'patient_name', 'is_due', 'status', 'created_by'
-    )
+        fields = (
+            'id', 'patient', 'patient_name', 'reminder_type', 'title', 'description',
+            'due_at', 'snooze_until', 'status', 'priority', 'completed_at', 'created_at',
+            'is_due', 'created_by',
+        )
+        read_only_fields = (
+            'id', 'completed_at', 'created_at', 'patient_name', 'is_due', 'status', 'created_by'
+        )
 
