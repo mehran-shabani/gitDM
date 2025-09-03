@@ -17,4 +17,4 @@ jobs:
         run: |
           curl -sSfL https://github.com/dotenv-linter/dotenv-linter/releases/latest/download/dotenv-linter-linux-x86_64.tar.gz | tar xzf - dotenv-linter
           sudo mv dotenv-linter /usr/local/bin
-      - uses: pre-commit/action@v3.0.0
+      - uses: pre-commit/action@v3.0.1
