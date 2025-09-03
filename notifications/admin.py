@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Notification, ClinicalAlert
+from .models import (
+    Notification, ClinicalAlert, SmartReminder, 
+    ReminderPattern, ReminderSchedule, ReminderResponse
+)
 
 
 @admin.register(Notification)

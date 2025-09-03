@@ -189,3 +189,63 @@ class ClinicalAlertService:
                     )
         
         return None
+    
+    @staticmethod
+    def create_test_reminder_notification(test_reminder):
+        """
+        ایجاد اطلاع‌رسانی برای یادآوری آزمایش
+        """
+        days_until_due = test_reminder.days_until_due()
+        
+        if days_until_due < 0:
+            # عقب‌افتاده
+            title = f"یادآوری عقب‌افتاده: {test_reminder.get_test_type_display()}"
+            message = f"آزمایش {test_reminder.get_test_type_display()} برای بیمار {test_reminder.patient.full_name} {abs(days_until_due)} روز عقب‌افتاده است."
+            notification_type = Notification.NotificationType.CRITICAL
+            priority = Notification.Priority.URGENT
+        elif days_until_due <= test_reminder.reminder_days_before:
+            # نزدیک به سررسید
+            title = f"یادآوری آزمایش: {test_reminder.get_test_type_display()}"
+            message = f"آزمایش {test_reminder.get_test_type_display()} برای بیمار {test_reminder.patient.full_name} در {days_until_due} روز آینده سررسید دارد."
+            notification_type = Notification.NotificationType.REMINDER
+            priority = Notification.Priority.MEDIUM
+        else:
+            return None
+        
+        # ایجاد notification برای پزشک معالج
+        if test_reminder.patient.primary_doctor:
+            return Notification.objects.create(
+                recipient=test_reminder.patient.primary_doctor,
+                title=title,
+                message=message,
+                notification_type=notification_type,
+                priority=priority,
+                patient_id=str(test_reminder.patient.id),
+                resource_type='test_reminder',
+                resource_id=str(test_reminder.id)
+            )
+        
+        return None
+    
+    @staticmethod
+    def create_test_completion_notification(test_reminder, performed_date):
+        """
+        ایجاد اطلاع‌رسانی برای تکمیل آزمایش
+        """
+        title = f"آزمایش انجام شد: {test_reminder.get_test_type_display()}"
+        message = f"آزمایش {test_reminder.get_test_type_display()} برای بیمار {test_reminder.patient.full_name} در تاریخ {performed_date.strftime('%Y/%m/%d')} انجام شد. تاریخ سررسید بعدی: {test_reminder.next_due.strftime('%Y/%m/%d')}"
+        
+        # ایجاد notification برای پزشک معالج
+        if test_reminder.patient.primary_doctor:
+            return Notification.objects.create(
+                recipient=test_reminder.patient.primary_doctor,
+                title=title,
+                message=message,
+                notification_type=Notification.NotificationType.INFO,
+                priority=Notification.Priority.LOW,
+                patient_id=str(test_reminder.patient.id),
+                resource_type='test_completion',
+                resource_id=str(test_reminder.id)
+            )
+        
+        return None

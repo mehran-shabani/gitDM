@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
-from .models import AISummary
+from .models import AISummary, BaselineMetrics, PatternAnalysis, AnomalyDetection, PatternAlert
 from .tasks import create_summary_with_references
 
 
@@ -169,3 +169,108 @@ class AISummarySimpleSerializer(serializers.ModelSerializer):
             str: مقدار `object_id` به صورت رشته.
         """
         return str(obj.object_id)
+
+
+class BaselineMetricsSerializer(serializers.ModelSerializer):
+    """Serializer for BaselineMetrics model"""
+    
+    class Meta:
+        model = BaselineMetrics
+        fields = [
+            'patient', 'avg_hba1c', 'avg_blood_glucose', 'avg_systolic_bp', 'avg_diastolic_bp',
+            'std_hba1c', 'std_blood_glucose', 'std_systolic_bp', 'std_diastolic_bp',
+            'avg_encounters_per_month', 'avg_labs_per_month', 'medication_adherence_score',
+            'last_calculated', 'data_points_count'
+        ]
+        read_only_fields = ['last_calculated']
+
+
+class PatternAnalysisSerializer(serializers.ModelSerializer):
+    """Serializer for PatternAnalysis model"""
+    pattern_type_display = serializers.CharField(source='get_pattern_type_display', read_only=True)
+    trend_direction_display = serializers.CharField(source='get_trend_direction_display', read_only=True)
+    
+    class Meta:
+        model = PatternAnalysis
+        fields = [
+            'id', 'patient', 'pattern_type', 'pattern_type_display',
+            'trend_direction', 'trend_direction_display', 'analysis_result',
+            'confidence_score', 'statistical_significance',
+            'analysis_start_date', 'analysis_end_date', 'created_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'pattern_type_display', 'trend_direction_display']
+
+
+class AnomalyDetectionSerializer(serializers.ModelSerializer):
+    """Serializer for AnomalyDetection model"""
+    anomaly_type_display = serializers.CharField(source='get_anomaly_type_display', read_only=True)
+    severity_level_display = serializers.CharField(source='get_severity_level_display', read_only=True)
+    acknowledged_by_name = serializers.CharField(source='acknowledged_by.full_name', read_only=True)
+    
+    class Meta:
+        model = AnomalyDetection
+        fields = [
+            'id', 'patient', 'anomaly_type', 'anomaly_type_display',
+            'severity_level', 'severity_level_display', 'description',
+            'detected_value', 'expected_value', 'deviation_score',
+            'is_acknowledged', 'acknowledged_by', 'acknowledged_by_name',
+            'acknowledged_at', 'detected_at', 'data_timestamp'
+        ]
+        read_only_fields = [
+            'id', 'detected_at', 'anomaly_type_display', 
+            'severity_level_display', 'acknowledged_by_name'
+        ]
+
+
+class PatternAlertSerializer(serializers.ModelSerializer):
+    """Serializer for PatternAlert model"""
+    alert_type_display = serializers.CharField(source='get_alert_type_display', read_only=True)
+    priority_display = serializers.CharField(source='get_priority_display', read_only=True)
+    resolved_by_name = serializers.CharField(source='resolved_by.full_name', read_only=True)
+    related_patterns_count = serializers.SerializerMethodField()
+    related_anomalies_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = PatternAlert
+        fields = [
+            'id', 'patient', 'alert_type', 'alert_type_display',
+            'priority', 'priority_display', 'title', 'message',
+            'related_patterns_count', 'related_anomalies_count',
+            'is_active', 'is_resolved', 'resolved_by', 'resolved_by_name',
+            'resolved_at', 'resolution_notes', 'created_at', 'expires_at'
+        ]
+        read_only_fields = [
+            'id', 'created_at', 'alert_type_display', 'priority_display',
+            'resolved_by_name', 'related_patterns_count', 'related_anomalies_count'
+        ]
+    
+    def get_related_patterns_count(self, obj):
+        return obj.related_patterns.count()
+    
+    def get_related_anomalies_count(self, obj):
+        return obj.related_anomalies.count()
+
+
+class AnomalyAcknowledgeSerializer(serializers.Serializer):
+    """Serializer for acknowledging anomalies"""
+    notes = serializers.CharField(required=False, help_text="Optional notes about the acknowledgment")
+
+
+class PatternAlertResolveSerializer(serializers.Serializer):
+    """Serializer for resolving pattern alerts"""
+    resolution_notes = serializers.CharField(help_text="Notes about how the alert was resolved")
+
+
+class PatternAnalysisRequestSerializer(serializers.Serializer):
+    """Serializer for requesting pattern analysis"""
+    patient_id = serializers.IntegerField()
+    pattern_types = serializers.MultipleChoiceField(
+        choices=PatternAnalysis.PatternType.choices,
+        help_text="Types of patterns to analyze"
+    )
+    months_back = serializers.IntegerField(
+        default=6,
+        min_value=1,
+        max_value=24,
+        help_text="Number of months of historical data to analyze"
+    )
