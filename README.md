@@ -1,3 +1,72 @@
+## API Monitor (Django + Celery + DRF)
+
+This project monitors API health, logs results with rotation, and runs AI-based log analysis. The app name is `<APP_NAME>` throughout code and paths. Replace `<APP_NAME>` with your desired name or keep it as literal if you prefer.
+
+### Tech
+- Django 5, DRF
+- Celery + Redis (worker + beat)
+- httpx (timeouts, retry/backoff)
+- Logging with RotatingFileHandler (JSONL)
+- scikit-learn IsolationForest
+- OpenAI (optional) for smart summaries; falls back to local rule-based summarizer
+- pytest, pytest-django, model-bakery
+
+### Quickstart (Local)
+1) Python 3.11+
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+# edit .env as needed
+
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py seed_services --file services.json
+
+# start redis (or via Docker)
+redis-server # or docker compose
+
+# in separate terminals
+celery -A apimonitor worker -l info
+celery -A apimonitor beat -l info
+python manage.py runserver
+```
+
+### Docker
+
+```bash
+docker-compose up --build
+```
+
+Make sure to set `<APP_NAME>` consistently. For Django settings it is already referenced. You can keep the literal `<APP_NAME>` as the package name or rename the directory and update references in `apimonitor/settings.py`, `apimonitor/urls.py`, and `apimonitor/celery.py`.
+
+### ENV
+See `.env.example`:
+- `DJANGO_SECRET_KEY`
+- `DEBUG`
+- `ALLOWED_HOSTS`
+- `DATABASE_URL` (e.g., `sqlite:///db.sqlite3`)
+- `REDIS_URL` (e.g., `redis://redis:6379/0`)
+- `HEALTH_INTERVAL_CRON` (default `*/5 * * * *`)
+- `OPENAI_API_KEY` (optional)
+- `SERVICES_JSON`
+
+### Endpoints
+- `GET/POST /api/monitor/services/`
+- `GET /api/monitor/results/?service=<id>&since=<iso>&until=<iso>`
+- `GET /api/monitor/digests/latest/?service=<id?>`
+- `GET /api/monitor/health/summary`
+
+### Tests
+```bash
+pytest
+```
+
+### Notes
+- Logs are stored at `logs/health.log` as JSONL with rotation.
+- Celery Beat runs health checks on a cron schedule (default every 5 minutes) and daily AI analysis at 02:00.
+
 # GitDM - Diabetes Management System
 
 **GitDM** (Git Diabetes Management) is a comprehensive diabetes management platform built with Django 5 and Django REST Framework. It provides healthcare professionals with advanced tools for patient data management, clinical decision support, AI-powered insights, and pattern analysis for diabetes care.

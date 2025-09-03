@@ -1,0 +1,20 @@
+[
+  {
+    "name": "UsersAPI",
+    "base_url": "https://api.example.com",
+    "health_path": "/health",
+    "method": "GET",
+    "headers": {"X-API-Key": "abc"},
+    "timeout_s": 3,
+    "enabled": true
+  },
+  {
+    "name": "Billing",
+    "base_url": "https://billing.example.com",
+    "health_path": "/status",
+    "method": "HEAD",
+    "headers": {},
+    "timeout_s": 2,
+    "enabled": true
+  }
+]

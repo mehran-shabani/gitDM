@@ -1,3 +1,63 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  web:
+    build: .
+    command: bash -lc "python manage.py migrate && gunicorn apimonitor.wsgi:application --bind 0.0.0.0:8000"
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - HEALTH_INTERVAL_CRON=${HEALTH_INTERVAL_CRON}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SERVICES_JSON=${SERVICES_JSON}
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  worker:
+    build: .
+    command: celery -A apimonitor worker -l info
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - HEALTH_INTERVAL_CRON=${HEALTH_INTERVAL_CRON}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+
+  beat:
+    build: .
+    command: celery -A apimonitor beat -l info
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - HEALTH_INTERVAL_CRON=${HEALTH_INTERVAL_CRON}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - web
+
 # docker-compose.yml for GitHub Codespaces
 # Simplified configuration using Django defaults
 
