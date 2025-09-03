@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('intelligence', '0002_alter_aisummary_patient'),
+        ('intelligence', '0002_anomaly_detection_system'),
     ]
 
     operations = [

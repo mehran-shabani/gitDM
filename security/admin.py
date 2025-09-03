@@ -1,32 +1,21 @@
 from django.contrib import admin
-from .models import AuditLog, SecurityEvent
+from .models import AuditLog, SecurityEvent, Role
 
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):
-    list_display = [
-        'user', 'action', 'resource_type', 'patient_id', 'timestamp'
-    ]
-    list_filter = ['action', 'resource_type', 'timestamp']
-    search_fields = ['user__email', 'patient_id', 'notes']
-    readonly_fields = [
-        'user', 'action', 'resource_type', 'resource_id', 'patient_id',
-        'old_values', 'new_values', 'ip_address', 'user_agent', 'timestamp'
-    ]
-    
+    list_display = ['id', 'user_id', 'path', 'method', 'status_code', 'created_at']
+    list_filter = ['method', 'status_code', 'created_at']
+    search_fields = ['path']
+    readonly_fields = ['id', 'user_id', 'path', 'method', 'status_code', 'created_at', 'meta']
+
     fieldsets = (
-        ('اطلاعات کاربر', {
-            'fields': ('user', 'ip_address', 'user_agent')
+        ('Request', {
+            'fields': ('path', 'method', 'status_code')
         }),
-        ('اطلاعات عملیات', {
-            'fields': ('action', 'resource_type', 'resource_id', 'patient_id')
+        ('User/Meta', {
+            'fields': ('user_id', 'meta', 'created_at')
         }),
-        ('جزئیات تغییرات', {
-            'fields': ('old_values', 'new_values', 'notes')
-        }),
-        ('زمان‌بندی', {
-            'fields': ('timestamp',)
-        })
     )
 
 
@@ -55,3 +44,10 @@ class SecurityEventAdmin(admin.ModelAdmin):
             'fields': ('timestamp',)
         })
     )
+
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ['id', 'user', 'role']
+    list_filter = ['role']
+    search_fields = ['user__email']

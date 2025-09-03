@@ -25,8 +25,8 @@ from django.http import JsonResponse
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
-router.register(r'patients', PatientViewSet)
-router.register(r'encounters', EncounterViewSet)
+router.register(r'patients', PatientViewSet, basename='patients')
+router.register(r'encounters', EncounterViewSet, basename='encounters')
 router.register(r'labs', LabResultViewSet)
 router.register(r'meds', MedicationOrderViewSet)
 router.register(r'refs', ClinicalReferenceViewSet)
@@ -48,6 +48,7 @@ def api_root_view(request):
 # The API URLs are now determined automatically by the router
 urlpatterns = [
     path('', include(router.urls)),
+    path('', include('gateway.simple_patterns')),
     path('', api_root_view, name='api-root'),
     path('health/', health, name='api-health'),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

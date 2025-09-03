@@ -262,7 +262,17 @@ def revert_to_version(
                 v_inst = rel_model.objects.get(pk=v)
                 setattr(obj, k, v_inst)
             except (rel_model.DoesNotExist, ValueError, TypeError):
-                setattr(obj, k, v)
+                try:
+                    setattr(obj, k, v)
+                except ValueError:
+                    # For FK fields expect instance, not raw id
+                    field = obj._meta.get_field(k)
+                    rel_model = field.remote_field.model if hasattr(field, 'remote_field') else None
+                    if rel_model and isinstance(v, (int, str)):
+                        rel_instance = rel_model.objects.filter(pk=v).first()
+                        setattr(obj, k, rel_instance)
+                    else:
+                        raise
         else:
             setattr(obj, k, v)
 

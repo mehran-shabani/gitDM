@@ -6,10 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-
-from encounters.models import Patient
-from security.models import DoctorProfile
-from security.permissions import IsDoctor, IsDoctorAdmin
+from gitdm.permissions import IsDoctor, IsDoctorAdmin
 from .models import PatientAnalytics, DoctorAnalytics, SystemAnalytics, Report
 from .serializers import (
     PatientAnalyticsSerializer, DoctorAnalyticsSerializer, SystemAnalyticsSerializer,
@@ -54,6 +51,7 @@ class PatientAnalyticsViewSet(viewsets.ModelViewSet):
             )
         
         # بررسی دسترسی به بیمار
+        from gitdm.models import PatientProfile as Patient
         patient = get_object_or_404(Patient, id=patient_id)
         
         if hasattr(request.user, 'doctor_profile'):
@@ -108,6 +106,7 @@ class PatientAnalyticsViewSet(viewsets.ModelViewSet):
             )
         
         # فیلتر بر اساس دسترسی
+        from gitdm.models import PatientProfile as Patient
         if hasattr(request.user, 'doctor_profile'):
             patients = Patient.objects.filter(
                 id__in=patient_ids,
@@ -165,6 +164,7 @@ class DoctorAnalyticsViewSet(viewsets.ModelViewSet):
         if not doctor_id and hasattr(request.user, 'doctor_profile'):
             doctor = request.user.doctor_profile
         else:
+            from gitdm.models import DoctorProfile
             doctor = get_object_or_404(DoctorProfile, id=doctor_id)
             
             # بررسی دسترسی
@@ -256,6 +256,8 @@ class SystemAnalyticsViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def health_check(self, request):
         """بررسی سلامت سیستم"""
+        from gitdm.models import PatientProfile as Patient
+        from gitdm.models import DoctorProfile
         health_data = {
             'status': 'healthy',
             'timestamp': timezone.now(),
@@ -438,6 +440,9 @@ class DashboardViewSet(viewsets.ViewSet):
         """خلاصه داشبورد برای کاربر فعلی"""
         user = request.user
         
+        from gitdm.models import PatientProfile as Patient
+        from encounters.models import Encounter
+        from notifications.models import ClinicalAlert
         if hasattr(user, 'doctor_profile'):
             # داشبورد پزشک
             doctor = user.doctor_profile
@@ -449,11 +454,11 @@ class DashboardViewSet(viewsets.ViewSet):
                 'total_patients': Patient.objects.filter(primary_doctor=doctor).count(),
                 'active_patients': Patient.objects.filter(
                     primary_doctor=doctor,
-                    encounters__encounter_date__gte=today - timedelta(days=30)
+                    encounters__occurred_at__gte=today - timedelta(days=30)
                 ).distinct().count(),
                 'total_encounters_today': Encounter.objects.filter(
-                    doctor=doctor,
-                    encounter_date=today
+                    created_by=doctor.user,
+                    occurred_at__date=today
                 ).count(),
                 'pending_alerts': ClinicalAlert.objects.filter(
                     patient__primary_doctor=doctor,

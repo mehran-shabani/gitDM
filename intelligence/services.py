@@ -10,7 +10,7 @@ from .models import AISummary, BaselineMetrics, PatternAnalysis, AnomalyDetectio
 from references.models import ClinicalReference
 from laboratory.models import LabResult
 from encounters.models import Encounter
-from pharmacy.models import Medication
+from pharmacy.models import MedicationOrder as Medication
 import openai
 import numpy as np
 

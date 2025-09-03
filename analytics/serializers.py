@@ -1,7 +1,5 @@
 from rest_framework import serializers
 from .models import PatientAnalytics, DoctorAnalytics, SystemAnalytics, Report
-from encounters.models import Patient
-from security.models import DoctorProfile
 
 
 class PatientAnalyticsSerializer(serializers.ModelSerializer):

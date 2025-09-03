@@ -5,9 +5,10 @@ from datetime import timedelta
 from rest_framework.test import APITestCase
 from rest_framework import status
 
-from encounters.models import Patient, Encounter
-from laboratory.models import LabTest, LabResult
-from security.models import DoctorProfile
+from encounters.models import Encounter
+from laboratory.models import LabResult
+from gitdm.models import PatientProfile as Patient
+from gitdm.models import DoctorProfile
 from .models import PatientAnalytics, DoctorAnalytics, SystemAnalytics, Report
 from .services import PatientAnalyticsService, DoctorAnalyticsService, SystemAnalyticsService
 
@@ -19,12 +20,7 @@ class PatientAnalyticsServiceTest(TestCase):
     
     def setUp(self):
         # ایجاد کاربر و پزشک
-        self.user = User.objects.create_user(
-            username='doctor1',
-            password='testpass123',
-            first_name='دکتر',
-            last_name='تست'
-        )
+        self.user = User.objects.create_user(email='doctor1@example.com', password='testpass123')
         self.doctor = DoctorProfile.objects.create(
             user=self.user,
             medical_code='12345',
@@ -32,14 +28,7 @@ class PatientAnalyticsServiceTest(TestCase):
         )
         
         # ایجاد بیمار
-        self.patient = Patient.objects.create(
-            first_name='بیمار',
-            last_name='تست',
-            national_id='1234567890',
-            date_of_birth='1980-01-01',
-            gender='M',
-            primary_doctor=self.doctor
-        )
+        self.patient = Patient.objects.create(full_name='بیمار تست', national_id='1234567890', primary_doctor=self.doctor)
         
         self.service = PatientAnalyticsService()
     
@@ -47,30 +36,10 @@ class PatientAnalyticsServiceTest(TestCase):
         """تست محاسبه آنالیتیکس بیمار"""
         # ایجاد داده‌های تست
         # آزمایش قند خون
-        test1 = LabTest.objects.create(
-            patient=self.patient,
-            test_type='FBS',
-            test_date=timezone.now().date()
-        )
-        LabResult.objects.create(
-            test=test1,
-            value='120',
-            unit='mg/dL',
-            is_normal=True
-        )
+        LabResult.objects.create(patient=self.patient, loinc='2345-7', value='120', unit='mg/dL', taken_at=timezone.now())
         
         # آزمایش HbA1c
-        test2 = LabTest.objects.create(
-            patient=self.patient,
-            test_type='HBA1C',
-            test_date=timezone.now().date()
-        )
-        LabResult.objects.create(
-            test=test2,
-            value='6.5',
-            unit='%',
-            is_normal=True
-        )
+        LabResult.objects.create(patient=self.patient, loinc='4548-4', value='6.5', unit='%', taken_at=timezone.now())
         
         # محاسبه آنالیتیکس
         analytics = self.service.calculate_patient_analytics(self.patient)
@@ -88,28 +57,10 @@ class PatientAnalyticsServiceTest(TestCase):
         current_date = timezone.now().date()
         
         # آزمایش قبلی
-        past_test = LabTest.objects.create(
-            patient=self.patient,
-            test_type='FBS',
-            test_date=past_date
-        )
-        LabResult.objects.create(
-            test=past_test,
-            value='150',
-            unit='mg/dL'
-        )
+        LabResult.objects.create(patient=self.patient, loinc='2345-7', value='150', unit='mg/dL', taken_at=past_date)
         
         # آزمایش فعلی
-        current_test = LabTest.objects.create(
-            patient=self.patient,
-            test_type='FBS',
-            test_date=current_date
-        )
-        LabResult.objects.create(
-            test=current_test,
-            value='120',
-            unit='mg/dL'
-        )
+        LabResult.objects.create(patient=self.patient, loinc='2345-7', value='120', unit='mg/dL', taken_at=current_date)
         
         analytics = self.service.calculate_patient_analytics(self.patient)
         
@@ -119,12 +70,7 @@ class PatientAnalyticsServiceTest(TestCase):
     def test_compliance_score_calculation(self):
         """تست محاسبه امتیاز پایبندی"""
         # ایجاد ویزیت
-        Encounter.objects.create(
-            patient=self.patient,
-            doctor=self.doctor,
-            encounter_date=timezone.now().date(),
-            chief_complaint='پیگیری دیابت'
-        )
+        Encounter.objects.create(patient=self.patient, created_by=self.user, occurred_at=timezone.now())
         
         analytics = self.service.calculate_patient_analytics(self.patient)
         
@@ -139,10 +85,7 @@ class DoctorAnalyticsServiceTest(TestCase):
         self.service = DoctorAnalyticsService()
         
         # ایجاد پزشک
-        self.user = User.objects.create_user(
-            username='doctor1',
-            password='testpass123'
-        )
+        self.user = User.objects.create_user(email='doctor1@example.com', password='testpass123')
         self.doctor = DoctorProfile.objects.create(
             user=self.user,
             medical_code='12345'
@@ -150,22 +93,11 @@ class DoctorAnalyticsServiceTest(TestCase):
         
         # ایجاد چند بیمار
         for i in range(5):
-            patient = Patient.objects.create(
-                first_name=f'بیمار{i}',
-                last_name='تست',
-                national_id=f'123456789{i}',
-                date_of_birth='1980-01-01',
-                gender='M',
-                primary_doctor=self.doctor
-            )
+            patient = Patient.objects.create(full_name=f'بیمار{i} تست', national_id=f'123456789{i}', primary_doctor=self.doctor)
             
             # ایجاد ویزیت برای بیماران فعال
             if i < 3:
-                Encounter.objects.create(
-                    patient=patient,
-                    doctor=self.doctor,
-                    encounter_date=timezone.now().date()
-                )
+                Encounter.objects.create(patient=patient, created_by=self.user, occurred_at=timezone.now())
     
     def test_calculate_doctor_analytics(self):
         """تست محاسبه آنالیتیکس پزشک"""
@@ -185,23 +117,14 @@ class SystemAnalyticsServiceTest(TestCase):
         
         # ایجاد داده‌های تست
         for i in range(3):
-            user = User.objects.create_user(
-                username=f'doctor{i}',
-                password='testpass123'
-            )
+            user = User.objects.create_user(email=f'doctor{i}@example.com', password='testpass123')
             DoctorProfile.objects.create(
                 user=user,
                 medical_code=f'1234{i}'
             )
         
         for i in range(10):
-            Patient.objects.create(
-                first_name=f'بیمار{i}',
-                last_name='تست',
-                national_id=f'123456789{i}',
-                date_of_birth='1980-01-01',
-                gender='M'
-            )
+            Patient.objects.create(full_name=f'بیمار{i} تست', national_id=f'123456789{i}')
     
     def test_calculate_system_analytics(self):
         """تست محاسبه آنالیتیکس سیستم"""
@@ -217,24 +140,14 @@ class AnalyticsAPITest(APITestCase):
     
     def setUp(self):
         # ایجاد پزشک
-        self.user = User.objects.create_user(
-            username='doctor1',
-            password='testpass123'
-        )
+        self.user = User.objects.create_user(email='doctor1@example.com', password='testpass123')
         self.doctor = DoctorProfile.objects.create(
             user=self.user,
             medical_code='12345'
         )
         
         # ایجاد بیمار
-        self.patient = Patient.objects.create(
-            first_name='بیمار',
-            last_name='تست',
-            national_id='1234567890',
-            date_of_birth='1980-01-01',
-            gender='M',
-            primary_doctor=self.doctor
-        )
+        self.patient = Patient.objects.create(full_name='بیمار تست', national_id='1234567890', primary_doctor=self.doctor)
         
         self.client.force_authenticate(user=self.user)
     
@@ -270,24 +183,14 @@ class AnalyticsAPITest(APITestCase):
     def test_unauthorized_access(self):
         """تست دسترسی غیرمجاز"""
         # ایجاد پزشک دیگر
-        other_user = User.objects.create_user(
-            username='doctor2',
-            password='testpass123'
-        )
+        other_user = User.objects.create_user(email='doctor2@example.com', password='testpass123')
         other_doctor = DoctorProfile.objects.create(
             user=other_user,
             medical_code='54321'
         )
         
         # ایجاد بیمار برای پزشک دیگر
-        other_patient = Patient.objects.create(
-            first_name='بیمار',
-            last_name='دیگر',
-            national_id='0987654321',
-            date_of_birth='1990-01-01',
-            gender='F',
-            primary_doctor=other_doctor
-        )
+        other_patient = Patient.objects.create(full_name='بیمار دیگر', national_id='0987654321', primary_doctor=other_doctor)
         
         # تلاش برای دسترسی به بیمار پزشک دیگر
         response = self.client.post('/api/analytics/patient-analytics/calculate/', {

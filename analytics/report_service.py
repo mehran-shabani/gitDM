@@ -29,10 +29,11 @@ matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from encounters.models import Patient, Encounter
-from laboratory.models import LabTest, LabResult
-from pharmacy.models import Medication
-from security.models import DoctorProfile
+from encounters.models import Encounter
+from laboratory.models import LabResult
+from pharmacy.models import MedicationOrder as Medication
+from gitdm.models import PatientProfile as Patient
+from gitdm.models import DoctorProfile
 from .models import Report, PatientAnalytics, DoctorAnalytics, SystemAnalytics
 from .services import PatientAnalyticsService, DoctorAnalyticsService, SystemAnalyticsService
 
@@ -118,20 +119,20 @@ class ReportGenerationService:
         # مواجهات
         encounters = Encounter.objects.filter(
             patient=patient,
-            encounter_date__range=[start_date, end_date]
-        ).order_by('-encounter_date')
+            occurred_at__range=[start_date, end_date]
+        ).order_by('-occurred_at')
         
         # آزمایش‌ها
-        lab_tests = LabTest.objects.filter(
+        lab_results = LabResult.objects.filter(
             patient=patient,
-            test_date__range=[start_date, end_date]
-        ).select_related('results').order_by('-test_date')
+            taken_at__range=[start_date, end_date]
+        ).order_by('-taken_at')
         
         # داروها
         medications = Medication.objects.filter(
             patient=patient,
-            prescribed_date__range=[start_date, end_date]
-        ).order_by('-prescribed_date')
+            start_date__range=[start_date, end_date]
+        ).order_by('-start_date')
         
         # آخرین آنالیتیکس
         latest_analytics = PatientAnalytics.objects.filter(
@@ -145,7 +146,7 @@ class ReportGenerationService:
         return {
             'patient': patient,
             'encounters': encounters,
-            'lab_tests': lab_tests,
+            'lab_results': lab_results,
             'medications': medications,
             'analytics': latest_analytics,
             'glucose_chart': glucose_chart,
@@ -264,17 +265,14 @@ class ReportGenerationService:
         story.append(PageBreak())
         story.append(Paragraph("آزمایش‌های اخیر", heading_style))
         
-        lab_data = [['تاریخ', 'نوع آزمایش', 'نتیجه', 'واحد', 'وضعیت']]
-        for test in data['lab_tests'][:10]:  # حداکثر 10 آزمایش اخیر
-            result = test.results.first()
-            if result:
-                lab_data.append([
-                    test.test_date.strftime('%Y-%m-%d'),
-                    test.get_test_type_display(),
-                    result.value,
-                    result.unit or '-',
-                    'نرمال' if result.is_normal else 'غیرنرمال'
-                ])
+        lab_data = [['تاریخ', 'LOINC', 'نتیجه', 'واحد']]
+        for result in data['lab_results'][:10]:  # حداکثر 10 آزمایش اخیر
+            lab_data.append([
+                result.taken_at.strftime('%Y-%m-%d'),
+                result.loinc,
+                result.value,
+                result.unit or '-',
+            ])
         
         if len(lab_data) > 1:
             lab_table = Table(lab_data, colWidths=[1.5*inch, 2*inch, 1*inch, 1*inch, 1.5*inch])
@@ -319,17 +317,13 @@ class ReportGenerationService:
             
             # برگه آزمایش‌ها
             lab_records = []
-            for test in data['lab_tests']:
-                result = test.results.first()
-                if result:
-                    lab_records.append({
-                        'تاریخ': test.test_date.strftime('%Y-%m-%d'),
-                        'نوع آزمایش': test.get_test_type_display(),
-                        'نتیجه': result.value,
-                        'واحد': result.unit or '-',
-                        'محدوده نرمال': result.reference_range or '-',
-                        'وضعیت': 'نرمال' if result.is_normal else 'غیرنرمال'
-                    })
+            for result in data['lab_results']:
+                lab_records.append({
+                    'تاریخ': result.taken_at.strftime('%Y-%m-%d'),
+                    'LOINC': result.loinc,
+                    'نتیجه': result.value,
+                    'واحد': result.unit or '-',
+                })
             
             if lab_records:
                 df_labs = pd.DataFrame(lab_records)
