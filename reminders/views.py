@@ -36,6 +36,16 @@ class ReminderViewSet(viewsets.ModelViewSet):
         created = ensure_upcoming_reminders(patient, created_by=request.user)
         return Response({'created': len(created)})
 
+# File: reminders/views.py
+
+from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.utils import timezone
+# … other imports …
+
+class ReminderViewSet(...):
+
     @action(detail=False, methods=['get'], url_path='due')
     def list_due(self, request):
         """
@@ -43,14 +53,22 @@ class ReminderViewSet(viewsets.ModelViewSet):
         Optional query: ?patient_id=<uuid>
         """
         qs = self.get_queryset().filter(status=Reminder.Status.PENDING)
+
         pid = request.query_params.get('patient_id')
         if pid:
             qs = qs.filter(patient_id=pid)
-        now = timezone.now()
-        qs = qs.filter(due_at__lte=now).order_by('due_at')
-        data = ReminderSerializer(qs, many=True).data
-        return Response({'count': len(data), 'results': data})
 
+        now = timezone.now()
+        # only include reminders whose due_at is past AND either never snoozed or snooze_until passed
+        qs = (
+            qs.filter(due_at__lte=now)
+              .filter(Q(snooze_until__isnull=True) | Q(snooze_until__lte=now))
+              .order_by('due_at')
+        )
+
+        count = qs.count()
+        data = self.get_serializer(qs, many=True).data
+        return Response({'count': count, 'results': data})
     @action(detail=True, methods=['post'])
     def complete(self, request, pk=None):
         reminder = self.get_object()
