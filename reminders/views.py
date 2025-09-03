@@ -11,14 +11,19 @@ from .serializers import ReminderSerializer
 from .services import ensure_upcoming_reminders, send_due_notifications
 
 
-class ReminderViewSet(viewsets.ModelViewSet):
+
+# File: reminders/views.py
+
+from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django.utils import timezone
+# … other imports …
+
+class ReminderViewSet(...):
     serializer_class = ReminderSerializer
     permission_classes = (IsAuthenticated, IsDoctor)
 
-    def get_queryset(self):
-        user = self.request.user
-        # Limit to reminders for patients under current doctor
-        return Reminder.objects.filter(patient__primary_doctor=user).select_related('patient')
     @action(detail=False, methods=['post'], url_path='generate')
     def generate_for_patient(self, request):
         """
@@ -35,15 +40,26 @@ class ReminderViewSet(viewsets.ModelViewSet):
         created = ensure_upcoming_reminders(patient, created_by=request.user)
         return Response({'created': len(created)})
 
-# File: reminders/views.py
+    def get_queryset(self):
+        user = self.request.user
+        # Limit to reminders for patients under current doctor
+        return Reminder.objects.filter(patient__primary_doctor=user).select_related('patient')
 
-from django.db.models import Q
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.utils import timezone
-# … other imports …
-
-class ReminderViewSet(...):
+    @action(detail=False, methods=['post'], url_path='generate')
+    def generate_for_patient(self, request):
+        """
+        Generate upcoming reminders for a given patient_id.
+        Body: {"patient_id": "<uuid>"}
+        """
+        pid = request.data.get('patient_id')
+        if not pid:
+            return Response({'detail': 'patient_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            patient = PatientProfile.objects.get(id=pid, primary_doctor=request.user)
+        except PatientProfile.DoesNotExist:
+            return Response({'detail': 'Patient not found or not accessible'}, status=status.HTTP_404_NOT_FOUND)
+        created = ensure_upcoming_reminders(patient, created_by=request.user)
+        return Response({'created': len(created)})
 
     @action(detail=False, methods=['get'], url_path='due')
     def list_due(self, request):
