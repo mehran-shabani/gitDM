@@ -17,6 +17,7 @@ from intelligence.views import (
     BaselineMetricsViewSet
 )
 from notifications.views import NotificationViewSet, ClinicalAlertViewSet
+from reminders.views import ReminderViewSet
 from .views import health
 from api.views_export import export_patient
 from versioning import views as version_views
@@ -36,6 +37,9 @@ router.register(r'pattern-analyses', PatternAnalysisViewSet)
 router.register(r'anomaly-detections', AnomalyDetectionViewSet)
 router.register(r'pattern-alerts', PatternAlertViewSet)
 router.register(r'baseline-metrics', BaselineMetricsViewSet)
+
+router.register(r'reminders', ReminderViewSet, basename='reminder')
+
 
 
 def api_root_view(request):

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد تایم‌لاین پزشکی</title>
+    
+    <!-- Bootstrap RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+            margin-bottom: 20px;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .reminder-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-right: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .reminder-overdue {
+            border-right-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        
+        .reminder-upcoming {
+            border-right-color: #ffc107;
+            background-color: #fffbf0;
+        }
+        
+        .critical-patient-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-right: 4px solid #dc3545;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .section-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- هدر داشبورد -->
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-chart-line"></i> داشبورد تایم‌لاین پزشکی</h1>
+                    <p class="mb-0">مدیریت جامع تایم‌لاین و یادآورهای بیماران</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="text-white">
+                        <small>آخرین به‌روزرسانی:</small><br>
+                        <span id="last-update">{{ "now"|date:"Y/m/d H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- آمار کلی -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number text-danger">{{ overdue_count }}</div>
+                    <h6>یادآورهای عقب‌افتاده</h6>
+                    <small class="text-muted">نیاز به اقدام فوری</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number text-warning">{{ upcoming_count }}</div>
+                    <h6>یادآورهای آتی</h6>
+                    <small class="text-muted">۷ روز آینده</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number text-info">{{ critical_patients|length }}</div>
+                    <h6>بیماران بحرانی</h6>
+                    <small class="text-muted">نیاز به توجه ویژه</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <div class="stats-number text-success" id="total-patients">-</div>
+                    <h6>کل بیماران</h6>
+                    <small class="text-muted">تحت نظارت</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- یادآورهای عقب‌افتاده -->
+        {% if overdue_reminders %}
+        <div class="section-card">
+            <h5 class="text-danger mb-3">
+                <i class="fas fa-exclamation-triangle"></i> یادآورهای عقب‌افتاده
+            </h5>
+            
+            {% for reminder in overdue_reminders %}
+            <div class="reminder-card reminder-overdue">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">{{ reminder.get_test_type_display }}</h6>
+                        <p class="mb-1 text-muted">بیمار: {{ reminder.patient.full_name }}</p>
+                        <small class="text-danger">
+                            <i class="fas fa-clock"></i> 
+                            {{ reminder.days_until_due|floatformat:0 }} روز عقب‌افتاده
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-sm btn-success" onclick="markCompleted({{ reminder.id }})">
+                            <i class="fas fa-check"></i> انجام شد
+                        </button>
+                        <a href="/timeline/patient/{{ reminder.patient.id }}/timeline/" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> مشاهده
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if overdue_count > 5 %}
+            <div class="text-center mt-3">
+                <a href="/timeline/api/reminders/overdue_reminders/" class="btn btn-outline-danger">
+                    مشاهده همه ({{ overdue_count }} مورد)
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- یادآورهای آتی -->
+        {% if upcoming_reminders %}
+        <div class="section-card">
+            <h5 class="text-warning mb-3">
+                <i class="fas fa-bell"></i> یادآورهای آتی (۷ روز آینده)
+            </h5>
+            
+            {% for reminder in upcoming_reminders %}
+            <div class="reminder-card reminder-upcoming">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">{{ reminder.get_test_type_display }}</h6>
+                        <p class="mb-1 text-muted">بیمار: {{ reminder.patient.full_name }}</p>
+                        <small class="text-warning">
+                            <i class="fas fa-calendar"></i> 
+                            سررسید: {{ reminder.next_due|date:"Y/m/d" }}
+                        </small>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-warning">{{ reminder.days_until_due }} روز</span>
+                        <a href="/timeline/patient/{{ reminder.patient.id }}/timeline/" class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye"></i> مشاهده
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+            {% if upcoming_count > 5 %}
+            <div class="text-center mt-3">
+                <a href="/timeline/api/reminders/upcoming_reminders/" class="btn btn-outline-warning">
+                    مشاهده همه ({{ upcoming_count }} مورد)
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <!-- بیماران بحرانی -->
+        {% if critical_patients %}
+        <div class="section-card">
+            <h5 class="text-danger mb-3">
+                <i class="fas fa-heartbeat"></i> بیماران نیازمند توجه فوری
+            </h5>
+            
+            {% for item in critical_patients %}
+            <div class="critical-patient-card">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h6 class="mb-1">{{ item.patient.full_name }}</h6>
+                        <p class="mb-1 text-muted">{{ item.alerts_count }} هشدار بحرانی</p>
+                        {% if item.latest_alert %}
+                        <small class="text-danger">
+                            آخرین هشدار: {{ item.latest_alert.title }}
+                        </small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-danger">{{ item.alerts_count }} هشدار</span>
+                        <a href="/timeline/patient/{{ item.patient.id }}/timeline/" class="btn btn-sm btn-danger">
+                            <i class="fas fa-exclamation-triangle"></i> بررسی فوری
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <!-- لینک‌های سریع -->
+        <div class="section-card">
+            <h5 class="mb-3"><i class="fas fa-link"></i> دسترسی سریع</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <a href="/timeline/api/reminders/" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="fas fa-list"></i> همه یادآورها
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/timeline/api/reminder-templates/" class="btn btn-outline-secondary w-100 mb-2">
+                        <i class="fas fa-template"></i> قالب‌های یادآوری
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/admin/timeline/" class="btn btn-outline-info w-100 mb-2">
+                        <i class="fas fa-cog"></i> مدیریت سیستم
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // بارگذاری آمار اضافی
+        fetch('/api/gitdm/patients/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.count) {
+                    document.getElementById('total-patients').textContent = data.count;
+                }
+            })
+            .catch(error => console.error('خطا در بارگذاری آمار:', error));
+        
+        async function markCompleted(reminderId) {
+            try {
+                const response = await fetch(`/timeline/api/reminders/${reminderId}/mark_completed/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        performed_date: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    location.reload(); // بارگذاری مجدد صفحه
+                } else {
+                    alert('خطا در علامت‌گذاری یادآوری');
+                }
+            } catch (error) {
+                console.error('خطا:', error);
+                alert('خطا در ارتباط با سرور');
+            }
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // به‌روزرسانی خودکار آمار هر ۵ دقیقه
+        setInterval(() => {
+            location.reload();
+        }, 5 * 60 * 1000);
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
