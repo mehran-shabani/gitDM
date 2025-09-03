@@ -11,6 +11,7 @@ from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
 from intelligence.views import AISummaryViewSet
 from notifications.views import NotificationViewSet, ClinicalAlertViewSet
+from reminders.views import ReminderViewSet
 from .views import health
 from api.views_export import export_patient
 from versioning import views as version_views
@@ -26,6 +27,7 @@ router.register(r'refs', ClinicalReferenceViewSet)
 router.register(r'ai-summaries', AISummaryViewSet)
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'alerts', ClinicalAlertViewSet, basename='clinicalalert')
+router.register(r'reminders', ReminderViewSet, basename='reminder')
 
 
 def api_root_view(request):
