@@ -3,6 +3,11 @@ from datetime import timedelta
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
+from celery.schedules import crontab
+
+# Load environment variables
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,7 +24,7 @@ if not SECRET_KEY:
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
-ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1']  # noqa: E501
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1', 'testserver']  # noqa: E501
 
 # GitHub Codespaces specific settings
 if os.getenv('CODESPACES', 'false').lower() == 'true':
@@ -51,6 +56,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_celery_beat',
+    'django_filters',
 
     # Your apps
     'gitdm',
@@ -64,6 +70,7 @@ INSTALLED_APPS = [
     'notifications',
     'reminders',
     'gateway',
+    'monitor',
 
     'analytics',
 
@@ -133,10 +140,109 @@ CACHES = {
 }
 
 # ------------------------
-# Celery - Disabled for Codespaces
+# Celery Configuration
 # ------------------------
-# Celery is disabled in Codespaces environment
-# To enable Celery, you need to set up a message broker
+
+# Celery Configuration
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_ENABLE_UTC = True
+
+# Beat Schedule for periodic tasks
+
+CELERY_BEAT_SCHEDULE = {
+    'run-health-checks': {
+        'task': 'monitor.tasks.run_health_checks',
+        'schedule': crontab(minute='*/5'),  # Every 5 minutes
+    },
+    'analyze-logs': {
+        'task': 'monitor.tasks.analyze_logs',
+        'schedule': crontab(hour=2, minute=0),  # Daily at 2 AM
+        'kwargs': {'period_hours': 24}
+    },
+}
+
+# ------------------------
+# Logging Configuration
+# ------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+        'json': {
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'health_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'health.log',
+            'maxBytes': 5 * 1024 * 1024,  # 5MB
+            'backupCount': 5,
+            'formatter': 'json',
+            'encoding': 'utf-8',
+        },
+        'app_file': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs' / 'monitor.log',
+            'maxBytes': 10 * 1024 * 1024,  # 10MB
+            'backupCount': 3,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        'monitor': {
+            'handlers': ['console', 'app_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'monitor.health': {
+            'handlers': ['console', 'health_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'monitor.tasks': {
+            'handlers': ['console', 'app_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['console', 'app_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
+
+# Ensure logs directory exists
+os.makedirs(BASE_DIR / 'logs', exist_ok=True)
+
+# ------------------------
+# Health Monitoring Settings
+# ------------------------
+HEALTH_INTERVAL_CRON = os.getenv('HEALTH_INTERVAL_CRON', '*/5 * * * *')
+SERVICES_JSON = os.getenv('SERVICES_JSON', './services.json')
 
 # ------------------------
 # REST Framework
@@ -144,11 +250,18 @@ CACHES = {
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 50,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    ],
 }
 
 SPECTACULAR_SETTINGS = {

@@ -1,0 +1,42 @@
+[
+  {
+    "name": "UsersAPI",
+    "base_url": "https://api.example.com",
+    "health_path": "/health",
+    "method": "GET",
+    "headers": {
+      "X-API-Key": "abc"
+    },
+    "timeout_s": 3,
+    "enabled": true
+  },
+  {
+    "name": "Billing",
+    "base_url": "https://billing.example.com",
+    "health_path": "/status",
+    "method": "HEAD",
+    "headers": {},
+    "timeout_s": 2,
+    "enabled": true
+  },
+  {
+    "name": "PaymentGateway",
+    "base_url": "https://payments.example.com",
+    "health_path": "/health",
+    "method": "GET",
+    "headers": {
+      "Authorization": "Bearer demo-token"
+    },
+    "timeout_s": 5,
+    "enabled": true
+  },
+  {
+    "name": "NotificationService",
+    "base_url": "https://notifications.example.com",
+    "health_path": "/ping",
+    "method": "GET",
+    "headers": {},
+    "timeout_s": 3,
+    "enabled": true
+  }
+]

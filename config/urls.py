@@ -13,6 +13,7 @@ from .schema_views import SpectacularAPIView
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('gateway.urls')),
+    path('', include('monitor.urls')),
     # Serve JSON with class name SpectacularAPIView to satisfy both tests
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
