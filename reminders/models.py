@@ -64,15 +64,15 @@ class Reminder(models.Model):
             models.Index(fields=['due_at']),
             models.Index(fields=['reminder_type']),
         )
-        constraints = [
+        constraints = (
             models.CheckConstraint(
                 name='completed_requires_timestamp',
-                check=(
+                condition=(
                     models.Q(status='COMPLETED', completed_at__isnull=False) |
                     models.Q(~models.Q(status='COMPLETED'), completed_at__isnull=True)
                 ),
             ),
-        ]
+        )
 
     def __str__(self) -> str:
         return f"{self.reminder_type} for {self.patient} due {self.due_at}"
