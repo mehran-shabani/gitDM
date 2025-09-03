@@ -136,6 +136,16 @@ Authorization: Bearer <ACCESS_TOKEN>
     - `GET /ai-summaries/stats/` آمار کلی خلاصه‌ها
     - `POST /ai-summaries/test-references/` تست لینک‌سازی مراجع بالینی
 
+- تشخیص الگوهای غیرطبیعی (`pattern-analyses`, `anomaly-detections`, `pattern-alerts`, `baseline-metrics`)
+  - `GET /pattern-analyses/` فهرست تحلیل‌های الگو
+  - `POST /pattern-analyses/analyze/` درخواست تحلیل جدید
+  - `GET /anomaly-detections/` فهرست ناهنجاری‌های تشخیص داده شده
+  - `POST /anomaly-detections/{id}/acknowledge/` تایید ناهنجاری
+  - `GET /pattern-alerts/` فهرست هشدارهای الگویی
+  - `POST /pattern-alerts/{id}/resolve/` حل هشدار
+  - `GET /baseline-metrics/` معیارهای پایه بیماران
+  - `POST /baseline-metrics/calculate/` محاسبه معیارهای پایه
+
 - نسخه‌بندی تغییرات (`versions`)
   - `GET /versions/{resource_type}/{resource_id}/` فهرست نسخه‌ها (خروجی: آرایه‌ای از نسخه‌ها)
   - `POST /versions/{resource_type}/{resource_id}/revert/` بازگردانی به نسخهٔ مشخص
