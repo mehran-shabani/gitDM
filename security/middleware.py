@@ -1,41 +1,166 @@
-from .models import AuditLog
+import json
 import logging
+from django.utils.deprecation import MiddlewareMixin
+from django.urls import resolve
+from .models import AuditLog, SecurityEvent
 
 logger = logging.getLogger(__name__)
 
-class AuditMiddleware:
-    def __init__(self, get_response):
-        """
-        یک خطی: سازنده‌ی میدل‌ور که Callable بعدی (لایه‌ی بعدی درخواست) را نگهداری می‌کند.
-        
-        توضیح: نمونه‌ی میدل‌ور را مقداردهی اولیه می‌کند و ارجاع به تابع یا callable لایه‌ی بعدی در زنجیره‌ی پردازش درخواست را در self.get_response ذخیره می‌نماید تا هنگام فراخوانی میدل‌ور بتواند درخواست را به لایه‌ی بعدی پاس دهد.
-        
-        Parameters:
-            get_response (callable): تابع یا callable مورد انتظار از چارچوب وب که یک شیء Request را گرفته و یک شیء Response بازمی‌گرداند؛ این مقدار در self.get_response نگهداری می‌شود.
-        """
-        self.get_response = get_response
 
-    def __call__(self, request):
+class AuditLoggingMiddleware(MiddlewareMixin):
+    """
+    Middleware برای ثبت خودکار فعالیت‌های کاربران
+    """
+    
+    # Actions که نیاز به audit logging دارند
+    AUDITABLE_ACTIONS = {
+        'POST': AuditLog.ActionType.CREATE,
+        'PUT': AuditLog.ActionType.UPDATE,
+        'PATCH': AuditLog.ActionType.UPDATE,
+        'DELETE': AuditLog.ActionType.DELETE,
+    }
+    
+    # Resources که باید audit شوند
+    AUDITABLE_RESOURCES = [
+        'patients', 'encounters', 'labs', 'meds', 'ai-summaries', 'refs'
+    ]
+    
+    def process_response(self, request, response):
         """
-        پردازش یک درخواست WSGI/Django: فراخوانی لایه بعدی، ثبت غیرتهاجمی رکورد AuditLog و بازگرداندن پاسخ.
+        پردازش response و ثبت audit log در صورت نیاز
+        """
+        # فقط برای کاربران احراز هویت شده
+        if not hasattr(request, 'user') or not request.user.is_authenticated:
+            return response
         
-        این متد ابتدا درخواست را به لایه بعدی می‌فرستد و پاسخ دریافتی را بازمی‌گرداند. پس از دریافت پاسخ، تلاش می‌کند یک رکورد AuditLog ایجاد کند که شامل شناسه کاربر (در صورت احراز هویت)، مسیر، متد HTTP، کد وضعیت پاسخ و آدرس کلاینت است. شناسه کاربر به‌صورت عددی ذخیره می‌شود.
-        """
-        response = self.get_response(request)
+        # فقط برای درخواست‌های API
+        if not request.path.startswith('/api/'):
+            return response
+        
+        # فقط برای actions قابل audit
+        if request.method not in self.AUDITABLE_ACTIONS:
+            return response
+        
+        # فقط برای response های موفق
+        if not (200 <= response.status_code < 300):
+            return response
+        
         try:
-            user_id = None
-            if hasattr(request, 'user') and getattr(request.user, 'is_authenticated', False):
-                user_id = request.user.id
-            AuditLog.objects.create(
-                user_id=str(user_id) if user_id is not None else None,
-                path=request.path,
-                method=request.method,
-                status_code=response.status_code,
-                meta={"remote_addr": request.META.get('REMOTE_ADDR')}
+            # استخراج اطلاعات از URL
+            resolved = resolve(request.path)
+            url_name = resolved.url_name
+            
+            # بررسی اینکه آیا resource قابل audit است
+            resource_type = None
+            for resource in self.AUDITABLE_RESOURCES:
+                if resource in request.path:
+                    resource_type = resource
+                    break
+            
+            if not resource_type:
+                return response
+            
+            # استخراج resource_id از URL
+            resource_id = resolved.kwargs.get('pk') or resolved.kwargs.get('id')
+            
+            # استخراج patient_id
+            patient_id = self._extract_patient_id(request, response, resource_type)
+            
+            # ثبت audit log
+            action = self.AUDITABLE_ACTIONS[request.method]
+            
+            old_values = None
+            new_values = None
+            
+            # برای UPDATE، سعی در استخراج داده‌های قدیم و جدید
+            if action == AuditLog.ActionType.UPDATE and hasattr(request, '_cached_old_data'):
+                old_values = request._cached_old_data
+                
+            if hasattr(response, 'data') and response.data:
+                new_values = response.data
+            
+            AuditLog.log_action(
+                user=request.user,
+                action=action,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                patient_id=patient_id,
+                old_values=old_values,
+                new_values=new_values,
+                request=request,
+                notes=f"API call: {request.method} {request.path}"
             )
+            
         except Exception as e:
-            logger.error("Failed to create audit log: %s", e)
+            # Log error اما response را block نکن
+            logger.error(f"Audit logging failed: {str(e)}")
+        
         return response
+    
+    def _extract_patient_id(self, request, response, resource_type):
+        """
+        استخراج patient_id از request یا response
+        """
+        # اگر resource خود patient است
+        if resource_type == 'patients':
+            if hasattr(response, 'data') and 'id' in response.data:
+                return response.data['id']
+        
+        # برای سایر resources، patient_id را از request body یا response جستجو کن
+        if hasattr(request, 'data') and 'patient' in request.data:
+            return request.data['patient']
+        
+        if hasattr(response, 'data') and 'patient' in response.data:
+            return response.data['patient']
+        
+        return None
 
-# Backwards-compatible alias expected by tests
-RequestLoggingMiddleware = AuditMiddleware
+
+class SecurityMiddleware(MiddlewareMixin):
+    """
+    Middleware برای تشخیص و ثبت رویدادهای امنیتی
+    """
+    
+    def process_request(self, request):
+        """
+        بررسی درخواست برای تشخیص فعالیت‌های مشکوک
+        """
+        # بررسی تعداد درخواست‌های زیاد از یک IP
+        ip_address = self._get_client_ip(request)
+        
+        # اینجا می‌توان logic های پیچیده‌تری برای تشخیص تهدیدات اضافه کرد
+        # مثل rate limiting، pattern recognition، etc.
+        
+        return None
+    
+    def process_response(self, request, response):
+        """
+        بررسی response برای تشخیص مسائل امنیتی
+        """
+        # ثبت failed login attempts
+        if (request.path == '/api/token/' and 
+            request.method == 'POST' and 
+            response.status_code == 401):
+            
+            try:
+                SecurityEvent.objects.create(
+                    event_type=SecurityEvent.EventType.FAILED_LOGIN,
+                    user=getattr(request, 'user', None) if hasattr(request, 'user') and request.user.is_authenticated else None,
+                    ip_address=self._get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                    details={'path': request.path, 'method': request.method},
+                    severity='MEDIUM'
+                )
+            except Exception as e:
+                logger.error(f"Security event logging failed: {str(e)}")
+        
+        return response
+    
+    def _get_client_ip(self, request):
+        """
+        استخراج IP واقعی کلاینت
+        """
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            return x_forwarded_for.split(',')[0].strip()
+        return request.META.get('REMOTE_ADDR')

@@ -5,12 +5,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import PatientProfile
 from .serializers import PatientSerializer, CustomTokenObtainPairSerializer
+from .permissions import IsDoctor, IsPatientOwnerOrDoctor
 
 
 class PatientViewSet(viewsets.ModelViewSet):
     queryset = PatientProfile.objects.all().order_by('-created_at')
     serializer_class = PatientSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsDoctor]
+    
+    def get_permissions(self):
+        """
+        تنظیم permissions بر اساس action
+        """
+        if self.action in ['retrieve', 'update', 'partial_update', 'destroy', 'timeline']:
+            permission_classes = [IsAuthenticated, IsPatientOwnerOrDoctor]
+        else:
+            permission_classes = [IsAuthenticated, IsDoctor]
+        
+        return [permission() for permission in permission_classes]
 
     def get_serializer_context(self):
         ctx = super().get_serializer_context()
