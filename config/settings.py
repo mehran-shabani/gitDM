@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'security',
     'notifications',
     'gateway',
+    'analytics',
 
 ]
 

@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}داشبورد تحلیلی{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'analytics/css/dashboard.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">
+                <i class="fas fa-chart-line"></i> داشبورد تحلیلی
+            </h1>
+        </div>
+    </div>
+
+    <!-- خلاصه آمار -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">کل بیماران</h6>
+                            <h3 class="mb-0" id="total-patients">-</h3>
+                            <small class="text-success" id="patients-trend">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </small>
+                        </div>
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">بیماران فعال</h6>
+                            <h3 class="mb-0" id="active-patients">-</h3>
+                            <small class="text-muted">در 30 روز گذشته</small>
+                        </div>
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">ویزیت‌های امروز</h6>
+                            <h3 class="mb-0" id="today-encounters">-</h3>
+                            <small class="text-info">
+                                <i class="fas fa-calendar"></i> {{ today|date:"Y/m/d" }}
+                            </small>
+                        </div>
+                        <div class="stat-icon bg-info">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card stat-card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">هشدارهای فعال</h6>
+                            <h3 class="mb-0" id="pending-alerts">-</h3>
+                            <small class="text-warning">نیاز به بررسی</small>
+                        </div>
+                        <div class="stat-icon bg-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نمودارها -->
+    <div class="row mb-4">
+        <!-- نمودار روند قند خون -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">روند قند خون بیماران</h5>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary active" data-period="week">هفته</button>
+                            <button type="button" class="btn btn-outline-secondary" data-period="month">ماه</button>
+                            <button type="button" class="btn btn-outline-secondary" data-period="quarter">فصل</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas id="glucose-trend-chart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- توزیع HbA1c -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <h5 class="mb-0">توزیع HbA1c بیماران</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="hba1c-distribution-chart"></canvas>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">میانگین HbA1c:</span>
+                            <strong id="avg-hba1c">-</strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">در محدوده هدف:</span>
+                            <strong id="goal-achievement">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- جداول و لیست‌ها -->
+    <div class="row">
+        <!-- بیماران نیازمند توجه -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">بیماران نیازمند توجه</h5>
+                        <a href="#" class="btn btn-sm btn-primary">مشاهده همه</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>نام بیمار</th>
+                                    <th>آخرین HbA1c</th>
+                                    <th>وضعیت</th>
+                                    <th>عملیات</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attention-patients">
+                                <tr>
+                                    <td colspan="4" class="text-center py-4">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">در حال بارگذاری...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- آخرین هشدارها -->
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">آخرین هشدارها</h5>
+                        <a href="#" class="btn btn-sm btn-warning">مشاهده همه</a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush" id="recent-alerts">
+                        <div class="list-group-item text-center py-4">
+                            <div class="spinner-border spinner-border-sm" role="status">
+                                <span class="visually-hidden">در حال بارگذاری...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- دکمه‌های عملیات -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <button class="btn btn-secondary" onclick="refreshDashboard()">
+                    <i class="fas fa-sync-alt"></i> بروزرسانی
+                </button>
+                <div>
+                    <button class="btn btn-info" onclick="exportDashboard()">
+                        <i class="fas fa-download"></i> دانلود گزارش
+                    </button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reportModal">
+                        <i class="fas fa-file-alt"></i> ایجاد گزارش سفارشی
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- مودال گزارش سفارشی -->
+<div class="modal fade" id="reportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ایجاد گزارش سفارشی</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="report-form">
+                    <div class="mb-3">
+                        <label class="form-label">نوع گزارش</label>
+                        <select class="form-select" name="report_type" required>
+                            <option value="">انتخاب کنید...</option>
+                            <option value="patient_summary">خلاصه بیمار</option>
+                            <option value="doctor_performance">عملکرد پزشک</option>
+                            <option value="system_overview">نمای کلی سیستم</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">فرمت خروجی</label>
+                        <select class="form-select" name="format" required>
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                            <option value="csv">CSV</option>
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">از تاریخ</label>
+                                <input type="date" class="form-control" name="start_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">تا تاریخ</label>
+                                <input type="date" class="form-control" name="end_date">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="patient-select-container" style="display: none;">
+                        <label class="form-label">انتخاب بیمار</label>
+                        <select class="form-select" name="patient_id">
+                            <option value="">انتخاب کنید...</option>
+                        </select>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="include_charts" id="include-charts" checked>
+                        <label class="form-check-label" for="include-charts">
+                            شامل نمودارها
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                <button type="button" class="btn btn-primary" onclick="generateReport()">
+                    <i class="fas fa-file-export"></i> تولید گزارش
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="{% static 'analytics/js/dashboard.js' %}"></script>
+{% endblock %}
