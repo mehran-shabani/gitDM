@@ -13,7 +13,7 @@ from .services import ensure_upcoming_reminders, send_due_notifications
 
 class ReminderViewSet(viewsets.ModelViewSet):
     serializer_class = ReminderSerializer
-    permission_classes = [IsAuthenticated, IsDoctor]
+    permission_classes = (IsAuthenticated, IsDoctor)
 
     def get_queryset(self):
         user = self.request.user
