@@ -18,8 +18,7 @@ class ReminderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         # Limit to reminders for patients under current doctor
-        return Reminder.objects.filter(patient__primary_doctor=user)
-
+        return Reminder.objects.filter(patient__primary_doctor=user).select_related('patient')
     @action(detail=False, methods=['post'], url_path='generate')
     def generate_for_patient(self, request):
         """
