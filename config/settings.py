@@ -64,7 +64,11 @@ INSTALLED_APPS = [
     'notifications',
     'reminders',
     'gateway',
+
+    'analytics',
+
     'timeline',
+
 
 ]
 

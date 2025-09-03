@@ -57,4 +57,5 @@ urlpatterns = [
     path('versions/<str:resource_type>/<str:resource_id>/', version_views.versions_list),
     path('versions/<str:resource_type>/<str:resource_id>/revert/', version_views.versions_revert),
     path('export/patient/<str:pk>/', export_patient, name='export_patient'),
+    path('analytics/', include('analytics.urls')),
 ]
