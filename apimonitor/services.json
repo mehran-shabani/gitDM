@@ -1,0 +1,33 @@
+[
+  {
+    "name": "UsersAPI",
+    "base_url": "https://api.example.com",
+    "health_path": "/health",
+    "method": "GET",
+    "headers": {
+      "X-API-Key": "abc123"
+    },
+    "timeout_s": 3,
+    "enabled": true
+  },
+  {
+    "name": "Billing",
+    "base_url": "https://billing.example.com",
+    "health_path": "/status",
+    "method": "HEAD",
+    "headers": {},
+    "timeout_s": 2,
+    "enabled": true
+  },
+  {
+    "name": "Analytics",
+    "base_url": "https://analytics.example.com",
+    "health_path": "/api/health",
+    "method": "GET",
+    "headers": {
+      "Authorization": "Bearer token123"
+    },
+    "timeout_s": 5,
+    "enabled": true
+  }
+]

@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: apimonitor_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: .
+    container_name: apimonitor_web
+    command: >
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        gunicorn --bind 0.0.0.0:8000 apimonitor.wsgi:application
+      "
+    volumes:
+      - .:/app
+      - logs_data:/app/logs
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/admin/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  worker:
+    build: .
+    container_name: apimonitor_worker
+    command: celery -A apimonitor worker -l info
+    volumes:
+      - .:/app
+      - logs_data:/app/logs
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - web
+
+  beat:
+    build: .
+    container_name: apimonitor_beat
+    command: celery -A apimonitor beat -l info
+    volumes:
+      - .:/app
+      - logs_data:/app/logs
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - worker
+
+volumes:
+  redis_data:
+  logs_data:
