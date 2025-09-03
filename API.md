@@ -11,7 +11,9 @@ GitDM uses JWT (JSON Web Token) authentication for API access.
 **Endpoint**: `POST /api/token/`
 
 **Request Body**:
+
 ```json
+
 {
     "email": "doctor@example.com",
     "password": "your_password"
@@ -779,7 +781,7 @@ patient_data = {
     'diabetes_type': 'TYPE2',
     'age': 45
 }
-response = requests.post('http://localhost:8000/api/patients/', 
+response = requests.post('http://localhost:8000/api/patients/',
                         json=patient_data, headers=headers)
 patient = response.json()
 

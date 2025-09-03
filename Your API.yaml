@@ -1,0 +1,6258 @@
+openapi: 3.0.3
+info:
+  title: Your API
+  version: 1.0.0
+  description: Description here.
+paths:
+  /api/ai-summaries/:
+    get:
+      operationId: api_ai_summaries_list
+      description: List all AI summaries with optional filtering by patient
+      summary: List AI summaries
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AISummaryList'
+          description: ''
+    post:
+      operationId: api_ai_summaries_create
+      description: Create a new AI summary using GapGPT/OpenAI
+      summary: Create AI summary
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CreateAISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateAISummary'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAISummary'
+          description: ''
+  /api/ai-summaries/{id}/:
+    get:
+      operationId: api_ai_summaries_retrieve
+      description: Retrieve a specific AI summary by ID
+      summary: Get AI summary
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ai summary.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+    put:
+      operationId: api_ai_summaries_update
+      description: ViewSet for AI summaries with GapGPT/OpenAI integration
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ai summary.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+    patch:
+      operationId: api_ai_summaries_partial_update
+      description: ViewSet for AI summaries with GapGPT/OpenAI integration
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ai summary.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAISummary'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+    delete:
+      operationId: api_ai_summaries_destroy
+      description: Delete an AI summary
+      summary: Delete AI summary
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ai summary.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/ai-summaries/{id}/regenerate/:
+    post:
+      operationId: api_ai_summaries_regenerate_create
+      description: Regenerate AI summary for existing record with new content
+      summary: Regenerate AI summary
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this ai summary.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegenerateAISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegenerateAISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegenerateAISummary'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+  /api/ai-summaries/stats/:
+    get:
+      operationId: api_ai_summaries_stats_retrieve
+      description: Get statistics about AI summaries
+      summary: Get summary statistics
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+  /api/ai-summaries/test/:
+    post:
+      operationId: api_ai_summaries_test_create
+      description: Test the AI service connection and generate a simple summary
+      summary: Test AI service
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+  /api/ai-summaries/test-references/:
+    post:
+      operationId: api_ai_summaries_test_references_create
+      description: Test the clinical references linking function with sample text
+      summary: Test clinical references linking
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AISummary'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AISummary'
+          description: ''
+  /api/alerts/:
+    get:
+      operationId: api_alerts_list
+      description: ViewSet برای مشاهده هشدارهای بالینی
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClinicalAlert'
+          description: ''
+  /api/alerts/{id}/:
+    get:
+      operationId: api_alerts_retrieve
+      description: ViewSet برای مشاهده هشدارهای بالینی
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalAlert'
+          description: ''
+  /api/alerts/{id}/acknowledge/:
+    post:
+      operationId: api_alerts_acknowledge_create
+      description: تایید هشدار توسط پزشک
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicalAlert'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClinicalAlert'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClinicalAlert'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalAlert'
+          description: ''
+  /api/alerts/active_count/:
+    get:
+      operationId: api_alerts_active_count_retrieve
+      description: تعداد هشدارهای فعال
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalAlert'
+          description: ''
+  /api/analytics/dashboard/summary/:
+    get:
+      operationId: api_analytics_dashboard_summary_retrieve
+      description: خلاصه داشبورد برای کاربر فعلی
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/analytics/dashboard/widgets/:
+    get:
+      operationId: api_analytics_dashboard_widgets_retrieve
+      description: دریافت ویجت‌های داشبورد
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/analytics/doctor-analytics/:
+    get:
+      operationId: api_analytics_doctor_analytics_list
+      description: ViewSet برای آنالیتیکس پزشکان
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+    post:
+      operationId: api_analytics_doctor_analytics_create
+      description: ViewSet برای آنالیتیکس پزشکان
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+  /api/analytics/doctor-analytics/{id}/:
+    get:
+      operationId: api_analytics_doctor_analytics_retrieve
+      description: ViewSet برای آنالیتیکس پزشکان
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار پزشک.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+    put:
+      operationId: api_analytics_doctor_analytics_update
+      description: ViewSet برای آنالیتیکس پزشکان
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار پزشک.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+    patch:
+      operationId: api_analytics_doctor_analytics_partial_update
+      description: ViewSet برای آنالیتیکس پزشکان
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار پزشک.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDoctorAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+    delete:
+      operationId: api_analytics_doctor_analytics_destroy
+      description: ViewSet برای آنالیتیکس پزشکان
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار پزشک.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/analytics/doctor-analytics/{id}/patient_distribution/:
+    get:
+      operationId: api_analytics_doctor_analytics_patient_distribution_retrieve
+      description: دریافت نمودار توزیع بیماران
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار پزشک.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+  /api/analytics/doctor-analytics/calculate/:
+    post:
+      operationId: api_analytics_doctor_analytics_calculate_create
+      description: محاسبه آنالیتیکس برای یک پزشک
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DoctorAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+  /api/analytics/doctor-analytics/performance_comparison/:
+    get:
+      operationId: api_analytics_doctor_analytics_performance_comparison_retrieve
+      description: مقایسه عملکرد پزشکان
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DoctorAnalytics'
+          description: ''
+  /api/analytics/patient-analytics/:
+    get:
+      operationId: api_analytics_patient_analytics_list
+      description: ViewSet برای آنالیتیکس بیماران
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+    post:
+      operationId: api_analytics_patient_analytics_create
+      description: ViewSet برای آنالیتیکس بیماران
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+  /api/analytics/patient-analytics/{id}/:
+    get:
+      operationId: api_analytics_patient_analytics_retrieve
+      description: ViewSet برای آنالیتیکس بیماران
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+    put:
+      operationId: api_analytics_patient_analytics_update
+      description: ViewSet برای آنالیتیکس بیماران
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+    patch:
+      operationId: api_analytics_patient_analytics_partial_update
+      description: ViewSet برای آنالیتیکس بیماران
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+    delete:
+      operationId: api_analytics_patient_analytics_destroy
+      description: ViewSet برای آنالیتیکس بیماران
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/analytics/patient-analytics/{id}/glucose_chart/:
+    get:
+      operationId: api_analytics_patient_analytics_glucose_chart_retrieve
+      description: دریافت داده‌های نمودار قند خون
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+  /api/analytics/patient-analytics/{id}/hba1c_trend/:
+    get:
+      operationId: api_analytics_patient_analytics_hba1c_trend_retrieve
+      description: دریافت داده‌های روند HbA1c
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار بیمار.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+  /api/analytics/patient-analytics/batch_analytics/:
+    get:
+      operationId: api_analytics_patient_analytics_batch_analytics_retrieve
+      description: دریافت آنالیتیکس برای چند بیمار
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+  /api/analytics/patient-analytics/calculate/:
+    post:
+      operationId: api_analytics_patient_analytics_calculate_create
+      description: محاسبه آنالیتیکس برای یک بیمار
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientAnalytics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientAnalytics'
+          description: ''
+  /api/analytics/reports/:
+    get:
+      operationId: api_analytics_reports_list
+      description: ViewSet برای مدیریت گزارش‌ها
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+          description: ''
+    post:
+      operationId: api_analytics_reports_create
+      description: ایجاد درخواست گزارش جدید
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Report'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Report'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/analytics/reports/{id}/:
+    get:
+      operationId: api_analytics_reports_retrieve
+      description: ViewSet برای مدیریت گزارش‌ها
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+    put:
+      operationId: api_analytics_reports_update
+      description: ViewSet برای مدیریت گزارش‌ها
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Report'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Report'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+    patch:
+      operationId: api_analytics_reports_partial_update
+      description: ViewSet برای مدیریت گزارش‌ها
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReport'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReport'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReport'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+    delete:
+      operationId: api_analytics_reports_destroy
+      description: ViewSet برای مدیریت گزارش‌ها
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/analytics/reports/{id}/download/:
+    get:
+      operationId: api_analytics_reports_download_retrieve
+      description: دانلود فایل گزارش
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/analytics/reports/{id}/send_email/:
+    post:
+      operationId: api_analytics_reports_send_email_create
+      description: ارسال گزارش از طریق ایمیل
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Report'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Report'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Report'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/analytics/reports/templates/:
+    get:
+      operationId: api_analytics_reports_templates_retrieve
+      description: دریافت قالب‌های گزارش
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+          description: ''
+  /api/analytics/system-analytics/:
+    get:
+      operationId: api_analytics_system_analytics_list
+      description: ViewSet برای آنالیتیکس سیستم
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+    post:
+      operationId: api_analytics_system_analytics_create
+      description: ViewSet برای آنالیتیکس سیستم
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+  /api/analytics/system-analytics/{id}/:
+    get:
+      operationId: api_analytics_system_analytics_retrieve
+      description: ViewSet برای آنالیتیکس سیستم
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار سیستم.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+    put:
+      operationId: api_analytics_system_analytics_update
+      description: ViewSet برای آنالیتیکس سیستم
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار سیستم.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+    patch:
+      operationId: api_analytics_system_analytics_partial_update
+      description: ViewSet برای آنالیتیکس سیستم
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار سیستم.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSystemAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSystemAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSystemAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+    delete:
+      operationId: api_analytics_system_analytics_destroy
+      description: ViewSet برای آنالیتیکس سیستم
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this آمار سیستم.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/analytics/system-analytics/calculate/:
+    post:
+      operationId: api_analytics_system_analytics_calculate_create
+      description: محاسبه آنالیتیکس سیستم
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SystemAnalytics'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+  /api/analytics/system-analytics/health_check/:
+    get:
+      operationId: api_analytics_system_analytics_health_check_retrieve
+      description: بررسی سلامت سیستم
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+  /api/analytics/system-analytics/overview/:
+    get:
+      operationId: api_analytics_system_analytics_overview_retrieve
+      description: دریافت نمای کلی سیستم
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+  /api/analytics/system-analytics/trend_chart/:
+    get:
+      operationId: api_analytics_system_analytics_trend_chart_retrieve
+      description: دریافت نمودار روند
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemAnalytics'
+          description: ''
+  /api/anomaly-detections/:
+    get:
+      operationId: api_anomaly_detections_list
+      description: List all detected anomalies with optional filtering
+      summary: List anomaly detections
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AnomalyDetection'
+          description: ''
+  /api/anomaly-detections/{id}/:
+    get:
+      operationId: api_anomaly_detections_retrieve
+      description: Retrieve a specific anomaly detection by ID
+      summary: Get anomaly detection
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Anomaly Detection.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyDetection'
+          description: ''
+  /api/anomaly-detections/{id}/acknowledge/:
+    post:
+      operationId: api_anomaly_detections_acknowledge_create
+      description: Mark an anomaly as acknowledged by the current user
+      summary: Acknowledge anomaly
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Anomaly Detection.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnomalyDetection'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AnomalyDetection'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AnomalyDetection'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnomalyDetection'
+          description: ''
+  /api/api/token/:
+    post:
+      operationId: api_api_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/api/token/refresh/:
+    post:
+      operationId: api_api_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/baseline-metrics/:
+    get:
+      operationId: api_baseline_metrics_list
+      description: List baseline metrics for patients
+      summary: List baseline metrics
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BaselineMetrics'
+          description: ''
+  /api/baseline-metrics/{id}/:
+    get:
+      operationId: api_baseline_metrics_retrieve
+      description: Retrieve baseline metrics for a specific patient
+      summary: Get baseline metrics
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Baseline Metrics.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaselineMetrics'
+          description: ''
+  /api/baseline-metrics/calculate/:
+    post:
+      operationId: api_baseline_metrics_calculate_create
+      description: Calculate or recalculate baseline metrics for a patient
+      summary: Calculate baseline metrics
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaselineMetrics'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BaselineMetrics'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BaselineMetrics'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaselineMetrics'
+          description: ''
+  /api/encounters/:
+    get:
+      operationId: api_encounters_list
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Encounter'
+          description: ''
+    post:
+      operationId: api_encounters_create
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+          description: ''
+  /api/encounters/{id}/:
+    get:
+      operationId: api_encounters_retrieve
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this encounter.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+          description: ''
+    put:
+      operationId: api_encounters_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this encounter.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Encounter'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+          description: ''
+    patch:
+      operationId: api_encounters_partial_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this encounter.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEncounter'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEncounter'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEncounter'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Encounter'
+          description: ''
+    delete:
+      operationId: api_encounters_destroy
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this encounter.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/export/patient/{id}/:
+    get:
+      operationId: api_export_patient_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/labs/:
+    get:
+      operationId: api_labs_list
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LabResult'
+          description: ''
+    post:
+      operationId: api_labs_create
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabResult'
+          description: ''
+  /api/labs/{id}/:
+    get:
+      operationId: api_labs_retrieve
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lab result.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabResult'
+          description: ''
+    put:
+      operationId: api_labs_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lab result.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LabResult'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabResult'
+          description: ''
+    patch:
+      operationId: api_labs_partial_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lab result.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedLabResult'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedLabResult'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedLabResult'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabResult'
+          description: ''
+    delete:
+      operationId: api_labs_destroy
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this lab result.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/meds/:
+    get:
+      operationId: api_meds_list
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicationOrder'
+          description: ''
+    post:
+      operationId: api_meds_create
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationOrder'
+          description: ''
+  /api/meds/{id}/:
+    get:
+      operationId: api_meds_retrieve
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medication order.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationOrder'
+          description: ''
+    put:
+      operationId: api_meds_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medication order.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicationOrder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationOrder'
+          description: ''
+    patch:
+      operationId: api_meds_partial_update
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medication order.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationOrder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationOrder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicationOrder'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicationOrder'
+          description: ''
+    delete:
+      operationId: api_meds_destroy
+      description: |-
+        Scope queryset to records owned by current doctor via patient.primary_doctor.
+
+        Assumes model has a FK field named `patient` pointing to an object with
+        `primary_doctor` attribute. Superusers are exempt.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this medication order.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notifications/:
+    get:
+      operationId: api_notifications_list
+      description: ViewSet برای مشاهده اطلاع‌رسانی‌ها
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/{id}/:
+    get:
+      operationId: api_notifications_retrieve
+      description: ViewSet برای مشاهده اطلاع‌رسانی‌ها
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/{id}/mark_read/:
+    post:
+      operationId: api_notifications_mark_read_create
+      description: علامت‌گذاری به عنوان خوانده شده
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/mark_all_read/:
+    post:
+      operationId: api_notifications_mark_all_read_create
+      description: علامت‌گذاری همه به عنوان خوانده شده
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Notification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Notification'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/unread_count/:
+    get:
+      operationId: api_notifications_unread_count_retrieve
+      description: تعداد اطلاع‌رسانی‌های خوانده نشده
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/patients/:
+    get:
+      operationId: api_patients_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Patient'
+          description: ''
+    post:
+      operationId: api_patients_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Patient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Patient'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/patients/{id}/:
+    get:
+      operationId: api_patients_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Patient Profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    put:
+      operationId: api_patients_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Patient Profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Patient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Patient'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    patch:
+      operationId: api_patients_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Patient Profile.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatient'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatient'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatient'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+    delete:
+      operationId: api_patients_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Patient Profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/patients/{id}/timeline/:
+    get:
+      operationId: api_patients_timeline_retrieve
+      description: |-
+        تایم‌لاین تجمیع‌شده یک بیمار را برمی‌گرداند، شامل مواجهات بالینی، نتایج آزمایش، دستورهای دارویی و خلاصه‌های تولیدشده توسط زیرسیستم هوش‌مصنوعی.
+
+        جزئیات:
+        - این اکشن برای یک بیمار مشخص (بر پایه pk/URL) اجرا می‌شود و مجموعه‌های مرتبط را جداگانه واکشی و سریالایز می‌کند.
+        - محدودیت‌ها:
+        - پارامتر کوئری `limit` تعیین‌کننده حداکثر تعداد آیتم‌ها برای هر یک از نوع‌های Encounter، LabResult و MedicationOrder است. مقدار پیش‌فرض 100 و بیشینه مجاز 500 است (اگر مقدار بزرگ‌تر ارسال شود به 500 تقلیل می‌یابد).
+        - AISummaryها مستقل از `limit` همواره تا 5 مورد اخیر (بر اساس `created_at` نزولی) محدود می‌شوند.
+        - داده‌های بازگردانده شده:
+        - patient: داده سریالایزشدهٔ بیمار
+        - encounters: لیست سریالایزشدهٔ Encounterها مرتب‌شده بر اساس `occured_at` نزولی (تا `limit`)
+        - labs: لیست سریالایزشدهٔ LabResultها مرتب‌شده بر اساس `taken_at` نزولی (تا `limit`)
+        - medications: لیست سریالایزشدهٔ MedicationOrderها مرتب‌شده بر اساس `start_date` نزولی (تا `limit`)
+        - ai_summaries: لیست سریالایزشدهٔ AISummaryها (حداکثر 5 مورد، مرتب بر اساس `created_at` نزولی)
+
+        نکات مرتبط با هوش‌مصنوعی و پردازش:
+        - AISummaryها خروجی‌های تحلیلی/خلاصه‌سازی هستند که ممکن است بر پایه پردازش‌های خودکار، مدل‌های زبانی یا آنالیزهای بالینی تولید شده باشند؛ این موارد مکمل داده‌های خام بالینی هستند و برای نمایش خلاصهٔ وضعیت یا نکات مهم بیمار ارائه می‌شوند.
+        - این اکشن صرفاً خواندن و سریالایز کردن رکوردهای AISummary را انجام می‌دهد و هیچ پردازش یا اجرای تسک ضمنی (مثل فراخوانی مدل یا ایجاد وظیفه پس‌زمینه) را راه‌اندازی نمی‌کند؛ اگر نیاز به تولید یا به‌روزرسانی خلاصه‌های هوش‌مصنوعی باشد، آن عملیات باید از مسیرهای جداگانه مدیریت شود.
+
+        عوارض جانبی و خطاها:
+        - خود تابع داده‌ها را تغییر نمی‌دهد؛ در صورت نبودن دسترسی یا وجود خطا در بازیابی آبجکت بیمار، خطاهای مربوط به permissions یا 404 توسط متدهای پایهٔ ViewSet/DRF تولید می‌شوند.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Patient Profile.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: ''
+  /api/pattern-alerts/:
+    get:
+      operationId: api_pattern_alerts_list
+      description: List all pattern-based alerts with filtering options
+      summary: List pattern alerts
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatternAlert'
+          description: ''
+  /api/pattern-alerts/{id}/:
+    get:
+      operationId: api_pattern_alerts_retrieve
+      description: Retrieve a specific pattern alert by ID
+      summary: Get pattern alert
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pattern Alert.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternAlert'
+          description: ''
+  /api/pattern-alerts/{id}/resolve/:
+    post:
+      operationId: api_pattern_alerts_resolve_create
+      description: Mark a pattern alert as resolved
+      summary: Resolve pattern alert
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pattern Alert.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatternAlert'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatternAlert'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatternAlert'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternAlert'
+          description: ''
+  /api/pattern-analyses/:
+    get:
+      operationId: api_pattern_analyses_list
+      description: List all pattern analyses with optional filtering by patient and
+        pattern type
+      summary: List pattern analyses
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatternAnalysis'
+          description: ''
+  /api/pattern-analyses/{id}/:
+    get:
+      operationId: api_pattern_analyses_retrieve
+      description: Retrieve a specific pattern analysis by ID
+      summary: Get pattern analysis
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Pattern Analysis.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternAnalysis'
+          description: ''
+  /api/pattern-analyses/analyze/:
+    post:
+      operationId: api_pattern_analyses_analyze_create
+      description: Trigger new pattern analysis for specified patient and pattern
+        types
+      summary: Request new pattern analysis
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatternAnalysis'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatternAnalysis'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatternAnalysis'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatternAnalysis'
+          description: ''
+  /api/refs/:
+    get:
+      operationId: api_refs_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClinicalReference'
+          description: ''
+    post:
+      operationId: api_refs_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalReference'
+          description: ''
+  /api/refs/{id}/:
+    get:
+      operationId: api_refs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this clinical reference.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalReference'
+          description: ''
+    put:
+      operationId: api_refs_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this clinical reference.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClinicalReference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalReference'
+          description: ''
+    patch:
+      operationId: api_refs_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this clinical reference.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedClinicalReference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedClinicalReference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedClinicalReference'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClinicalReference'
+          description: ''
+    delete:
+      operationId: api_refs_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this clinical reference.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/reminders/:
+    get:
+      operationId: api_reminders_list
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reminder'
+          description: ''
+    post:
+      operationId: api_reminders_create
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/reminders/{id}/:
+    get:
+      operationId: api_reminders_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+    put:
+      operationId: api_reminders_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+    patch:
+      operationId: api_reminders_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedReminder'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+    delete:
+      operationId: api_reminders_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/reminders/{id}/complete/:
+    post:
+      operationId: api_reminders_complete_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/reminders/{id}/snooze/:
+    post:
+      operationId: api_reminders_snooze_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/reminders/due/:
+    get:
+      operationId: api_reminders_due_retrieve
+      description: |-
+        List due reminders for current doctor patients.
+        Optional query: ?patient_id=<uuid>
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/reminders/generate/:
+    post:
+      operationId: api_reminders_generate_create
+      description: |-
+        Generate upcoming reminders for a given patient_id.
+        Body: {"patient_id": "<uuid>"}
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/reminders/notify-due/:
+    post:
+      operationId: api_reminders_notify_due_create
+      description: |-
+        Send Notification entries for all due reminders for a given patient.
+        Body: {"patient_id": "<uuid>"}
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reminder'
+          description: ''
+  /api/token/:
+    post:
+      operationId: api_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPair'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: api_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/versions/{resource_type}/{resource_id}/:
+    get:
+      operationId: api_versions_retrieve
+      parameters:
+      - in: path
+        name: resource_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: resource_type
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/versions/{resource_type}/{resource_id}/revert/:
+    post:
+      operationId: api_versions_revert_create
+      parameters:
+      - in: path
+        name: resource_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: resource_type
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
+  /timeline/api/categories/:
+    get:
+      operationId: timeline_api_categories_list
+      description: ViewSet برای مشاهده دسته‌بندی‌های رویدادهای تایم‌لاین
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEventCategory'
+          description: ''
+  /timeline/api/categories/{id}/:
+    get:
+      operationId: timeline_api_categories_retrieve
+      description: ViewSet برای مشاهده دسته‌بندی‌های رویدادهای تایم‌لاین
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Timeline Event Category.
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineEventCategory'
+          description: ''
+  /timeline/api/preferences/:
+    get:
+      operationId: timeline_api_preferences_list
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    post:
+      operationId: timeline_api_preferences_create
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+  /timeline/api/preferences/{id}/:
+    get:
+      operationId: timeline_api_preferences_retrieve
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    put:
+      operationId: timeline_api_preferences_update
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    patch:
+      operationId: timeline_api_preferences_partial_update
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientTimelinePreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientTimelinePreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPatientTimelinePreference'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    delete:
+      operationId: timeline_api_preferences_destroy
+      description: ViewSet برای مدیریت تنظیمات تایم‌لاین بیمار
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /timeline/api/preferences/my_preferences/:
+    get:
+      operationId: timeline_api_preferences_my_preferences_retrieve
+      description: تنظیمات تایم‌لاین کاربر جاری (اگر بیمار است)
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    post:
+      operationId: timeline_api_preferences_my_preferences_create
+      description: تنظیمات تایم‌لاین کاربر جاری (اگر بیمار است)
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+    put:
+      operationId: timeline_api_preferences_my_preferences_update
+      description: تنظیمات تایم‌لاین کاربر جاری (اگر بیمار است)
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatientTimelinePreference'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTimelinePreference'
+          description: ''
+  /timeline/api/reminder-templates/:
+    get:
+      operationId: timeline_api_reminder_templates_list
+      description: ViewSet برای مشاهده قالب‌های یادآوری
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReminderTemplate'
+          description: ''
+  /timeline/api/reminder-templates/{id}/:
+    get:
+      operationId: timeline_api_reminder_templates_retrieve
+      description: ViewSet برای مشاهده قالب‌های یادآوری
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Reminder Template.
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderTemplate'
+          description: ''
+  /timeline/api/reminder-templates/by_test_type/:
+    get:
+      operationId: timeline_api_reminder_templates_by_test_type_retrieve
+      description: دریافت قالب بر اساس نوع آزمایش
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderTemplate'
+          description: ''
+  /timeline/api/reminders/:
+    get:
+      operationId: timeline_api_reminders_list
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TestReminder'
+          description: ''
+    post:
+      operationId: timeline_api_reminders_create
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/reminders/{id}/:
+    get:
+      operationId: timeline_api_reminders_retrieve
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+    put:
+      operationId: timeline_api_reminders_update
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+    patch:
+      operationId: timeline_api_reminders_partial_update
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTestReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTestReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTestReminder'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+    delete:
+      operationId: timeline_api_reminders_destroy
+      description: ViewSet برای مدیریت یادآورهای آزمایشات
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /timeline/api/reminders/{id}/mark_completed/:
+    post:
+      operationId: timeline_api_reminders_mark_completed_create
+      description: علامت‌گذاری یادآوری به عنوان انجام شده
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/reminders/create_from_template/:
+    post:
+      operationId: timeline_api_reminders_create_from_template_create
+      description: ایجاد یادآوری از قالب
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TestReminder'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/reminders/overdue_reminders/:
+    get:
+      operationId: timeline_api_reminders_overdue_reminders_retrieve
+      description: یادآورهای عقب‌افتاده
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/reminders/patient_reminders/:
+    get:
+      operationId: timeline_api_reminders_patient_reminders_retrieve
+      description: دریافت یادآورهای یک بیمار خاص
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/reminders/upcoming_reminders/:
+    get:
+      operationId: timeline_api_reminders_upcoming_reminders_retrieve
+      description: یادآورهای آتی (در ۷ روز آینده)
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestReminder'
+          description: ''
+  /timeline/api/timeline/:
+    get:
+      operationId: timeline_api_timeline_list
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+    post:
+      operationId: timeline_api_timeline_create
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+  /timeline/api/timeline/{id}/:
+    get:
+      operationId: timeline_api_timeline_retrieve
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+    put:
+      operationId: timeline_api_timeline_update
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MedicalTimeline'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+    patch:
+      operationId: timeline_api_timeline_partial_update
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalTimeline'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalTimeline'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMedicalTimeline'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+    delete:
+      operationId: timeline_api_timeline_destroy
+      description: ViewSet برای مدیریت تایم‌لاین پزشکی
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /timeline/api/timeline/patient_timeline/:
+    get:
+      operationId: timeline_api_timeline_patient_timeline_retrieve
+      description: دریافت تایم‌لاین یک بیمار خاص
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+  /timeline/api/timeline/timeline_summary/:
+    get:
+      operationId: timeline_api_timeline_timeline_summary_retrieve
+      description: خلاصه‌ای از تایم‌لاین بیمار
+      tags:
+      - timeline
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MedicalTimeline'
+          description: ''
+components:
+  schemas:
+    AISummary:
+      type: object
+      description: Serializer for AISummary model with enhanced fields
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        content_type:
+          type: integer
+          nullable: true
+        object_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        resource_type:
+          type: string
+          readOnly: true
+        summary:
+          type: string
+        references:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - patient
+      - references
+      - resource_type
+      - summary
+      - updated_at
+    AISummaryList:
+      type: object
+      description: Simplified serializer for listing AI summaries
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        resource_type:
+          type: string
+          readOnly: true
+        summary_preview:
+          type: string
+          readOnly: true
+        references_count:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - patient
+      - references_count
+      - resource_type
+      - summary_preview
+      - updated_at
+    AnomalyDetection:
+      type: object
+      description: Serializer for AnomalyDetection model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        anomaly_type:
+          $ref: '#/components/schemas/AnomalyTypeEnum'
+        anomaly_type_display:
+          type: string
+          readOnly: true
+        severity_level:
+          $ref: '#/components/schemas/SeverityLevelEnum'
+        severity_level_display:
+          type: string
+          readOnly: true
+        description:
+          type: string
+        detected_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+          nullable: true
+        expected_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+          nullable: true
+        deviation_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,3})?$
+        is_acknowledged:
+          type: boolean
+        acknowledged_by:
+          type: integer
+          nullable: true
+        acknowledged_by_name:
+          type: string
+          readOnly: true
+        acknowledged_at:
+          type: string
+          format: date-time
+          nullable: true
+        detected_at:
+          type: string
+          format: date-time
+          readOnly: true
+        data_timestamp:
+          type: string
+          format: date-time
+      required:
+      - acknowledged_by_name
+      - anomaly_type
+      - anomaly_type_display
+      - data_timestamp
+      - description
+      - detected_at
+      - deviation_score
+      - id
+      - patient
+      - severity_level
+      - severity_level_display
+    AnomalyTypeEnum:
+      enum:
+      - OUTLIER
+      - SUDDEN_CHANGE
+      - TREND_REVERSAL
+      - MISSING_DATA
+      - MED_SKIP
+      - UNUSUAL_PATTERN
+      type: string
+      description: |-
+        * `OUTLIER` - نقطه پرت آماری
+        * `SUDDEN_CHANGE` - تغییر ناگهانی
+        * `TREND_REVERSAL` - معکوس شدن روند
+        * `MISSING_DATA` - داده گمشده
+        * `MED_SKIP` - عدم مصرف دارو
+        * `UNUSUAL_PATTERN` - الگوی غیرعادی
+    BaselineMetrics:
+      type: object
+      description: Serializer for BaselineMetrics model
+      properties:
+        patient:
+          type: integer
+        avg_hba1c:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        avg_blood_glucose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        avg_systolic_bp:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        avg_diastolic_bp:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+        std_hba1c:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        std_blood_glucose:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        std_systolic_bp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        std_diastolic_bp:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+          nullable: true
+        avg_encounters_per_month:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        avg_labs_per_month:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,2}(?:\.\d{0,2})?$
+          nullable: true
+        medication_adherence_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+          nullable: true
+        last_calculated:
+          type: string
+          format: date-time
+          readOnly: true
+        data_points_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+      required:
+      - last_calculated
+      - patient
+    BlankEnum:
+      enum:
+      - ''
+    ClinicalAlert:
+      type: object
+      description: Serializer برای هشدارهای بالینی
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        alert_type:
+          $ref: '#/components/schemas/ClinicalAlertAlertTypeEnum'
+        severity:
+          $ref: '#/components/schemas/ClinicalAlertSeverityEnum'
+        trigger_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+          nullable: true
+        threshold_value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+          nullable: true
+        message:
+          type: string
+        is_active:
+          type: boolean
+        acknowledged_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        patient_name:
+          type: string
+          readOnly: true
+        acknowledged_by_name:
+          type: string
+          readOnly: true
+      required:
+      - acknowledged_at
+      - acknowledged_by_name
+      - alert_type
+      - created_at
+      - id
+      - message
+      - patient_name
+    ClinicalAlertAlertTypeEnum:
+      enum:
+      - HIGH_HBA1C
+      - LOW_GLUCOSE
+      - HIGH_GLUCOSE
+      - MISSED_APPOINTMENT
+      - DRUG_INTERACTION
+      - ABNORMAL_TREND
+      type: string
+      description: |-
+        * `HIGH_HBA1C` - HbA1c بالا
+        * `LOW_GLUCOSE` - قند خون پایین
+        * `HIGH_GLUCOSE` - قند خون بالا
+        * `MISSED_APPOINTMENT` - عدم حضور در ویزیت
+        * `DRUG_INTERACTION` - تداخل دارویی
+        * `ABNORMAL_TREND` - روند غیرطبیعی
+    ClinicalAlertSeverityEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+      type: string
+      description: |-
+        * `LOW` - پایین
+        * `MEDIUM` - متوسط
+        * `HIGH` - بالا
+        * `CRITICAL` - بحرانی
+    ClinicalReference:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        source:
+          type: string
+          maxLength: 120
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1900
+          format: int64
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        topic:
+          type: string
+          maxLength: 80
+      required:
+      - id
+      - source
+      - title
+      - topic
+      - year
+    CreateAISummary:
+      type: object
+      description: Serializer for creating AI summaries with content to be processed
+      properties:
+        patient_id:
+          type: integer
+        content:
+          type: string
+          description: Raw medical content to be summarized by AI
+        content_type_model:
+          type: string
+          description: Model name for generic relation (e.g., 'encounter', 'lab_result')
+        object_id:
+          type: string
+          description: Object ID for generic relation
+        context:
+          type: string
+          description: Optional patient context for better summarization
+        summary_type:
+          allOf:
+          - $ref: '#/components/schemas/SummaryTypeEnum'
+          default: medical_record
+          description: |-
+            Type of summary for specialized AI prompts
+
+            * `medical_record` - Medical Record
+            * `encounter` - Patient Encounter
+            * `lab_results` - Laboratory Results
+            * `medications` - Medications
+        topic_hint:
+          type: string
+          default: diabetes
+          description: Topic hint for linking clinical references
+        async_processing:
+          type: boolean
+          default: true
+          description: Process summary asynchronously using background task
+      required:
+      - content
+      - patient_id
+    DefaultFrequencyEnum:
+      enum:
+      - WEEKLY
+      - MONTHLY
+      - QUARTERLY
+      - BIANNUALLY
+      - ANNUALLY
+      - CUSTOM
+      type: string
+      description: |-
+        * `WEEKLY` - هفتگی
+        * `MONTHLY` - ماهانه
+        * `QUARTERLY` - سه‌ماهه
+        * `BIANNUALLY` - شش‌ماهه
+        * `ANNUALLY` - سالانه
+        * `CUSTOM` - سفارشی
+    DefaultPriorityEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - URGENT
+      type: string
+      description: |-
+        * `LOW` - پایین
+        * `MEDIUM` - متوسط
+        * `HIGH` - بالا
+        * `URGENT` - فوری
+    DoctorAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای پزشک
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        doctor:
+          type: integer
+          title: پزشک
+        doctor_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        total_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل بیماران
+        active_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران فعال
+        new_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران جدید
+        total_encounters:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل ویزیت‌ها
+        avg_encounters_per_patient:
+          type: number
+          format: double
+          nullable: true
+          title: میانگین ویزیت به ازای هر بیمار
+        avg_patient_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c بیماران
+        patients_at_goal:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران در محدوده هدف
+        patients_above_goal:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران بالای محدوده هدف
+        goal_achievement_rate:
+          type: string
+          readOnly: true
+        total_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل هشدارها
+        critical_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: هشدارهای بحرانی
+        alert_response_rate:
+          type: string
+          readOnly: true
+        performance_score:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: امتیاز عملکرد
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - alert_response_rate
+      - created_at
+      - doctor
+      - doctor_name
+      - goal_achievement_rate
+      - id
+      - updated_at
+    Encounter:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        occurred_at:
+          type: string
+          format: date-time
+        subjective:
+          type: string
+        objective: {}
+        assessment: {}
+        plan: {}
+        created_by:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - id
+      - occurred_at
+      - patient
+    EventTypeEnum:
+      enum:
+      - ENCOUNTER
+      - LAB_RESULT
+      - MEDICATION
+      - PHYSICAL_EXAM
+      - DIAGNOSTIC_TEST
+      - PROCEDURE
+      - DIET_PLAN
+      - EXERCISE
+      - ALERT
+      - REMINDER
+      type: string
+      description: |-
+        * `ENCOUNTER` - مواجهه بالینی
+        * `LAB_RESULT` - نتیجه آزمایش
+        * `MEDICATION` - دارو
+        * `PHYSICAL_EXAM` - معاینه فیزیکی
+        * `DIAGNOSTIC_TEST` - تست تشخیصی
+        * `PROCEDURE` - اقدام درمانی
+        * `DIET_PLAN` - برنامه غذایی
+        * `EXERCISE` - ورزش
+        * `ALERT` - هشدار بالینی
+        * `REMINDER` - یادآوری
+    FormatEnum:
+      enum:
+      - pdf
+      - excel
+      - csv
+      type: string
+      description: |-
+        * `pdf` - PDF
+        * `excel` - Excel
+        * `csv` - CSV
+    FrequencyAc7Enum:
+      enum:
+      - WEEKLY
+      - MONTHLY
+      - QUARTERLY
+      - BIANNUALLY
+      - ANNUALLY
+      - CUSTOM
+      type: string
+      description: |-
+        * `WEEKLY` - هفتگی
+        * `MONTHLY` - ماهانه
+        * `QUARTERLY` - سه‌ماهه
+        * `BIANNUALLY` - شش‌ماهه
+        * `ANNUALLY` - سالانه
+        * `CUSTOM` - سفارشی
+    GlucoseTrendEnum:
+      enum:
+      - improving
+      - stable
+      - worsening
+      type: string
+      description: |-
+        * `improving` - در حال بهبود
+        * `stable` - ثابت
+        * `worsening` - در حال بدتر شدن
+    Hba1cTrendEnum:
+      enum:
+      - improving
+      - stable
+      - worsening
+      type: string
+      description: |-
+        * `improving` - در حال بهبود
+        * `stable` - ثابت
+        * `worsening` - در حال بدتر شدن
+    LabResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        encounter:
+          type: integer
+          nullable: true
+        loinc:
+          type: string
+          maxLength: 40
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+        unit:
+          type: string
+          maxLength: 16
+        taken_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - loinc
+      - patient
+      - taken_at
+      - unit
+      - value
+    MedicalTimeline:
+      type: object
+      description: سریالایزر برای نمایش رویدادهای تایم‌لاین پزشکی
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_type_display:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        metadata: {}
+        severity:
+          $ref: '#/components/schemas/MedicalTimelineSeverityEnum'
+        severity_display:
+          type: string
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_visible:
+          type: boolean
+        content_type_name:
+          type: string
+          readOnly: true
+        content_object_data:
+          type: string
+          readOnly: true
+      required:
+      - content_object_data
+      - content_type_name
+      - created_at
+      - created_by
+      - created_by_name
+      - event_type
+      - event_type_display
+      - id
+      - occurred_at
+      - patient
+      - patient_name
+      - severity_display
+      - title
+    MedicalTimelineSeverityEnum:
+      enum:
+      - LOW
+      - NORMAL
+      - HIGH
+      - CRITICAL
+      type: string
+      description: |-
+        * `LOW` - پایین
+        * `NORMAL` - عادی
+        * `HIGH` - بالا
+        * `CRITICAL` - بحرانی
+    MedicationOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        encounter:
+          type: integer
+          nullable: true
+        atc:
+          type: string
+          description: ATC classification code (e.g., A10BA02 for Metformin)
+          pattern: ^[A-Z]\d{2}[A-Z]{1,2}\d{2}$
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 100
+        dose:
+          type: string
+          description: 'دوز دارو (مثال: 500mg, 1.5g, 10units)'
+          maxLength: 50
+        frequency:
+          $ref: '#/components/schemas/MedicationOrderFrequencyEnum'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - atc
+      - dose
+      - id
+      - name
+      - patient
+      - start_date
+    MedicationOrderFrequencyEnum:
+      enum:
+      - QD
+      - BID
+      - TID
+      - QID
+      - Q6H
+      - Q8H
+      - Q12H
+      - PRN
+      - QW
+      - QM
+      type: string
+      description: |-
+        * `QD` - Once daily
+        * `BID` - Twice daily
+        * `TID` - Three times daily
+        * `QID` - Four times daily
+        * `Q6H` - Every 6 hours
+        * `Q8H` - Every 8 hours
+        * `Q12H` - Every 12 hours
+        * `PRN` - As needed
+        * `QW` - Weekly
+        * `QM` - Monthly
+    Notification:
+      type: object
+      description: Serializer برای اطلاع‌رسانی‌ها
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        message:
+          type: string
+        notification_type:
+          $ref: '#/components/schemas/NotificationTypeEnum'
+        priority:
+          $ref: '#/components/schemas/Priority95eEnum'
+        patient_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        resource_type:
+          type: string
+          nullable: true
+          maxLength: 50
+        resource_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        is_read:
+          type: boolean
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        recipient_name:
+          type: string
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - message
+      - read_at
+      - recipient_name
+      - title
+    NotificationTypeEnum:
+      enum:
+      - INFO
+      - WARNING
+      - CRITICAL
+      - REMINDER
+      - AI_SUMMARY
+      type: string
+      description: |-
+        * `INFO` - اطلاعات
+        * `WARNING` - هشدار
+        * `CRITICAL` - بحرانی
+        * `REMINDER` - یادآوری
+        * `AI_SUMMARY` - خلاصه هوشمند
+    NullEnum:
+      enum:
+      - null
+    PatchedAISummary:
+      type: object
+      description: Serializer for AISummary model with enhanced fields
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        content_type:
+          type: integer
+          nullable: true
+        object_id:
+          type: string
+          nullable: true
+          maxLength: 64
+        resource_type:
+          type: string
+          readOnly: true
+        summary:
+          type: string
+        references:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedClinicalReference:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        source:
+          type: string
+          maxLength: 120
+        year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 1900
+          format: int64
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        topic:
+          type: string
+          maxLength: 80
+    PatchedDoctorAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای پزشک
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        doctor:
+          type: integer
+          title: پزشک
+        doctor_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        total_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل بیماران
+        active_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران فعال
+        new_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران جدید
+        total_encounters:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل ویزیت‌ها
+        avg_encounters_per_patient:
+          type: number
+          format: double
+          nullable: true
+          title: میانگین ویزیت به ازای هر بیمار
+        avg_patient_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c بیماران
+        patients_at_goal:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران در محدوده هدف
+        patients_above_goal:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: بیماران بالای محدوده هدف
+        goal_achievement_rate:
+          type: string
+          readOnly: true
+        total_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل هشدارها
+        critical_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: هشدارهای بحرانی
+        alert_response_rate:
+          type: string
+          readOnly: true
+        performance_score:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: امتیاز عملکرد
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedEncounter:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        occurred_at:
+          type: string
+          format: date-time
+        subjective:
+          type: string
+        objective: {}
+        assessment: {}
+        plan: {}
+        created_by:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedLabResult:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        encounter:
+          type: integer
+          nullable: true
+        loinc:
+          type: string
+          maxLength: 40
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,4})?$
+        unit:
+          type: string
+          maxLength: 16
+        taken_at:
+          type: string
+          format: date-time
+    PatchedMedicalTimeline:
+      type: object
+      description: سریالایزر برای نمایش رویدادهای تایم‌لاین پزشکی
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        event_type_display:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        metadata: {}
+        severity:
+          $ref: '#/components/schemas/MedicalTimelineSeverityEnum'
+        severity_display:
+          type: string
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_visible:
+          type: boolean
+        content_type_name:
+          type: string
+          readOnly: true
+        content_object_data:
+          type: string
+          readOnly: true
+    PatchedMedicationOrder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        encounter:
+          type: integer
+          nullable: true
+        atc:
+          type: string
+          description: ATC classification code (e.g., A10BA02 for Metformin)
+          pattern: ^[A-Z]\d{2}[A-Z]{1,2}\d{2}$
+          maxLength: 20
+        name:
+          type: string
+          maxLength: 100
+        dose:
+          type: string
+          description: 'دوز دارو (مثال: 500mg, 1.5g, 10units)'
+          maxLength: 50
+        frequency:
+          $ref: '#/components/schemas/MedicationOrderFrequencyEnum'
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+          nullable: true
+    PatchedPatient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        national_id:
+          type: string
+          nullable: true
+          description: کد ملی 10 رقمی
+          maxLength: 20
+        full_name:
+          type: string
+          maxLength: 120
+        dob:
+          type: string
+          format: date
+          nullable: true
+          description: تاریخ تولد
+        sex:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SexEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        primary_doctor:
+          type: integer
+          nullable: true
+        primary_doctor_id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPatientAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای بیمار
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: بیمار
+        patient_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        avg_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: میانگین قند خون
+        min_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: حداقل قند خون
+        max_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: حداکثر قند خون
+        glucose_std_dev:
+          type: number
+          format: double
+          nullable: true
+          title: انحراف معیار قند خون
+        glucose_trend:
+          allOf:
+          - $ref: '#/components/schemas/GlucoseTrendEnum'
+          title: روند قند خون
+        glucose_in_range_percentage:
+          type: string
+          readOnly: true
+        avg_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c
+        hba1c_trend:
+          allOf:
+          - $ref: '#/components/schemas/Hba1cTrendEnum'
+          title: روند HbA1c
+        hba1c_status:
+          type: string
+          readOnly: true
+        avg_systolic:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+          title: میانگین فشار سیستولیک
+        avg_diastolic:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+          title: میانگین فشار دیاستولیک
+        encounters_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد ویزیت‌ها
+        medications_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد داروها
+        lab_tests_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد آزمایش‌ها
+        alerts_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد هشدارها
+        compliance_score:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: امتیاز پایبندی به درمان
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedPatientTimelinePreference:
+      type: object
+      description: سریالایزر برای تنظیمات تایم‌لاین بیمار
+      properties:
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        show_lab_results:
+          type: boolean
+        show_medications:
+          type: boolean
+        show_encounters:
+          type: boolean
+        show_alerts:
+          type: boolean
+        show_reminders:
+          type: boolean
+        enable_email_reminders:
+          type: boolean
+        enable_sms_reminders:
+          type: boolean
+        default_timeline_range_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+    PatchedReminder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        reminder_type:
+          $ref: '#/components/schemas/ReminderTypeEnum'
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        snooze_until:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReminderStatusEnum'
+          readOnly: true
+        priority:
+          $ref: '#/components/schemas/ReminderPriorityEnum'
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_due:
+          type: boolean
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+    PatchedReport:
+      type: object
+      description: سریالایزر برای گزارش‌ها
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        report_type:
+          allOf:
+          - $ref: '#/components/schemas/ReportTypeEnum'
+          title: نوع گزارش
+        format:
+          allOf:
+          - $ref: '#/components/schemas/FormatEnum'
+          title: فرمت
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          title: وضعیت
+        requested_by:
+          type: integer
+          nullable: true
+          title: درخواست‌دهنده
+        requested_by_name:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: تاریخ شروع
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: تاریخ پایان
+        patient:
+          type: integer
+          nullable: true
+          title: بیمار
+        patient_name:
+          type: string
+          readOnly: true
+        doctor:
+          type: integer
+          nullable: true
+          title: پزشک
+        doctor_name:
+          type: string
+          readOnly: true
+        file_path:
+          type: string
+          readOnly: true
+          nullable: true
+          title: مسیر فایل
+        error_message:
+          type: string
+          readOnly: true
+          nullable: true
+          title: پیام خطا
+        metadata:
+          title: متادیتا
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        duration:
+          type: string
+          readOnly: true
+    PatchedSystemAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای سیستم
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        total_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل کاربران
+        active_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کاربران فعال
+        total_doctors:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل پزشکان
+        total_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل بیماران
+        user_engagement_rate:
+          type: string
+          readOnly: true
+        total_encounters:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل ویزیت‌ها
+        total_lab_tests:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل آزمایش‌ها
+        total_medications:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل نسخه‌ها
+        total_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل هشدارها
+        avg_system_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c سیستم
+        system_goal_achievement:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: درصد دستیابی به اهداف
+        data_completeness_score:
+          type: string
+          readOnly: true
+        daily_active_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کاربران فعال روزانه
+        api_calls:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد فراخوانی API
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedTestReminder:
+      type: object
+      description: سریالایزر برای یادآورهای آزمایشات
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        test_type:
+          $ref: '#/components/schemas/TestTypeEnum'
+        test_type_display:
+          type: string
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyAc7Enum'
+        frequency_display:
+          type: string
+          readOnly: true
+        priority:
+          $ref: '#/components/schemas/Priority95eEnum'
+        priority_display:
+          type: string
+          readOnly: true
+        last_performed:
+          type: string
+          format: date-time
+          nullable: true
+        next_due:
+          type: string
+          format: date-time
+        reminder_days_before:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        custom_interval_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          description: فاصله سفارشی به روز (فقط برای نوع CUSTOM)
+        created_by:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_overdue:
+          type: string
+          readOnly: true
+        days_until_due:
+          type: string
+          readOnly: true
+        should_send_reminder:
+          type: string
+          readOnly: true
+    Patient:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        national_id:
+          type: string
+          nullable: true
+          description: کد ملی 10 رقمی
+          maxLength: 20
+        full_name:
+          type: string
+          maxLength: 120
+        dob:
+          type: string
+          format: date
+          nullable: true
+          description: تاریخ تولد
+        sex:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/SexEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        primary_doctor:
+          type: integer
+          nullable: true
+        primary_doctor_id:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - primary_doctor_id
+    PatientAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای بیمار
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+          title: بیمار
+        patient_name:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        avg_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: میانگین قند خون
+        min_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: حداقل قند خون
+        max_glucose:
+          type: number
+          format: double
+          maximum: 800
+          minimum: 20
+          nullable: true
+          title: حداکثر قند خون
+        glucose_std_dev:
+          type: number
+          format: double
+          nullable: true
+          title: انحراف معیار قند خون
+        glucose_trend:
+          allOf:
+          - $ref: '#/components/schemas/GlucoseTrendEnum'
+          title: روند قند خون
+        glucose_in_range_percentage:
+          type: string
+          readOnly: true
+        avg_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c
+        hba1c_trend:
+          allOf:
+          - $ref: '#/components/schemas/Hba1cTrendEnum'
+          title: روند HbA1c
+        hba1c_status:
+          type: string
+          readOnly: true
+        avg_systolic:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+          title: میانگین فشار سیستولیک
+        avg_diastolic:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          nullable: true
+          title: میانگین فشار دیاستولیک
+        encounters_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد ویزیت‌ها
+        medications_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد داروها
+        lab_tests_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد آزمایش‌ها
+        alerts_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد هشدارها
+        compliance_score:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: امتیاز پایبندی به درمان
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - glucose_in_range_percentage
+      - hba1c_status
+      - id
+      - patient
+      - patient_name
+      - updated_at
+    PatientTimelinePreference:
+      type: object
+      description: سریالایزر برای تنظیمات تایم‌لاین بیمار
+      properties:
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        show_lab_results:
+          type: boolean
+        show_medications:
+          type: boolean
+        show_encounters:
+          type: boolean
+        show_alerts:
+          type: boolean
+        show_reminders:
+          type: boolean
+        enable_email_reminders:
+          type: boolean
+        enable_sms_reminders:
+          type: boolean
+        default_timeline_range_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+      required:
+      - patient
+      - patient_name
+    PatternAlert:
+      type: object
+      description: Serializer for PatternAlert model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        alert_type:
+          $ref: '#/components/schemas/PatternAlertAlertTypeEnum'
+        alert_type_display:
+          type: string
+          readOnly: true
+        priority:
+          $ref: '#/components/schemas/PatternAlertPriorityEnum'
+        priority_display:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        message:
+          type: string
+        related_patterns_count:
+          type: string
+          readOnly: true
+        related_anomalies_count:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+        is_resolved:
+          type: boolean
+        resolved_by:
+          type: integer
+          nullable: true
+        resolved_by_name:
+          type: string
+          readOnly: true
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolution_notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - alert_type
+      - alert_type_display
+      - created_at
+      - id
+      - message
+      - patient
+      - priority
+      - priority_display
+      - related_anomalies_count
+      - related_patterns_count
+      - resolved_by_name
+      - title
+    PatternAlertAlertTypeEnum:
+      enum:
+      - DETERIORATING
+      - NON_ADHERENCE
+      - MISSED_APPT
+      - UNUSUAL_LAB
+      - EMERGENCY
+      type: string
+      description: |-
+        * `DETERIORATING` - بدتر شدن کنترل
+        * `NON_ADHERENCE` - عدم پایبندی دارویی
+        * `MISSED_APPT` - عدم حضور در ویزیت
+        * `UNUSUAL_LAB` - الگوی غیرعادی آزمایش
+        * `EMERGENCY` - الگوی اورژانسی
+    PatternAlertPriorityEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - URGENT
+      type: string
+      description: |-
+        * `LOW` - کم
+        * `MEDIUM` - متوسط
+        * `HIGH` - بالا
+        * `URGENT` - فوری
+    PatternAnalysis:
+      type: object
+      description: Serializer for PatternAnalysis model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        pattern_type:
+          $ref: '#/components/schemas/PatternTypeEnum'
+        pattern_type_display:
+          type: string
+          readOnly: true
+        trend_direction:
+          $ref: '#/components/schemas/TrendDirectionEnum'
+        trend_direction_display:
+          type: string
+          readOnly: true
+        analysis_result: {}
+        confidence_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,2})?$
+        statistical_significance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,3})?$
+          nullable: true
+        analysis_start_date:
+          type: string
+          format: date-time
+        analysis_end_date:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - analysis_end_date
+      - analysis_start_date
+      - confidence_score
+      - created_at
+      - id
+      - patient
+      - pattern_type
+      - pattern_type_display
+      - trend_direction
+      - trend_direction_display
+    PatternTypeEnum:
+      enum:
+      - GLUCOSE_TREND
+      - HBA1C_TREND
+      - BP_TREND
+      - MED_ADHERENCE
+      - VISIT_FREQ
+      - LAB_FREQ
+      type: string
+      description: |-
+        * `GLUCOSE_TREND` - روند قند خون
+        * `HBA1C_TREND` - روند HbA1c
+        * `BP_TREND` - روند فشار خون
+        * `MED_ADHERENCE` - پایبندی دارویی
+        * `VISIT_FREQ` - فراوانی ویزیت
+        * `LAB_FREQ` - فراوانی آزمایش
+    Priority95eEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - URGENT
+      type: string
+      description: |-
+        * `LOW` - پایین
+        * `MEDIUM` - متوسط
+        * `HIGH` - بالا
+        * `URGENT` - فوری
+    RegenerateAISummary:
+      type: object
+      description: Serializer for regenerating existing AI summaries
+      properties:
+        summary_id:
+          type: string
+        content:
+          type: string
+          description: New content to summarize
+        context:
+          type: string
+          description: Optional patient context
+        summary_type:
+          allOf:
+          - $ref: '#/components/schemas/SummaryTypeEnum'
+          default: medical_record
+      required:
+      - content
+      - summary_id
+    Reminder:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        reminder_type:
+          $ref: '#/components/schemas/ReminderTypeEnum'
+        title:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        due_at:
+          type: string
+          format: date-time
+        snooze_until:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReminderStatusEnum'
+          readOnly: true
+        priority:
+          $ref: '#/components/schemas/ReminderPriorityEnum'
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_due:
+          type: boolean
+          readOnly: true
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+      required:
+      - completed_at
+      - created_at
+      - created_by
+      - due_at
+      - id
+      - is_due
+      - patient
+      - patient_name
+      - reminder_type
+      - status
+      - title
+    ReminderPriorityEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - URGENT
+      type: string
+      description: |-
+        * `LOW` - Low
+        * `MEDIUM` - Medium
+        * `HIGH` - High
+        * `URGENT` - Urgent
+    ReminderStatusEnum:
+      enum:
+      - PENDING
+      - SENT
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `SENT` - Sent
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    ReminderTemplate:
+      type: object
+      description: سریالایزر برای قالب‌های یادآوری
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        test_type:
+          $ref: '#/components/schemas/TestTypeEnum'
+        test_type_display:
+          type: string
+          readOnly: true
+        default_frequency:
+          $ref: '#/components/schemas/DefaultFrequencyEnum'
+        default_frequency_display:
+          type: string
+          readOnly: true
+        default_priority:
+          $ref: '#/components/schemas/DefaultPriorityEnum'
+        default_priority_display:
+          type: string
+          readOnly: true
+        default_reminder_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        instructions:
+          type: string
+        preparation_notes:
+          type: string
+        is_active:
+          type: boolean
+      required:
+      - default_frequency
+      - default_frequency_display
+      - default_priority_display
+      - id
+      - test_type
+      - test_type_display
+    ReminderTypeEnum:
+      enum:
+      - HBA1C
+      - FBS
+      - 2HPP
+      - BUN
+      - CR
+      - ALT
+      - AST
+      - ALP
+      - PR_URINE_24H
+      - EYE_EXAM
+      - EMG
+      - NCV
+      - TSH
+      - BMI
+      - DIET
+      - OTHER
+      type: string
+      description: |-
+        * `HBA1C` - HbA1c
+        * `FBS` - Fasting Blood Sugar
+        * `2HPP` - 2-Hour Postprandial Glucose
+        * `BUN` - Blood Urea Nitrogen
+        * `CR` - Creatinine
+        * `ALT` - Alanine Transaminase
+        * `AST` - Aspartate Transaminase
+        * `ALP` - Alkaline Phosphatase
+        * `PR_URINE_24H` - 24h Urine Protein
+        * `EYE_EXAM` - Eye Physical Exam
+        * `EMG` - EMG
+        * `NCV` - NCV
+        * `TSH` - Thyroid Stimulating Hormone
+        * `BMI` - Body Mass Index
+        * `DIET` - Diet/Nutrition Review
+        * `OTHER` - Other
+    Report:
+      type: object
+      description: سریالایزر برای گزارش‌ها
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        report_type:
+          allOf:
+          - $ref: '#/components/schemas/ReportTypeEnum'
+          title: نوع گزارش
+        format:
+          allOf:
+          - $ref: '#/components/schemas/FormatEnum'
+          title: فرمت
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ReportStatusEnum'
+          title: وضعیت
+        requested_by:
+          type: integer
+          nullable: true
+          title: درخواست‌دهنده
+        requested_by_name:
+          type: string
+          readOnly: true
+        start_date:
+          type: string
+          format: date
+          nullable: true
+          title: تاریخ شروع
+        end_date:
+          type: string
+          format: date
+          nullable: true
+          title: تاریخ پایان
+        patient:
+          type: integer
+          nullable: true
+          title: بیمار
+        patient_name:
+          type: string
+          readOnly: true
+        doctor:
+          type: integer
+          nullable: true
+          title: پزشک
+        doctor_name:
+          type: string
+          readOnly: true
+        file_path:
+          type: string
+          readOnly: true
+          nullable: true
+          title: مسیر فایل
+        error_message:
+          type: string
+          readOnly: true
+          nullable: true
+          title: پیام خطا
+        metadata:
+          title: متادیتا
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        duration:
+          type: string
+          readOnly: true
+      required:
+      - completed_at
+      - created_at
+      - doctor_name
+      - duration
+      - error_message
+      - file_path
+      - id
+      - patient_name
+      - report_type
+      - requested_by_name
+    ReportStatusEnum:
+      enum:
+      - pending
+      - processing
+      - completed
+      - failed
+      type: string
+      description: |-
+        * `pending` - در انتظار
+        * `processing` - در حال پردازش
+        * `completed` - تکمیل شده
+        * `failed` - ناموفق
+    ReportTypeEnum:
+      enum:
+      - patient_summary
+      - doctor_performance
+      - system_overview
+      - custom
+      type: string
+      description: |-
+        * `patient_summary` - خلاصه بیمار
+        * `doctor_performance` - عملکرد پزشک
+        * `system_overview` - نمای کلی سیستم
+        * `custom` - سفارشی
+    SeverityLevelEnum:
+      enum:
+      - LOW
+      - MEDIUM
+      - HIGH
+      - CRITICAL
+      type: string
+      description: |-
+        * `LOW` - کم
+        * `MEDIUM` - متوسط
+        * `HIGH` - بالا
+        * `CRITICAL` - بحرانی
+    SexEnum:
+      enum:
+      - MALE
+      - FEMALE
+      - OTHER
+      type: string
+      description: |-
+        * `MALE` - Male
+        * `FEMALE` - Female
+        * `OTHER` - Other
+    SummaryTypeEnum:
+      enum:
+      - medical_record
+      - encounter
+      - lab_results
+      - medications
+      type: string
+      description: |-
+        * `medical_record` - Medical Record
+        * `encounter` - Patient Encounter
+        * `lab_results` - Laboratory Results
+        * `medications` - Medications
+    SystemAnalytics:
+      type: object
+      description: سریالایزر برای آمارهای سیستم
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        date:
+          type: string
+          format: date
+          title: تاریخ
+        total_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل کاربران
+        active_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کاربران فعال
+        total_doctors:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل پزشکان
+        total_patients:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل بیماران
+        user_engagement_rate:
+          type: string
+          readOnly: true
+        total_encounters:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل ویزیت‌ها
+        total_lab_tests:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل آزمایش‌ها
+        total_medications:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل نسخه‌ها
+        total_alerts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کل هشدارها
+        avg_system_hba1c:
+          type: number
+          format: double
+          maximum: 18
+          minimum: 4
+          nullable: true
+          title: میانگین HbA1c سیستم
+        system_goal_achievement:
+          type: number
+          format: double
+          maximum: 100
+          minimum: 0
+          nullable: true
+          title: درصد دستیابی به اهداف
+        data_completeness_score:
+          type: string
+          readOnly: true
+        daily_active_users:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: کاربران فعال روزانه
+        api_calls:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+          title: تعداد فراخوانی API
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - data_completeness_score
+      - id
+      - updated_at
+      - user_engagement_rate
+    TestReminder:
+      type: object
+      description: سریالایزر برای یادآورهای آزمایشات
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        patient:
+          type: integer
+        patient_name:
+          type: string
+          readOnly: true
+        test_type:
+          $ref: '#/components/schemas/TestTypeEnum'
+        test_type_display:
+          type: string
+          readOnly: true
+        frequency:
+          $ref: '#/components/schemas/FrequencyAc7Enum'
+        frequency_display:
+          type: string
+          readOnly: true
+        priority:
+          $ref: '#/components/schemas/Priority95eEnum'
+        priority_display:
+          type: string
+          readOnly: true
+        last_performed:
+          type: string
+          format: date-time
+          nullable: true
+        next_due:
+          type: string
+          format: date-time
+        reminder_days_before:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        is_active:
+          type: boolean
+        notes:
+          type: string
+        custom_interval_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          nullable: true
+          description: فاصله سفارشی به روز (فقط برای نوع CUSTOM)
+        created_by:
+          type: integer
+          readOnly: true
+        created_by_name:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_overdue:
+          type: string
+          readOnly: true
+        days_until_due:
+          type: string
+          readOnly: true
+        should_send_reminder:
+          type: string
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - created_by_name
+      - days_until_due
+      - frequency
+      - frequency_display
+      - id
+      - is_overdue
+      - next_due
+      - patient
+      - patient_name
+      - priority_display
+      - should_send_reminder
+      - test_type
+      - test_type_display
+      - updated_at
+    TestTypeEnum:
+      enum:
+      - HBA1C
+      - FBS
+      - 2HPP
+      - BUN
+      - CR
+      - ALT
+      - AST
+      - ALP
+      - TSH
+      - PR_URINE_24
+      - EYE_EXAM
+      - EMG
+      - NCV
+      - BMI
+      - BP
+      - DIET
+      - EXERCISE
+      type: string
+      description: |-
+        * `HBA1C` - HbA1c (هموگلوبین گلیکوزیله)
+        * `FBS` - قند ناشتا (Fasting Blood Sugar)
+        * `2HPP` - قند ۲ ساعت بعد از غذا (2-Hour Post-Prandial)
+        * `BUN` - اوره خون (Blood Urea Nitrogen)
+        * `CR` - کراتینین (Creatinine)
+        * `ALT` - آلانین آمینوترانسفراز
+        * `AST` - آسپارتات آمینوترانسفراز
+        * `ALP` - آلکالین فسفاتاز
+        * `TSH` - هورمون محرک تیروئید
+        * `PR_URINE_24` - پروتئین ادرار ۲۴ ساعته
+        * `EYE_EXAM` - معاینه چشم
+        * `EMG` - الکترومایوگرافی
+        * `NCV` - سرعت رسانش عصبی
+        * `BMI` - شاخص توده بدنی
+        * `BP` - فشار خون
+        * `DIET` - مشاوره تغذیه
+        * `EXERCISE` - برنامه ورزشی
+    TimelineEventCategory:
+      type: object
+      description: سریالایزر برای دسته‌بندی رویدادهای تایم‌لاین
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+        color:
+          type: string
+          maxLength: 7
+        icon:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - name
+    TokenObtainPair:
+      type: object
+      properties:
+        email:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - email
+      - password
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TrendDirectionEnum:
+      enum:
+      - IMPROVING
+      - STABLE
+      - WORSENING
+      - FLUCTUATING
+      type: string
+      description: |-
+        * `IMPROVING` - بهبود
+        * `STABLE` - پایدار
+        * `WORSENING` - بدتر شدن
+        * `FLUCTUATING` - نوسان
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

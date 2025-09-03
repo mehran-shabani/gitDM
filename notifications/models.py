@@ -1,5 +1,6 @@
-from django.db import models
+# flake8: noqa: E501, RUF012,
 from django.conf import settings
+from django.db import models
 from django.utils import timezone
 
 
@@ -13,13 +14,13 @@ class Notification(models.Model):
         CRITICAL = 'CRITICAL', 'بحرانی'
         REMINDER = 'REMINDER', 'یادآوری'
         AI_SUMMARY = 'AI_SUMMARY', 'خلاصه هوشمند'
-    
+
     class Priority(models.TextChoices):
         LOW = 'LOW', 'پایین'
         MEDIUM = 'MEDIUM', 'متوسط'
         HIGH = 'HIGH', 'بالا'
         URGENT = 'URGENT', 'فوری'
-    
+
     recipient = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -37,34 +38,34 @@ class Notification(models.Model):
         choices=Priority.choices,
         default=Priority.MEDIUM
     )
-    
+
     # ارتباط با منابع
     patient_id = models.CharField(max_length=64, null=True, blank=True)
     resource_type = models.CharField(max_length=50, null=True, blank=True)
     resource_id = models.CharField(max_length=64, null=True, blank=True)
-    
+
     # وضعیت
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     expires_at = models.DateTimeField(null=True, blank=True)
-    
+
     # کانال‌های ارسال
     sent_email = models.BooleanField(default=False)
     sent_sms = models.BooleanField(default=False)
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-created_at']  # noqa: RUF012
         indexes = [
             models.Index(fields=['recipient', 'is_read']),
             models.Index(fields=['notification_type', 'priority']),
             models.Index(fields=['patient_id', 'created_at']),
             models.Index(fields=['expires_at']),
         ]
-    
+
     def __str__(self):
         return f"{self.title} - {self.recipient.email}"
-    
+
     def mark_as_read(self):
         """
         علامت‌گذاری به عنوان خوانده شده
@@ -85,7 +86,7 @@ class ClinicalAlert(models.Model):
         MISSED_APPOINTMENT = 'MISSED_APPOINTMENT', 'عدم حضور در ویزیت'
         DRUG_INTERACTION = 'DRUG_INTERACTION', 'تداخل دارویی'
         ABNORMAL_TREND = 'ABNORMAL_TREND', 'روند غیرطبیعی'
-    
+
     patient = models.ForeignKey(
         'gitdm.PatientProfile',
         on_delete=models.CASCADE,
@@ -102,12 +103,12 @@ class ClinicalAlert(models.Model):
         ],
         default='MEDIUM'
     )
-    
+
     # جزئیات هشدار
     trigger_value = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     threshold_value = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
     message = models.TextField()
-    
+
     # وضعیت
     is_active = models.BooleanField(default=True)
     acknowledged_by = models.ForeignKey(
@@ -118,20 +119,20 @@ class ClinicalAlert(models.Model):
         related_name='acknowledged_alerts'
     )
     acknowledged_at = models.DateTimeField(null=True, blank=True)
-    
+
     created_at = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-created_at']  # noqa: RUF012
         indexes = [
             models.Index(fields=['patient', 'is_active']),
             models.Index(fields=['alert_type', 'severity']),
-            models.Index(fields=['created_at']),
+            models.Index(fields=['created_at']),  # noqa: RUF012
         ]
-    
+
     def __str__(self):
         return f"{self.alert_type} - {self.patient.full_name}"
-    
+
     def acknowledge(self, user):
         """
         تایید هشدار توسط پزشک
@@ -153,13 +154,13 @@ class SmartReminder(models.Model):
         EXERCISE = 'EXERCISE', 'ورزش'
         DIET = 'DIET', 'رژیم غذایی'
         GLUCOSE_CHECK = 'GLUCOSE_CHECK', 'چک قند خون'
-    
+
     class Status(models.TextChoices):
         ACTIVE = 'ACTIVE', 'فعال'
         PAUSED = 'PAUSED', 'متوقف شده'
         COMPLETED = 'COMPLETED', 'تکمیل شده'
         CANCELLED = 'CANCELLED', 'لغو شده'
-    
+
     patient = models.ForeignKey(
         'gitdm.PatientProfile',
         on_delete=models.CASCADE,
@@ -168,15 +169,15 @@ class SmartReminder(models.Model):
     reminder_type = models.CharField(max_length=20, choices=ReminderType.choices)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
-    
+
     # ارتباط با منابع
     medication_id = models.CharField(max_length=64, null=True, blank=True)
     lab_test_id = models.CharField(max_length=64, null=True, blank=True)
-    
+
     # زمان‌بندی
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
-    
+
     # تنظیمات تکرار
     frequency = models.CharField(
         max_length=20,
@@ -195,13 +196,13 @@ class SmartReminder(models.Model):
         blank=True,
         help_text="روزهای هفته برای یادآوری (0=یکشنبه، 6=شنبه)"
     )
-    
+
     # زمان‌های پیشنهادی (یادگیری شده)
     preferred_times = models.JSONField(
         default=list,
         help_text="زمان‌های ترجیحی برای یادآوری"
     )
-    
+
     # وضعیت
     status = models.CharField(
         max_length=20,
@@ -212,7 +213,7 @@ class SmartReminder(models.Model):
         default=True,
         help_text="آیا زمان‌بندی بر اساس رفتار بیمار تنظیم شود"
     )
-    
+
     # اطلاعات اولویت
     priority = models.IntegerField(
         default=5,
@@ -222,17 +223,17 @@ class SmartReminder(models.Model):
         default=False,
         help_text="آیا یادآوری بحرانی است"
     )
-    
+
     # متادیتا
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='created_reminders'
+        related_name='created_smart_reminders'
     )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['-priority', '-created_at']
         indexes = [
@@ -240,10 +241,10 @@ class SmartReminder(models.Model):
             models.Index(fields=['start_date', 'end_date']),
             models.Index(fields=['status', 'priority']),
         ]
-    
+
     def __str__(self):
         return f"{self.reminder_type} - {self.title} - {self.patient.full_name}"
-    
+
     def is_active_on_date(self, date):
         """
         چک کردن اینکه آیا یادآوری در تاریخ مشخص فعال است
@@ -270,7 +271,7 @@ class ReminderPattern(models.Model):
         max_length=20,
         choices=SmartReminder.ReminderType.choices
     )
-    
+
     # الگوهای زمانی
     best_response_times = models.JSONField(
         default=list,
@@ -280,7 +281,7 @@ class ReminderPattern(models.Model):
         default=list,
         help_text="زمان‌هایی که بیمار پاسخ نداده"
     )
-    
+
     # آمار پاسخ‌دهی
     total_reminders_sent = models.PositiveIntegerField(default=0)
     total_responses = models.PositiveIntegerField(default=0)
@@ -289,7 +290,7 @@ class ReminderPattern(models.Model):
         blank=True,
         help_text="میانگین زمان پاسخ به یادآوری"
     )
-    
+
     # ترجیحات یادگیری شده
     preferred_notification_channel = models.CharField(
         max_length=20,
@@ -301,7 +302,7 @@ class ReminderPattern(models.Model):
         ],
         default='IN_APP'
     )
-    
+
     # تحلیل رفتاری
     compliance_rate = models.DecimalField(
         max_digits=5,
@@ -310,17 +311,17 @@ class ReminderPattern(models.Model):
         help_text="نرخ تبعیت از یادآوری (درصد)"
     )
     last_pattern_update = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         unique_together = ['patient', 'reminder_type']
         indexes = [
             models.Index(fields=['patient', 'reminder_type']),
             models.Index(fields=['compliance_rate']),
         ]
-    
+
     def __str__(self):
         return f"Pattern {self.reminder_type} - {self.patient.full_name}"
-    
+
     def update_pattern(self, response_time, responded):
         """
         بروزرسانی الگوی رفتاری بر اساس پاسخ جدید
@@ -333,7 +334,7 @@ class ReminderPattern(models.Model):
         else:
             if response_time.hour not in self.worst_response_times:
                 self.worst_response_times.append(response_time.hour)
-        
+
         # محاسبه نرخ تبعیت
         self.compliance_rate = (self.total_responses / self.total_reminders_sent) * 100
         self.save()
@@ -349,20 +350,20 @@ class ReminderSchedule(models.Model):
         related_name='schedules'
     )
     scheduled_time = models.DateTimeField()
-    
+
     # وضعیت
     is_sent = models.BooleanField(default=False)
     sent_at = models.DateTimeField(null=True, blank=True)
-    
+
     # پاسخ بیمار
     is_acknowledged = models.BooleanField(default=False)
     acknowledged_at = models.DateTimeField(null=True, blank=True)
     response_time = models.DurationField(null=True, blank=True)
-    
+
     # تلاش‌های ارسال
     attempt_count = models.PositiveIntegerField(default=0)
     last_attempt_at = models.DateTimeField(null=True, blank=True)
-    
+
     # نتیجه
     action_taken = models.CharField(
         max_length=50,
@@ -376,11 +377,11 @@ class ReminderSchedule(models.Model):
         blank=True
     )
     notes = models.TextField(blank=True)
-    
+
     # متادیتا
     created_at = models.DateTimeField(default=timezone.now)
     notification_id = models.CharField(max_length=64, null=True, blank=True)
-    
+
     class Meta:
         ordering = ['scheduled_time']
         indexes = [
@@ -388,10 +389,10 @@ class ReminderSchedule(models.Model):
             models.Index(fields=['is_sent', 'scheduled_time']),
             models.Index(fields=['is_acknowledged']),
         ]
-    
+
     def __str__(self):
         return f"{self.reminder.title} - {self.scheduled_time}"
-    
+
     def mark_as_sent(self):
         """
         علامت‌گذاری به عنوان ارسال شده
@@ -401,7 +402,7 @@ class ReminderSchedule(models.Model):
         self.attempt_count += 1
         self.last_attempt_at = timezone.now()
         self.save()
-    
+
     def acknowledge(self, action_taken=None, notes=''):
         """
         ثبت پاسخ بیمار به یادآوری
@@ -415,7 +416,7 @@ class ReminderSchedule(models.Model):
         if notes:
             self.notes = notes
         self.save()
-        
+
         # بروزرسانی الگوی رفتاری
         pattern, created = ReminderPattern.objects.get_or_create(
             patient=self.reminder.patient,
@@ -433,7 +434,7 @@ class ReminderResponse(models.Model):
         on_delete=models.CASCADE,
         related_name='responses'
     )
-    
+
     # نوع پاسخ
     response_type = models.CharField(
         max_length=20,
@@ -444,13 +445,13 @@ class ReminderResponse(models.Model):
             ('DISMISSED', 'رد شده')
         ]
     )
-    
+
     # زمان پاسخ
     response_time = models.DateTimeField()
     response_delay = models.DurationField(
         help_text="تاخیر در پاسخ از زمان ارسال"
     )
-    
+
     # جزئیات پاسخ
     action_result = models.CharField(
         max_length=50,
@@ -463,7 +464,7 @@ class ReminderResponse(models.Model):
         null=True,
         blank=True
     )
-    
+
     # بازخورد بیمار
     patient_feedback = models.TextField(blank=True)
     satisfaction_score = models.IntegerField(
@@ -471,12 +472,12 @@ class ReminderResponse(models.Model):
         blank=True,
         help_text="امتیاز رضایت (1-5)"
     )
-    
+
     # متادیتا
     device_type = models.CharField(max_length=50, blank=True)
     location = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
-    
+
     class Meta:
         ordering = ['-created_at']
         indexes = [
@@ -484,6 +485,6 @@ class ReminderResponse(models.Model):
             models.Index(fields=['response_time']),
             models.Index(fields=['satisfaction_score']),
         ]
-    
+
     def __str__(self):
         return f"Response to {self.schedule} - {self.response_type}"

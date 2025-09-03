@@ -1,27 +1,29 @@
-from django.urls import path, include
+from django.http import JsonResponse
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
-from rest_framework.routers import DefaultRouter
-from gitdm.views import PatientViewSet
+
+from api.views_export import export_patient
 from encounters.views import EncounterViewSet
+from gitdm.views import PatientViewSet
+from intelligence.views import (
+    AISummaryViewSet,
+    AnomalyDetectionViewSet,
+    BaselineMetricsViewSet,
+    PatternAlertViewSet,
+    PatternAnalysisViewSet,
+)
 from laboratory.views import LabResultViewSet
+from notifications.views import ClinicalAlertViewSet, NotificationViewSet
 from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
-from intelligence.views import (
-    AISummaryViewSet, 
-    PatternAnalysisViewSet, 
-    AnomalyDetectionViewSet, 
-    PatternAlertViewSet, 
-    BaselineMetricsViewSet
-)
-from notifications.views import NotificationViewSet, ClinicalAlertViewSet
 from reminders.views import ReminderViewSet
-from .views import health
-from api.views_export import export_patient
 from versioning import views as version_views
-from django.http import JsonResponse
+
+from .views import health
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()
@@ -42,7 +44,7 @@ router.register(r'reminders', ReminderViewSet, basename='reminder')
 
 
 
-def api_root_view(request):
+def api_root_view(request):  # noqa: ANN001, ANN201
     return JsonResponse({"status": "ok"})
 
 # The API URLs are now determined automatically by the router
@@ -55,8 +57,10 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair_api'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh_api'),
-    path('versions/<str:resource_type>/<str:resource_id>/', version_views.versions_list),
-    path('versions/<str:resource_type>/<str:resource_id>/revert/', version_views.versions_revert),
+    path('versions/<str:resource_type>/<str:resource_id>/',
+     version_views.versions_list),
+    path('versions/<str:resource_type>/<str:resource_id>/revert/',
+     version_views.versions_revert),
     path('export/patient/<str:pk>/', export_patient, name='export_patient'),
     path('analytics/', include('analytics.urls')),
 ]

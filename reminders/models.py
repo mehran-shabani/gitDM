@@ -40,7 +40,7 @@ class Reminder(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='created_reminders'
+        related_name='created_basic_reminders'
     )
     reminder_type = models.CharField(max_length=32, choices=ReminderType.choices)
     title = models.CharField(max_length=200)
