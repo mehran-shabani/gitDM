@@ -62,7 +62,13 @@ INSTALLED_APPS = [
     'versioning',
     'security',
     'notifications',
+    'reminders',
     'gateway',
+
+    'analytics',
+
+    'timeline',
+
 
 ]
 

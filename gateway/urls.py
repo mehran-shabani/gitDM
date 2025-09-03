@@ -9,8 +9,15 @@ from encounters.views import EncounterViewSet
 from laboratory.views import LabResultViewSet
 from pharmacy.views import MedicationOrderViewSet
 from references.views import ClinicalReferenceViewSet
-from intelligence.views import AISummaryViewSet
+from intelligence.views import (
+    AISummaryViewSet, 
+    PatternAnalysisViewSet, 
+    AnomalyDetectionViewSet, 
+    PatternAlertViewSet, 
+    BaselineMetricsViewSet
+)
 from notifications.views import NotificationViewSet, ClinicalAlertViewSet
+from reminders.views import ReminderViewSet
 from .views import health
 from api.views_export import export_patient
 from versioning import views as version_views
@@ -26,6 +33,13 @@ router.register(r'refs', ClinicalReferenceViewSet)
 router.register(r'ai-summaries', AISummaryViewSet)
 router.register(r'notifications', NotificationViewSet, basename='notification')
 router.register(r'alerts', ClinicalAlertViewSet, basename='clinicalalert')
+router.register(r'pattern-analyses', PatternAnalysisViewSet)
+router.register(r'anomaly-detections', AnomalyDetectionViewSet)
+router.register(r'pattern-alerts', PatternAlertViewSet)
+router.register(r'baseline-metrics', BaselineMetricsViewSet)
+
+router.register(r'reminders', ReminderViewSet, basename='reminder')
+
 
 
 def api_root_view(request):
@@ -43,4 +57,5 @@ urlpatterns = [
     path('versions/<str:resource_type>/<str:resource_id>/', version_views.versions_list),
     path('versions/<str:resource_type>/<str:resource_id>/revert/', version_views.versions_revert),
     path('export/patient/<str:pk>/', export_patient, name='export_patient'),
+    path('analytics/', include('analytics.urls')),
 ]

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تایم‌لاین پزشکی - {{ patient.name }}</title>
+    
+    <!-- Bootstrap RTL -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Vazir', 'Tahoma', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .timeline-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .patient-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        
+        .timeline-event {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-right: 5px solid #007bff;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        
+        .timeline-event:hover {
+            transform: translateY(-2px);
+        }
+        
+        .event-encounter { border-right-color: #28a745; }
+        .event-lab_result { border-right-color: #dc3545; }
+        .event-medication { border-right-color: #ffc107; }
+        .event-physical_exam { border-right-color: #17a2b8; }
+        .event-alert { border-right-color: #fd7e14; }
+        
+        .severity-normal { background-color: #d4edda; }
+        .severity-high { background-color: #f8d7da; }
+        .severity-critical { background-color: #f5c6cb; }
+        
+        .filters-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        .reminder-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-right: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .reminder-overdue {
+            border-right-color: #dc3545;
+            background-color: #fff5f5;
+        }
+        
+        .reminder-upcoming {
+            border-right-color: #ffc107;
+            background-color: #fffbf0;
+        }
+    </style>
+</head>
+<body>
+    <div class="timeline-container">
+        <!-- هدر بیمار -->
+        <div class="patient-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1><i class="fas fa-user-md"></i> {{ patient.name }}</h1>
+                    <p class="mb-0">سن: {{ patient.age }} سال | کد بیمار: {{ patient.id }}</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-light" onclick="exportTimeline()">
+                        <i class="fas fa-download"></i> خروجی PDF
+                    </button>
+                    <button class="btn btn-light" onclick="printTimeline()">
+                        <i class="fas fa-print"></i> چاپ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- آمار کلی -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 class="text-primary" id="total-events">0</h3>
+                    <p>کل رویدادها</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 class="text-success" id="lab-results">0</h3>
+                    <p>نتایج آزمایش</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 class="text-warning" id="encounters">0</h3>
+                    <p>مواجهات</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <h3 class="text-danger" id="overdue-reminders">0</h3>
+                    <p>یادآورهای عقب‌افتاده</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- فیلترها -->
+        <div class="filters-panel">
+            <h5><i class="fas fa-filter"></i> فیلترهای تایم‌لاین</h5>
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">از تاریخ:</label>
+                    <input type="date" class="form-control" id="start-date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">تا تاریخ:</label>
+                    <input type="date" class="form-control" id="end-date">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">نوع رویداد:</label>
+                    <select class="form-select" id="event-type" multiple>
+                        <option value="ENCOUNTER">مواجهه بالینی</option>
+                        <option value="LAB_RESULT">نتیجه آزمایش</option>
+                        <option value="MEDICATION">دارو</option>
+                        <option value="PHYSICAL_EXAM">معاینه فیزیکی</option>
+                        <option value="ALERT">هشدار بالینی</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-primary d-block w-100" onclick="applyFilters()">
+                        <i class="fas fa-search"></i> اعمال
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- نمودار تایم‌لاین -->
+        <div class="chart-container">
+            <h5><i class="fas fa-chart-line"></i> نمودار تایم‌لاین پزشکی</h5>
+            <canvas id="timelineChart" width="400" height="200"></canvas>
+        </div>
+        
+        <!-- یادآورهای فعال -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h5><i class="fas fa-bell text-warning"></i> یادآورهای آتی</h5>
+                    <div id="upcoming-reminders"></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h5><i class="fas fa-exclamation-triangle text-danger"></i> یادآورهای عقب‌افتاده</h5>
+                    <div id="overdue-reminders-list"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- لیست رویدادهای تایم‌لاین -->
+        <div class="chart-container">
+            <h5><i class="fas fa-history"></i> تاریخچه کامل رویدادها</h5>
+            <div id="timeline-events"></div>
+        </div>
+    </div>
+
+    <script>
+        let timelineChart;
+        const patientId = {{ patient.id }};
+        
+        // بارگذاری داده‌های اولیه
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTimelineData();
+            loadReminders();
+        });
+        
+        async function loadTimelineData() {
+            try {
+                const response = await fetch(`/api/timeline/patient_timeline/?patient_id=${patientId}`);
+                const data = await response.json();
+                
+                updateStatistics(data);
+                createTimelineChart(data.timeline);
+                displayTimelineEvents(data.timeline);
+                
+            } catch (error) {
+                console.error('خطا در بارگذاری داده‌ها:', error);
+            }
+        }
+        
+        async function loadReminders() {
+            try {
+                // یادآورهای آتی
+                const upcomingResponse = await fetch(`/api/reminders/upcoming_reminders/`);
+                const upcomingData = await upcomingResponse.json();
+                displayUpcomingReminders(upcomingData.reminders);
+                
+                // یادآورهای عقب‌افتاده
+                const overdueResponse = await fetch(`/api/reminders/overdue_reminders/`);
+                const overdueData = await overdueResponse.json();
+                displayOverdueReminders(overdueData.reminders);
+                
+                // به‌روزرسانی آمار
+                document.getElementById('overdue-reminders').textContent = overdueData.overdue_count;
+                
+            } catch (error) {
+                console.error('خطا در بارگذاری یادآورها:', error);
+            }
+        }
+        
+        function updateStatistics(data) {
+            document.getElementById('total-events').textContent = data.timeline.length;
+            
+            const labResults = data.timeline.filter(event => event.event_type === 'LAB_RESULT').length;
+            const encounters = data.timeline.filter(event => event.event_type === 'ENCOUNTER').length;
+            
+            document.getElementById('lab-results').textContent = labResults;
+            document.getElementById('encounters').textContent = encounters;
+        }
+        
+        function createTimelineChart(timelineData) {
+            const ctx = document.getElementById('timelineChart').getContext('2d');
+            
+            // آماده‌سازی داده‌ها برای نمودار
+            const chartData = timelineData.map(event => ({
+                x: new Date(event.occurred_at),
+                y: getEventTypeValue(event.event_type),
+                title: event.title,
+                description: event.description,
+                severity: event.severity
+            }));
+            
+            timelineChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'رویدادهای پزشکی',
+                        data: chartData,
+                        backgroundColor: function(context) {
+                            const severity = context.raw.severity;
+                            switch(severity) {
+                                case 'CRITICAL': return '#dc3545';
+                                case 'HIGH': return '#fd7e14';
+                                case 'NORMAL': return '#28a745';
+                                default: return '#007bff';
+                            }
+                        },
+                        borderColor: function(context) {
+                            return context.raw.backgroundColor;
+                        },
+                        pointRadius: 8,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                unit: 'day',
+                                displayFormats: {
+                                    day: 'yyyy/MM/dd'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'تاریخ'
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            min: 0,
+                            max: 6,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const labels = {
+                                        1: 'مواجهه',
+                                        2: 'آزمایش',
+                                        3: 'دارو',
+                                        4: 'معاینه',
+                                        5: 'هشدار',
+                                        6: 'یادآوری'
+                                    };
+                                    return labels[value] || '';
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'نوع رویداد'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    return new Date(context[0].raw.x).toLocaleDateString('fa-IR');
+                                },
+                                label: function(context) {
+                                    const point = context.raw;
+                                    return [
+                                        point.title,
+                                        point.description.substring(0, 100) + (point.description.length > 100 ? '...' : '')
+                                    ];
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+        
+        function getEventTypeValue(eventType) {
+            const typeMap = {
+                'ENCOUNTER': 1,
+                'LAB_RESULT': 2,
+                'MEDICATION': 3,
+                'PHYSICAL_EXAM': 4,
+                'ALERT': 5,
+                'REMINDER': 6
+            };
+            return typeMap[eventType] || 0;
+        }
+        
+        function displayTimelineEvents(events) {
+            const container = document.getElementById('timeline-events');
+            container.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.className = `timeline-event event-${event.event_type.toLowerCase()} severity-${event.severity.toLowerCase()}`;
+                
+                eventDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${event.title}</h6>
+                            <p class="mb-2 text-muted">${event.description}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar"></i> ${new Date(event.occurred_at).toLocaleDateString('fa-IR')}
+                                | <i class="fas fa-user"></i> ${event.created_by_name}
+                            </small>
+                        </div>
+                        <span class="badge bg-${getSeverityColor(event.severity)}">${getSeverityText(event.severity)}</span>
+                    </div>
+                `;
+                
+                container.appendChild(eventDiv);
+            });
+        }
+        
+        function displayUpcomingReminders(reminders) {
+            const container = document.getElementById('upcoming-reminders');
+            container.innerHTML = '';
+            
+            if (reminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">یادآوری آتی وجود ندارد</p>';
+                return;
+            }
+            
+            reminders.forEach(reminder => {
+                const reminderDiv = document.createElement('div');
+                reminderDiv.className = 'reminder-card reminder-upcoming';
+                
+                reminderDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${reminder.test_type_display}</h6>
+                            <small class="text-muted">سررسید: ${new Date(reminder.next_due).toLocaleDateString('fa-IR')}</small>
+                        </div>
+                        <span class="badge bg-warning">${reminder.days_until_due} روز</span>
+                    </div>
+                `;
+                
+                container.appendChild(reminderDiv);
+            });
+        }
+        
+        function displayOverdueReminders(reminders) {
+            const container = document.getElementById('overdue-reminders-list');
+            container.innerHTML = '';
+            
+            if (reminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">یادآوری عقب‌افتاده وجود ندارد</p>';
+                return;
+            }
+            
+            reminders.forEach(reminder => {
+                const reminderDiv = document.createElement('div');
+                reminderDiv.className = 'reminder-card reminder-overdue';
+                
+                reminderDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">${reminder.test_type_display}</h6>
+                            <small class="text-muted">سررسید: ${new Date(reminder.next_due).toLocaleDateString('fa-IR')}</small>
+                        </div>
+                        <div>
+                            <span class="badge bg-danger">${Math.abs(reminder.days_until_due)} روز عقب‌افتاده</span>
+                            <button class="btn btn-sm btn-success me-2" onclick="markReminderCompleted(${reminder.id})">
+                                <i class="fas fa-check"></i> انجام شد
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(reminderDiv);
+            });
+        }
+        
+        function getSeverityColor(severity) {
+            const colorMap = {
+                'LOW': 'secondary',
+                'NORMAL': 'success',
+                'HIGH': 'warning',
+                'CRITICAL': 'danger'
+            };
+            return colorMap[severity] || 'primary';
+        }
+        
+        function getSeverityText(severity) {
+            const textMap = {
+                'LOW': 'پایین',
+                'NORMAL': 'عادی',
+                'HIGH': 'بالا',
+                'CRITICAL': 'بحرانی'
+            };
+            return textMap[severity] || severity;
+        }
+        
+        async function markReminderCompleted(reminderId) {
+            try {
+                const response = await fetch(`/api/reminders/${reminderId}/mark_completed/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({
+                        performed_date: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    // بارگذاری مجدد یادآورها
+                    loadReminders();
+                    alert('یادآوری به عنوان انجام شده علامت‌گذاری شد');
+                } else {
+                    alert('خطا در علامت‌گذاری یادآوری');
+                }
+            } catch (error) {
+                console.error('خطا:', error);
+                alert('خطا در ارتباط با سرور');
+            }
+        }
+        
+        function applyFilters() {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const eventType = Array.from(document.getElementById('event-type').selectedOptions).map(o => o.value);
+            
+            let url = `/api/timeline/patient_timeline/?patient_id=${patientId}`;
+            
+            if (startDate) url += `&start_date=${startDate}T00:00:00Z`;
+            if (endDate) url += `&end_date=${endDate}T23:59:59Z`;
+            if (eventType.length > 0) url += `&event_types=${eventType.join(',')}`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    updateStatistics(data);
+                    createTimelineChart(data.timeline);
+                    displayTimelineEvents(data.timeline);
+                })
+                .catch(error => console.error('خطا در اعمال فیلترها:', error));
+        }
+        
+        function exportTimeline() {
+            window.print();
+        }
+        
+        function printTimeline() {
+            window.print();
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
