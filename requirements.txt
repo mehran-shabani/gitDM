@@ -14,6 +14,9 @@ django-celery-beat>=2.5
 # --- AI / LLM ---
 openai>=1.65.0
 
+# --- Data Analysis ---
+numpy>=1.24.0
+
 # --- Server ---
 gunicorn>=21.2
 
