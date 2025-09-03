@@ -77,6 +77,20 @@ class Reminder(models.Model):
     def __str__(self) -> str:
         return f"{self.reminder_type} for {self.patient} due {self.due_at}"
 
+    def clean(self):
+        super().clean()
+        # due_at و snooze_until باید aware باشن
+        for field in ('due_at', 'snooze_until'):
+            dt = getattr(self, field)
+            if dt and timezone.is_naive(dt):
+                setattr(self, field, timezone.make_aware(dt))
+            # snooze در گذشته ممنوع
+            if self.snooze_until and self.snooze_until <= timezone.now():
+                raise ValidationError({'snooze_until': 'باید در آینده باشه'})
+            # completed_at فقط وقتی status=COMPLETED
+            if (self.status == self.Status.COMPLETED) ^ bool(self.completed_at):
+                raise ValidationError('وضعیت و زمان تکمیل همخوان نیست')
+
     @property
     def is_due(self) -> bool:
         now = timezone.now()
