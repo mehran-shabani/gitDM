@@ -21,19 +21,7 @@ DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS_ENV = os.getenv('DJANGO_ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS_ENV.split(',')] if ALLOWED_HOSTS_ENV else ['localhost', '127.0.0.1']  # noqa: E501
 
-# GitHub Codespaces specific settings
-if os.getenv('CODESPACES', 'false').lower() == 'true':
-    ALLOWED_HOSTS.extend([
-        f"{os.getenv('CODESPACE_NAME')}-8000.{os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')}",
-        'localhost',
-        '127.0.0.1',
-        '[::1]',
-    ])
-    CSRF_TRUSTED_ORIGINS = [
-        f"https://{os.getenv('CODESPACE_NAME')}-8000.{os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')}",
-    ]
-    # Force debug in codespaces for development
-    DEBUG = True
+
 
 # ------------------------
 # Installed Apps
