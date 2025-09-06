@@ -2,6 +2,8 @@
 
 **GitDM** (Git Diabetes Management) is a comprehensive diabetes management platform built with Django 5 and Django REST Framework. It provides healthcare professionals with advanced tools for patient data management, clinical decision support, AI-powered insights, and pattern analysis for diabetes care.
 
+> **Note:** All project documentation is consolidated here. The former `docs.md` file has been removed.
+
 ## 🎯 Project Overview
 
 ### Purpose
