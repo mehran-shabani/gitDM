@@ -3,7 +3,7 @@ Health check implementation with retry and backoff logic.
 """
 import time
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 import httpx
 from httpx import TimeoutException, NetworkError, HTTPStatusError
 
