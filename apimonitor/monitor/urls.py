@@ -9,7 +9,7 @@ from monitor.views import (
     AIDigestViewSet,
     HealthSummaryView
 )
-
+app_name = "monitor"
 # Create router and register viewsets
 router = DefaultRouter()
 router.register(r'services', ServiceViewSet, basename='service')
