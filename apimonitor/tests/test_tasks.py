@@ -67,7 +67,7 @@ class TestRunHealthChecks:
     @patch('monitor.tasks.call_health')
     def test_run_health_checks_with_exception(self, mock_call_health):
         """Test health checks handling exceptions."""
-        _service = baker.make(Service, name='Service1', enabled=True)
+        baker.make(Service, name='Service1', enabled=True)
         
         # Mock exception during health check
         mock_call_health.side_effect = Exception("Unexpected error")
