@@ -7,7 +7,9 @@
 ## 🎯 Project Overview
 
 ### Purpose
+
 GitDM addresses the critical need for integrated diabetes management by providing healthcare professionals with a unified platform to:
+
 - Track patient health data over time
 - Identify patterns and anomalies in diabetic care
 - Generate AI-powered clinical insights
@@ -15,13 +17,16 @@ GitDM addresses the critical need for integrated diabetes management by providin
 - Provide intelligent reminders and alerts
 
 ### Goals
+
 - **Improve Patient Outcomes**: Enable proactive diabetes management through data-driven insights
 - **Enhance Clinical Efficiency**: Streamline workflows for healthcare providers
 - **Reduce Complications**: Early detection of concerning patterns and trends
 - **Support Evidence-Based Care**: Integration with clinical references and guidelines
 
 ### Market Need
+
 Diabetes affects millions globally, requiring continuous monitoring and management. Traditional paper-based or fragmented digital systems fail to provide the comprehensive view needed for optimal care. GitDM fills this gap by offering:
+
 - Integrated patient timelines
 - AI-powered pattern recognition
 - Automated clinical alerts
@@ -31,37 +36,44 @@ Diabetes affects millions globally, requiring continuous monitoring and manageme
 ## 🛠️ Technology Stack
 
 ### Backend Framework
+
 - **Django 5.0+**: Modern Python web framework with robust ORM and security features
 - **Django REST Framework 3.15+**: Powerful toolkit for building Web APIs
 - **PostgreSQL/SQLite**: Primary database (SQLite for development, PostgreSQL for production)
 
 ### Authentication & Security
+
 - **JWT Authentication**: Token-based authentication using `djangorestframework-simplejwt`
 - **Role-Based Access Control**: Custom permission system for doctors, patients, and administrators
 - **Security Middleware**: Custom audit logging and security enhancements
 
 ### AI & Analytics
+
 - **OpenAI API**: GPT-powered clinical summarization and insights
 - **NumPy & Pandas**: Statistical analysis and data processing
 - **Pattern Analysis**: Custom anomaly detection algorithms
 - **Matplotlib & Seaborn**: Data visualization for analytics
 
 ### Documentation & API
+
 - **OpenAPI 3.0**: Complete API specification with Swagger UI
 - **drf-spectacular**: Automated API schema generation
 - **ReDoc**: Alternative API documentation interface
 
 ### Task Processing
+
 - **Celery**: Asynchronous task processing for AI operations
 - **Django-Celery-Beat**: Periodic task scheduling for reminders and analytics
 
 ### Development & Deployment
+
 - **Docker**: Containerized development and deployment
 - **GitHub Codespaces**: Cloud development environment support
 - **Gunicorn**: Production WSGI server
 - **pytest**: Comprehensive testing framework
 
 ### Reporting & Export
+
 - **ReportLab**: PDF generation for clinical reports
 - **OpenPyXL**: Excel export functionality
 - **Matplotlib**: Chart generation for analytics
@@ -69,6 +81,7 @@ Diabetes affects millions globally, requiring continuous monitoring and manageme
 ## 💡 Why GitDM?
 
 ### Unique Value Proposition
+
 1. **Medical Domain Expertise**: Built specifically for diabetes care workflows
 2. **AI Integration**: Leverages modern AI for clinical insights and pattern detection
 3. **Comprehensive Timeline**: Unified view of all patient interactions and data
@@ -76,6 +89,7 @@ Diabetes affects millions globally, requiring continuous monitoring and manageme
 5. **Persian Language Support**: Localized for Persian-speaking healthcare providers
 
 ### Technical Advantages
+
 - **Modern Django Architecture**: Leverages latest Django features and best practices
 - **Microservice-Ready**: Modular app structure enables easy scaling
 - **API-First Design**: RESTful APIs enable integration with external systems
@@ -98,7 +112,7 @@ Diabetes affects millions globally, requiring continuous monitoring and manageme
 
 ### Example User Journey
 
-```
+```m
 Doctor logs in → Views dashboard with pending alerts → 
 Selects patient → Reviews timeline → Records new encounter → 
 Orders lab tests → Prescribes medication → Generates AI summary → 
@@ -106,6 +120,7 @@ Reviews pattern analysis alerts → Sets follow-up reminders
 ```
 
 ### Key Features in Action
+
 - **Smart Reminders**: Automated notifications for medication adherence and lab tests
 - **Anomaly Detection**: Statistical analysis identifies concerning trends
 - **Clinical Decision Support**: AI-powered insights and reference integration
@@ -115,6 +130,7 @@ Reviews pattern analysis alerts → Sets follow-up reminders
 ## 🚀 Setup Instructions
 
 ### Prerequisites
+
 - Python 3.11+
 - Docker and Docker Compose (recommended)
 - Git
@@ -122,12 +138,14 @@ Reviews pattern analysis alerts → Sets follow-up reminders
 ### Quick Start with Docker (Recommended)
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd gitdm
    ```
 
 2. **Environment setup**
+
    ```bash
    # Copy environment template (if available)
    cp .env.example .env
@@ -135,19 +153,21 @@ Reviews pattern analysis alerts → Sets follow-up reminders
    ```
 
 3. **Run bootstrap script**
+
    ```bash
    ./bootstrap.sh
    ```
 
 4. **Access the application**
-   - Application: http://localhost:8000
-   - API Documentation: http://localhost:8000/api/docs/
-   - Admin Panel: http://localhost:8000/admin
+   - Application: <http://localhost:8000>
+   - API Documentation: <http://localhost:8000/api/docs/>
+   - Admin Panel: <http://localhost:8000/admin>
    - Default admin credentials: `admin` / `admin123`
 
 ### GitHub Codespaces Setup
 
 The project includes full GitHub Codespaces support:
+
 1. Open in Codespaces
 2. Automatic setup runs (SQLite database, migrations, static files)
 3. Access via port-forwarded URL on port 8000
@@ -155,27 +175,32 @@ The project includes full GitHub Codespaces support:
 ### Local Development (Without Docker)
 
 1. **Create virtual environment**
+
    ```bash
    python -m venv .venv
    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
    ```
 
 2. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Database setup**
+
    ```bash
    python manage.py migrate
    ```
 
 4. **Create superuser**
+
    ```bash
    python manage.py createsuperuser
    ```
 
 5. **Run development server**
+
    ```bash
    python manage.py runserver
    ```
@@ -217,7 +242,7 @@ MINIO_STATIC_BUCKET=static
 
 ### Application Structure
 
-```
+```bash
 config/          # Django project settings and URL configuration
 gitdm/           # Core domain (users, patients, authentication)
 encounters/      # Clinical encounters and SOAP notes
@@ -253,38 +278,48 @@ tests/           # Comprehensive test suite
 All API endpoints are prefixed with `/api/` and require JWT authentication (except authentication endpoints).
 
 #### Authentication
+
 - `POST /api/token/` - Obtain JWT access/refresh tokens
 - `POST /api/token/refresh/` - Refresh access token
 
 #### Patient Management
+
+```bash
 - `GET /api/patients/` - List patients (filtered by doctor access)
 - `POST /api/patients/` - Create new patient
 - `GET /api/patients/{id}/` - Patient details
 - `PUT/PATCH /api/patients/{id}/` - Update patient
 - `DELETE /api/patients/{id}/` - Delete patient
 - `GET /api/patients/{id}/timeline/` - Patient timeline (limit: max 500)
+```
 
 #### Clinical Data
+
 - `GET/POST /api/encounters/` - Clinical encounters
 - `GET/POST /api/labs/` - Laboratory results
 - `GET/POST /api/meds/` - Medication orders
 - `GET/POST /api/refs/` - Clinical references
 
-#### AI & Analytics
+### A-I & Analytics
+
+```bash
 - `GET/POST /api/ai-summaries/` - AI-generated summaries
 - `POST /api/ai-summaries/{id}/regenerate/` - Regenerate summary
 - `GET /api/pattern-analyses/` - Pattern analysis results
 - `POST /api/pattern-analyses/analyze/` - Request new analysis
 - `GET /api/anomaly-detections/` - Detected anomalies
 - `GET /api/baseline-metrics/` - Patient baseline metrics
+```
 
 #### System Features
+
 - `GET /api/versions/{resource_type}/{resource_id}/` - Version history
 - `POST /api/versions/{resource_type}/{resource_id}/revert/` - Revert to version
 - `GET /api/export/patient/{id}/` - Export patient data
 - `GET /health/` - System health check
 
 ### API Documentation Interfaces
+
 - **Swagger UI**: `/api/docs/` - Interactive API documentation
 - **ReDoc**: `/api/redoc/` - Alternative documentation interface
 - **OpenAPI Schema**: `/api/schema/` - Raw OpenAPI specification
@@ -294,11 +329,13 @@ For detailed API documentation including request/response schemas, parameters, a
 ## 🧪 Testing
 
 Run the test suite:
+
 ```bash
 pytest -v
 ```
 
 The test suite includes:
+
 - API endpoint testing
 - JWT authentication flows
 - Versioning system validation
@@ -308,13 +345,16 @@ The test suite includes:
 ## 🚀 Deployment Notes
 
 ### Docker Deployment
+
 The application is containerized and ready for deployment:
+
 - `Dockerfile` provides production-ready container
 - `docker-compose.yml` for local development
 - Environment variable configuration
 - Static file collection and database migration automation
 
 ### Production Considerations
+
 - Set `DJANGO_DEBUG=False` in production
 - Configure PostgreSQL database
 - Set up Redis for Celery task processing
@@ -323,6 +363,7 @@ The application is containerized and ready for deployment:
 - Configure proper `DJANGO_ALLOWED_HOSTS`
 
 ### Scaling Options
+
 - Horizontal scaling with multiple Django instances
 - Separate Celery workers for AI processing
 - Database read replicas for analytics
@@ -331,36 +372,42 @@ The application is containerized and ready for deployment:
 ## 📁 Key Features
 
 ### 🤖 AI-Powered Insights
+
 - Automated clinical summary generation
 - Pattern recognition in patient data
 - Clinical reference integration
 - Intelligent content analysis
 
 ### 📊 Advanced Analytics
+
 - Statistical baseline calculations
 - Anomaly detection algorithms
 - Trend analysis and forecasting
 - Performance metrics and reporting
 
 ### 🔔 Smart Notifications
+
 - Medication adherence reminders
 - Lab test scheduling alerts
 - Clinical milestone notifications
 - Customizable alert thresholds
 
 ### 📈 Patient Timeline
+
 - Comprehensive chronological view
 - Interactive data visualization
 - Multi-source data integration
 - Exportable patient summaries
 
 ### 🔒 Security & Compliance
+
 - Role-based access control
 - Comprehensive audit logging
 - Data versioning and recovery
 - Secure API authentication
 
 ### 🌐 Integration Ready
+
 - RESTful API design
 - OpenAPI 3.0 specification
 - Webhook support for notifications
@@ -373,6 +420,7 @@ This project is released under the license specified in the `LICENSE` file.
 ## 🤝 Contributing
 
 ### Development Guidelines
+
 - Run tests before submitting PRs: `pytest -v`
 - Follow PEP 8 style guidelines (enforced by Ruff)
 - Keep commit messages concise and descriptive
@@ -380,6 +428,7 @@ This project is released under the license specified in the `LICENSE` file.
 - Ensure all new features include appropriate tests
 
 ### Code Quality
+
 - Ruff linting and formatting configured
 - Type hints required for new code
 - Comprehensive test coverage expected
