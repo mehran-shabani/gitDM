@@ -1,0 +1,26 @@
+*.pyc
+__pycache__/
+.env
+.env.*
+.venv
+venv/
+.pytest_cache
+.coverage
+htmlcov/
+db.sqlite3
+db.sqlite3-wal
+db.sqlite3-shm
+logs/*.log
+staticfiles/
+.ruff_cache/
+.mypy_cache/
+.coverage.*
+# Celery beat artifacts
+celerybeat-schedule*
+celerybeat.pid
+.git
+.gitignore
+.dockerignore
+Dockerfile
+docker-compose.yml
+README.md
