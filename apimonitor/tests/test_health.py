@@ -35,7 +35,7 @@ class TestCallHealth:
             
             mock_client_class.return_value = mock_client
             
-            result = call_health(service)
+            call_health(service)
         
         assert result['status_code'] == 200
         assert result['ok'] is True

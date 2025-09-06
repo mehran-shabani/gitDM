@@ -3,7 +3,7 @@ Health check implementation with retry and backoff logic.
 """
 import time
 import logging
-from typing import Dict, Any
+from typing import Any
 import httpx
 from httpx import TimeoutException, NetworkError, HTTPStatusError
 
@@ -12,7 +12,7 @@ from monitor.models import Service
 logger = logging.getLogger('monitor.health')
 
 
-def call_health(service: Service) -> Dict[str, Any]:
+def call_health(service: Service) -> dict[str, Any]:
     """
     Perform health check on a service with retry and backoff.
     
@@ -77,7 +77,7 @@ def call_health(service: Service) -> Dict[str, Any]:
                 
                 return result
                 
-        except TimeoutException as e:
+        except TimeoutException:
             last_error = f"Timeout after {service.timeout_s}s"
             logger.warning(
                 {
@@ -90,7 +90,7 @@ def call_health(service: Service) -> Dict[str, Any]:
             )
             
         except NetworkError as e:
-            last_error = f"Network error: {str(e)}"
+            last_error = f"Network error: {e!s}"
             logger.warning(
                 {
                     'service': service.name,
@@ -104,7 +104,7 @@ def call_health(service: Service) -> Dict[str, Any]:
             
         except HTTPStatusError as e:
             # This shouldn't happen since we handle all status codes
-            last_error = f"HTTP error: {str(e)}"
+            last_error = f"HTTP error: {e!s}"
             logger.warning(
                 {
                     'service': service.name,
@@ -117,7 +117,7 @@ def call_health(service: Service) -> Dict[str, Any]:
             )
             
         except Exception as e:
-            last_error = f"Unexpected error: {type(e).__name__}: {str(e)}"
+            last_error = f"Unexpected error: {type(e).__name__}: {e!s}"
             logger.error(
                 {
                     'service': service.name,

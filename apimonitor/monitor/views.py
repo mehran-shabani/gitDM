@@ -57,6 +57,7 @@ class HealthCheckResultViewSet(viewsets.ReadOnlyModelViewSet):
                 since_dt = timezone.datetime.fromisoformat(since.replace('Z', '+00:00'))
                 queryset = queryset.filter(checked_at__gte=since_dt)
             except ValueError:
+                # Ignore invalid datetime format
                 pass
         
         until = self.request.query_params.get('until')
@@ -65,6 +66,7 @@ class HealthCheckResultViewSet(viewsets.ReadOnlyModelViewSet):
                 until_dt = timezone.datetime.fromisoformat(until.replace('Z', '+00:00'))
                 queryset = queryset.filter(checked_at__lte=until_dt)
             except ValueError:
+                # Ignore invalid datetime format
                 pass
         
         return queryset

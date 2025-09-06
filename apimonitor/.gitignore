@@ -15,7 +15,6 @@ venv.bak/
 # Django
 *.log
 *.pot
-*.pyc
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -45,7 +44,9 @@ coverage.xml
 
 # Logs
 logs/*.log*
-*.log
+# Celery beat artifacts
+celerybeat-schedule*
+celerybeat.pid
 
 # OS
 .DS_Store

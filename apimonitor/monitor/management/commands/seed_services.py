@@ -3,6 +3,8 @@ Management command to seed services from JSON file.
 """
 import json
 import os
+from typing import Any
+
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 from monitor.models import Service
@@ -24,7 +26,7 @@ class Command(BaseCommand):
             help='Clear existing services before seeding'
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: object, **options: Any) -> None:
         # Determine file path
         file_path = options.get('file')
         if not file_path:
@@ -36,12 +38,12 @@ class Command(BaseCommand):
         
         # Load services from JSON
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path, encoding='utf-8') as f:
                 services_data = json.load(f)
         except json.JSONDecodeError as e:
-            raise CommandError(f'Invalid JSON in {file_path}: {e}')
-        except Exception as e:
-            raise CommandError(f'Error reading {file_path}: {e}')
+            raise CommandError(f'Invalid JSON in {file_path}: {e}') from e
+        except OSError as e:
+            raise CommandError(f'Error reading {file_path}: {e}') from e
         
         if not isinstance(services_data, list):
             raise CommandError('Services JSON must be an array of service objects')
@@ -60,14 +62,14 @@ class Command(BaseCommand):
         for service_data in services_data:
             # Validate required fields
             required_fields = ['name', 'base_url']
-            for field in required_fields:
-                if field not in service_data:
-                    self.stdout.write(
-                        self.style.ERROR(
-                            f'Skipping service missing required field "{field}": {service_data}'
-                        )
+            missing = [f for f in required_fields if f not in service_data]
+            if missing:
+                self.stdout.write(
+                    self.style.ERROR(
+                        f'Skipping service missing required fields {missing}: {service_data}'
                     )
-                    continue
+                )
+                continue
             
             # Extract fields with defaults
             defaults = {

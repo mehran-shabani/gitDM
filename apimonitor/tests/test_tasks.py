@@ -95,15 +95,15 @@ class TestAnalyzeLogs:
     def test_analyze_logs_with_anomalies(self, mock_isolation_forest):
         """Test analyze_logs detects anomalies."""
         # Create test data
-        service = baker.make(Service, name='TestService')
+        service_obj = baker.make(Service, name='TestService')
         now = timezone.now()
-        
+
         # Create health results with varying latencies
         for i in range(20):
             latency = 100 if i < 18 else 5000  # 2 anomalies
             baker.make(
                 HealthCheckResult,
-                service=service,
+                service=service_obj,
                 status_code=200,
                 ok=True,
                 latency_ms=latency,

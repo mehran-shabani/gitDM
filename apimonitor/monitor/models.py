@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator
-from typing import Optional
 
 
 class Service(models.Model):
@@ -30,10 +29,10 @@ class Service(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['name']
-        indexes = [
+        ordering = ('name',)
+        indexes = (
             models.Index(fields=['enabled']),
-        ]
+        )
 
     def __str__(self) -> str:
         return f"{self.name} ({self.base_url})"
@@ -64,12 +63,12 @@ class HealthCheckResult(models.Model):
     meta = models.JSONField(default=dict, blank=True)
 
     class Meta:
-        ordering = ['-checked_at']
-        indexes = [
+        ordering = ('-checked_at',)
+        indexes = (
             models.Index(fields=['service', '-checked_at']),
             models.Index(fields=['checked_at']),
             models.Index(fields=['ok']),
-        ]
+        )
 
     def __str__(self) -> str:
         status = self.status_code or 'Error'
@@ -93,11 +92,11 @@ class AIDigest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
-        indexes = [
+        ordering = ('-created_at',)
+        indexes = (
             models.Index(fields=['service', '-created_at']),
             models.Index(fields=['period_start', 'period_end']),
-        ]
+        )
 
     def __str__(self) -> str:
         service_name = self.service.name if self.service else 'All Services'
