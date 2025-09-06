@@ -184,3 +184,8 @@ class TestCallHealth:
                 headers={'X-API-Key': 'test-key'},
                 follow_redirects=True
             )
+            # Also ensure httpx.Client was created with TLS verify enabled
+            _, client_kwargs = mock_client_class.call_args
+            assert client_kwargs.get('verify') is True
+            assert client_kwargs.get('timeout') is not None
+            assert result['ok'] is True
