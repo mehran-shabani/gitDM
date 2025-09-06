@@ -188,7 +188,7 @@ class TestAIDigestViewSet:
         
         assert response.status_code == status.HTTP_200_OK
         assert response.data['id'] == new_digest.id
-    
+        assert response.data['id'] != old_digest.id
     def test_latest_digest_by_service(self):
         """Test getting latest digest for specific service."""
         service = baker.make(Service)
