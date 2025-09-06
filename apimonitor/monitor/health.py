@@ -38,10 +38,12 @@ def call_health(service: Service) -> Dict[str, Any]:
     last_error = None
     start_time = time.time()
     
-    for attempt in range(max_retries + 1):
-        try:
-            with httpx.Client(timeout=timeout, verify=True) as client:
-                request_start = time.time()
+    # Open a single client to reuse connections across retries
+    with httpx.Client(timeout=timeout, verify=True) as client:
+        for attempt in range(max_retries + 1):
+            try:
+                # Use a monotonic timer for accurate measurements
+                request_start = time.perf_counter()
                 
                 response = client.request(
                     method=method,
@@ -49,7 +51,6 @@ def call_health(service: Service) -> Dict[str, Any]:
                     headers=headers,
                     follow_redirects=True
                 )
-                
                 latency_ms = (time.time() - request_start) * 1000
                 status_code = response.status_code
                 ok = 200 <= status_code < 400
