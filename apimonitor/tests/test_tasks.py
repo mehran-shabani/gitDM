@@ -57,13 +57,13 @@ class TestRunHealthChecks:
         assert result1.status_code == 200
         assert result1.ok is True
         assert result1.latency_ms == 150.5
+        assert result1.error_text == ""
         
         # Check second result
         result2 = HealthCheckResult.objects.filter(service=service2).first()
         assert result2.status_code == 503
         assert result2.ok is False
         assert result2.error_text == 'Service unavailable'
-    
     @patch('monitor.tasks.call_health')
     def test_run_health_checks_with_exception(self, mock_call_health):
         """Test health checks handling exceptions."""
