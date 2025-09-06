@@ -70,6 +70,29 @@ DATABASES = {
     )
 }
 
+# Cache configuration
+# Uses Redis by default (with REDIS_CACHE_URL or REDIS_URL),
+# falls back to in-memory cache if disabled.
+USE_REDIS_CACHE = env.bool('USE_REDIS_CACHE', True)
+REDIS_CACHE_URL = env.str('REDIS_CACHE_URL', env.str('REDIS_URL', 'redis://localhost:6379/1'))
+
+if USE_REDIS_CACHE:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_CACHE_URL,
+            'TIMEOUT': env.int('CACHE_TIMEOUT', 300),
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'apimonitor-locmem',
+            'TIMEOUT': env.int('CACHE_TIMEOUT', 300),
+        }
+    }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
