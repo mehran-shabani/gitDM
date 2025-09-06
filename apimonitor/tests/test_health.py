@@ -175,7 +175,7 @@ class TestCallHealth:
             
             mock_client_class.return_value = mock_client
             
-            call_health(service)
+            result = call_health(service)
             
             # Verify headers were passed
             mock_client.request.assert_called_with(
