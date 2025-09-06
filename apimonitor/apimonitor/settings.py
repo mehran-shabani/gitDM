@@ -3,7 +3,6 @@ Django settings for apimonitor project.
 """
 
 from pathlib import Path
-import os
 from environs import Env
 
 # Initialize environment variables

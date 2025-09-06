@@ -173,7 +173,7 @@ class TestAIDigestViewSet:
     def test_latest_digest_global(self):
         """Test getting latest global digest."""
         # Create digests with different timestamps
-        old_digest = baker.make(
+        baker.make(
             AIDigest,
             service=None,
             created_at=timezone.now() - timedelta(days=1)

@@ -4,12 +4,12 @@ Celery tasks for health monitoring and AI analysis.
 import json
 import logging
 from datetime import datetime, timedelta
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 from celery import shared_task
 from django.conf import settings
 from django.utils import timezone
-from django.db.models import Count, Avg, Q
+from django.db.models import Avg
 import numpy as np
 from sklearn.ensemble import IsolationForest
 
@@ -20,7 +20,7 @@ logger = logging.getLogger('monitor.tasks')
 
 
 @shared_task
-def run_health_checks() -> Dict[str, Any]:
+def run_health_checks() -> dict[str, Any]:
     """
     Run health checks for all enabled services.
     
@@ -64,7 +64,7 @@ def run_health_checks() -> Dict[str, Any]:
             })
             
         except Exception as e:
-            logger.error(f"Failed to check {service.name}: {str(e)}", exc_info=True)
+            logger.error("Failed to check %s: %s", service.name, e, exc_info=True)
             errors.append({
                 'service': service.name,
                 'error': str(e)
@@ -78,12 +78,12 @@ def run_health_checks() -> Dict[str, Any]:
         'timestamp': timezone.now().isoformat()
     }
     
-    logger.info(f"Health check summary: {summary}")
+    logger.info("Health check summary: %s", summary)
     return summary
 
 
 @shared_task
-def analyze_logs(period_hours: int = 24) -> Dict[str, Any]:
+def analyze_logs(period_hours: int = 24) -> dict[str, Any]:
     """
     Analyze health check logs using AI/ML techniques.
     
@@ -103,7 +103,9 @@ def analyze_logs(period_hours: int = 24) -> Dict[str, Any]:
     ).select_related('service').order_by('checked_at')
     
     if not results.exists():
-        logger.warning(f"No health check results found for period {start_time} to {end_time}")
+        logger.warning(
+            "No health check results found for period %s to %s", start_time, end_time
+        )
         return {'status': 'no_data'}
     
     # Analyze per service
@@ -146,7 +148,9 @@ def analyze_logs(period_hours: int = 24) -> Dict[str, Any]:
             
             # Collect anomalies
             service_anomalies = []
-            for i, (pred, score) in enumerate(zip(predictions, anomaly_scores)):
+            for i, (pred, score) in enumerate(
+                zip(predictions, anomaly_scores, strict=True)
+            ):
                 if pred == -1:  # Anomaly
                     service_anomalies.append({
                         'timestamp': timestamps[i].isoformat(),
@@ -190,7 +194,9 @@ def analyze_logs(period_hours: int = 24) -> Dict[str, Any]:
         summary_text=summary_text
     )
     
-    logger.info(f"Created AI digest {digest.id} for period {start_time} to {end_time}")
+    logger.info(
+        "Created AI digest %s for period %s to %s", digest.id, start_time, end_time
+    )
     
     return {
         'status': 'success',
@@ -201,9 +207,9 @@ def analyze_logs(period_hours: int = 24) -> Dict[str, Any]:
 
 
 def generate_summary(
-    service_summaries: List[Dict],
-    anomalies: List[Dict],
-    period_hours: int
+    service_summaries: list[dict],
+    anomalies: list[dict],
+    period_hours: int,
 ) -> str:
     """
     Generate a summary text from analysis results.
@@ -257,12 +263,12 @@ Keep the summary under 300 words and focus on actionable insights."""
             return response.choices[0].message.content
             
         except Exception as e:
-            logger.error(f"OpenAI API error: {str(e)}", exc_info=True)
+            logger.error("OpenAI API error: %s", e, exc_info=True)
             # Fall back to rule-based summary
     
     # Rule-based summary generation
     summary_parts = [
-        f"## Health Check Analysis Report",
+        "## Health Check Analysis Report",
         f"Period: Last {period_hours} hours",
         f"Total anomalies detected: {len(anomalies)}",
         ""
