@@ -88,6 +88,15 @@ class Command(BaseCommand):
                 defaults['method'] = 'GET'
             
             # Create or update service
+            # validate first
+            candidate = Service(name=service_data['name'], **defaults)
+            try:
+                candidate.full_clean()
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(
+                    f'Skipping invalid service \"{service_data.get(\"name\")}\": {e}'
+                ))
+                continue
             service, created = Service.objects.update_or_create(
                 name=service_data['name'],
                 defaults=defaults
