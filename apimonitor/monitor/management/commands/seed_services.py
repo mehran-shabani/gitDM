@@ -80,6 +80,12 @@ class Command(BaseCommand):
                 'timeout_s': service_data.get('timeout_s', 5),
                 'enabled': service_data.get('enabled', True),
             }
+            allowed_methods = {m for (m, _) in Service._meta.get_field('method').choices}
+            if defaults['method'] not in allowed_methods:
+                self.stdout.write(self.style.WARNING(
+                    f'Invalid method "{defaults["method"]}" for {service_data.get("name")}, falling back to GET'
+                ))
+                defaults['method'] = 'GET'
             
             # Create or update service
             service, created = Service.objects.update_or_create(
