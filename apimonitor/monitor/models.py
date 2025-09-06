@@ -40,8 +40,7 @@ class Service(models.Model):
     @property
     def full_url(self) -> str:
         """Get the complete health check URL."""
-        return f"{self.base_url.rstrip('/')}{self.health_path}"
-
+        return f"{self.base_url.rstrip('/')}/{self.health_path.lstrip('/')}"
 
 class HealthCheckResult(models.Model):
     """Health check result for a service."""
