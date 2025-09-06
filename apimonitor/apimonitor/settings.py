@@ -165,7 +165,19 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 # Celery Beat Schedule
+# --- top of apimonitor/apimonitor/settings.py ---
+
+from pathlib import Path
+import os
+from environs import Env
 from celery.schedules import crontab
+
+# ... rest of your imports and code ...
+
+# --- later in the file, Celery Beat Schedule section ---
+
+# Celery Beat Schedule
+# (the `from celery.schedules import crontab` line has been removed)
 
 CELERY_BEAT_SCHEDULE = {
     'run-health-checks': {
