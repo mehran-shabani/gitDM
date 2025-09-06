@@ -5,7 +5,7 @@ import time
 import logging
 from typing import Any
 import httpx
-from httpx import TimeoutException, NetworkError  # HTTPStatusError not needed unless raise_for_status()
+from httpx import TimeoutException, NetworkError
 
 from monitor.models import Service
 
@@ -32,7 +32,7 @@ def call_health(service: Service) -> dict[str, Any]:
 
     # Retry configuration
     max_retries = 2
-    backoff_delays = [0.5, 1.5]  # match max_retries (len == max_retries)
+    backoff_delays = [0.5, 1.5]  # len == max_retries
 
     last_error: str | None = None
     start_time = time.perf_counter()
@@ -67,7 +67,6 @@ def call_health(service: Service) -> dict[str, Any]:
                         'ts': time.time(),
                     }
                 )
-
                 return result
 
             except TimeoutException:
@@ -136,5 +135,4 @@ def call_health(service: Service) -> dict[str, Any]:
             'ts': time.time(),
         }
     )
-
     return result
