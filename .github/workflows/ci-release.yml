@@ -18,12 +18,13 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install -r backend/requirements.txt
 
       - name: Prepare env file (if needed)
         run: |
@@ -40,10 +41,36 @@ jobs:
         run: |
           pytest -v --tb=short
 
+  frontend-tests:
+    name: Frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Build frontend
+        run: npm run build
+
   release:
     name: Package and release
-    needs: tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.tests.result == 'success'
+    needs: [tests, frontend-tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.tests.result == 'success' && needs.frontend-tests.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -56,7 +83,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.13'
 
       - name: Install zip tool
         run: |

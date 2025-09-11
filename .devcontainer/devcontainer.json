@@ -10,10 +10,10 @@
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
+      "version": "3.13"
     },
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
+      "version": "20"
     }
   },
 
@@ -52,11 +52,15 @@
     }
   },
 
-  "forwardPorts": [8000],
+  "forwardPorts": [8000, 3000],
   
   "portsAttributes": {
     "8000": {
-      "label": "Django App",
+      "label": "Django Backend",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "React Frontend",
       "onAutoForward": "notify"
     }
   },

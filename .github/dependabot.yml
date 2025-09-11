@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Python dependencies
+  # Python dependencies (root)
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
@@ -16,6 +16,40 @@ updates:
     labels:
       - "dependencies"
       - "python"
+
+  # Python dependencies (backend)
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "@me"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+
+  # Frontend dependencies
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "@me"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "frontend"
 
   # GitHub Actions
   - package-ecosystem: "github-actions"

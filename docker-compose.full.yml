@@ -1,0 +1,104 @@
+# Full docker-compose with both frontend and backend
+version: '3.9'
+
+services:
+  # Backend Django service
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gitdm-backend
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0,backend
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  # Frontend React service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: gitdm-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # PostgreSQL database
+  db:
+    image: postgres:15-alpine
+    container_name: gitdm-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=gitdm
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+
+  # Redis for Celery (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: gitdm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Celery worker (optional)
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gitdm-celery
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+  # Celery beat scheduler (optional)
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gitdm-celery-beat
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:

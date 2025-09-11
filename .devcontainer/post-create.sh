@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Setting up development environment..."
+echo "🚀 Setting up GitHub Codespaces development environment..."
 
 # Copy .env.example to .env if it doesn't exist
 if [ ! -f .env ]; then
@@ -13,6 +13,13 @@ fi
 echo "📦 Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
+pip install -r backend/requirements.txt
+
+# Install Node.js dependencies for frontend
+echo "📦 Installing Node.js dependencies..."
+cd frontend
+npm install
+cd ..
 
 # Run migrations
 echo "🔄 Running database migrations..."
@@ -34,11 +41,23 @@ EOF
 echo "📁 Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Build frontend
+echo "🏗️ Building frontend..."
+cd frontend
+npm run build
+cd ..
+
 echo "✨ Development environment setup complete!"
-echo "🌐 Django app will be available at: http://localhost:8000"
-if [ "${VERBOSE_CREDENTIALS:-}" = "1" ]; then
-  echo "🔐 Admin panel: http://localhost:8000/admin (username: admin, password: admin123)"
-else
-  echo "🔐 Admin panel: http://localhost:8000/admin"
-  echo "👉 برای تغییر پسورد ادمین: python manage.py changepassword admin"
-fi
+echo ""
+echo "🌐 Available services:"
+echo "  - Django backend: http://localhost:8000"
+echo "  - React frontend: http://localhost:3000 (use ./scripts/start-frontend.sh)"
+echo "  - Admin panel: http://localhost:8000/admin"
+echo ""
+echo "🔐 Default credentials:"
+echo "  - Django admin: admin / admin123"
+echo ""
+echo "🚀 Quick start:"
+echo "  - Start backend: python manage.py runserver 0.0.0.0:8000"
+echo "  - Start frontend: cd frontend && npm run dev"
+echo "  - Start both: ./scripts/start-dev.sh"
