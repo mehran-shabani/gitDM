@@ -9,6 +9,6 @@ environs==11.0.0
 pytest==7.4.4
 pytest-django==4.11.1
 model-bakery==1.20.5
-openai==1.6.1
+openai==1.107.1
 psycopg2-binary==2.9.10
 gunicorn==23.0.0
