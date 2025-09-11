@@ -7,6 +7,12 @@
 
 ---
 
+## Table of Contents
+- [Backend Repair Agent Tasks](#backend-repair-agent-tasks)
+- [Frontend Repair Agent Tasks](#frontend-repair-agent-tasks)
+- [Shared Infrastructure Tasks](#shared-infrastructure-tasks)
+- [Priority Action Items](#priority-action-items)
+
 ## Backend Repair Agent Tasks
 
 ### ✅ Confirmed Working Components
