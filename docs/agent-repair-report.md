@@ -97,7 +97,7 @@
 ### 🔍 Areas Where API Usage May Break Due to Backend Changes
 
 #### API Client Generation:
-- **OpenAPI Spec:** Verify `frontend/OpenAPI.yaml` matches backend changes
+- **OpenAPI Spec:** Verify [`frontend/openapi.yaml`](../frontend/openapi.yaml) (actual path) matches backend changes
 - **Generated Client:** Regenerate API client if backend endpoints changed
 - **Type Definitions:** Update TypeScript types for modified API responses
 - **Error Handling:** Ensure API error responses are properly handled
