@@ -163,14 +163,14 @@
 ### 🐳 Docker Configuration Drift Across Services (e.g. Full vs Simple)
 
 #### Docker Compose Files:
-- **`docker-compose.simple.yml`:** Single container with SQLite
-- **`docker-compose.full.yml`:** Multi-container with PostgreSQL, Redis, Celery
-- **`docker-compose.yml`:** Default configuration (verify which is used)
+- **[`docker-compose.simple.yml`](../docker-compose.simple.yml):** Single container with SQLite
+- **[`docker-compose.full.yml`](../docker-compose.full.yml):** Multi-container with PostgreSQL, Redis, Celery
+- **[`docker-compose.yml`](../docker-compose.yml):** Default configuration (verify which is used)
 - **Service Dependencies:** Ensure consistent service dependencies across configs
 
 #### Dockerfile Issues:
-- **`Dockerfile`:** Root Dockerfile for backend
-- **`frontend/Dockerfile`:** Frontend containerization
+- **[`Dockerfile`](../Dockerfile):** Root Dockerfile for backend
+- **[`frontend/Dockerfile`](../frontend/Dockerfile):** Frontend containerization
 - **Requirements Paths:** Fixed requirements.txt paths (verify consistency)
 - **Python Version:** Python 3.13 support (verify all containers use same version)
 
@@ -179,7 +179,6 @@
 - **Service Discovery:** Inter-service communication setup
 - **Volume Mounts:** Persistent data storage configuration
 - **Environment Variables:** Consistent env var handling
-
 ### 🧱 Devcontainer Misconfigurations (Versions, Ports, Prebuild Setup)
 
 #### Devcontainer Configuration:
