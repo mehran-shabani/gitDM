@@ -1,5 +1,6 @@
 # Simplified docker-compose for development
 # Uses SQLite database (no external database required)
+# Compatible with GitHub Codespaces and Docker Desktop
 
 version: '3.9'
 
@@ -17,8 +18,13 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - django_db:/app/db.sqlite3
     environment:
       - DJANGO_DEBUG=True
-      - DJANGO_SECRET_KEY=dev-secret-key
+      - DJANGO_SECRET_KEY=dev-secret-key-for-sqlite-only
       - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - CODESPACES=true
     restart: unless-stopped
+
+volumes:
+  django_db:

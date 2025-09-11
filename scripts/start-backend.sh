@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "🐍 Starting Django backend server..."
+echo "🐍 Starting Django backend server (SQLite only)..."
+echo "ℹ️  Note: Background tasks (Celery) are disabled in this simplified setup"
 
 # Activate virtual environment if it exists
 if [ -d "backend/venv" ]; then

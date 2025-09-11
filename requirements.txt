@@ -6,11 +6,6 @@ djangorestframework>=3.15
 djangorestframework-simplejwt>=5.3
 drf-spectacular>=0.27
 
-# --- Celery & scheduling ---
-# Note: Celery is kept for future use but won't work without a broker
-celery>=5.3
-django-celery-beat>=2.5
-
 # --- AI / LLM ---
 openai>=1.65.0
 

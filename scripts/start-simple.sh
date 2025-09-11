@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "🚀 Starting simple Docker setup (SQLite database)..."
+echo "🚀 Starting simple Docker setup (SQLite database only)..."
+echo "ℹ️  Note: Background tasks (Celery) are disabled in this simplified setup"
 
 # Create .env from .env.example if it doesn't exist
 if [ ! -f .env ]; then
@@ -47,3 +48,4 @@ echo "🔐 Admin panel: http://localhost:8000/admin (admin/admin123)"
 echo ""
 echo "📊 View logs: docker compose -f docker-compose.simple.yml logs -f"
 echo "🛑 Stop services: ./scripts/stop-simple.sh"
+echo "ℹ️  Note: Background tasks (Celery) are disabled in this simplified setup"

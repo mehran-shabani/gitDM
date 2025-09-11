@@ -1,5 +1,5 @@
 {
-  "name": "Django Development",
+  "name": "Django Development (SQLite Only)",
   "dockerComposeFile": [
     "../docker-compose.yml"
   ],
