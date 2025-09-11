@@ -25,7 +25,7 @@
 - **Security:** Custom middleware and permissions
 - **Documentation:** API documentation with Swagger/ReDoc
 
-### 🔄 APIs or Models That May Be Impacted by Removing: Redis, Celery, MinIO, PostgreSQL
+### 🔄 Potential impact if optional services are disabled (under evaluation)
 
 #### Redis Dependencies:
 - **Celery Integration:** Configured but requires Redis broker for full functionality
@@ -50,7 +50,6 @@
 - **Advanced Queries:** Complex analytics and reporting queries
 - **Data Integrity:** Foreign key constraints and advanced indexing
 - **Migration History:** Custom migrations that may be PostgreSQL-specific
-
 ### ⚠️ Production-Only Configs or Integration Settings to Ignore for Now
 - **SSL/HTTPS Configuration:** Production SSL setup not configured
 - **Load Balancing:** Multi-instance deployment configuration missing
