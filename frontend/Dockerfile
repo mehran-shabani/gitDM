@@ -1,5 +1,5 @@
-# Frontend Dockerfile
-FROM node:18-alpine
+# Frontend Dockerfile for Development
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -7,17 +7,14 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev dependencies for development)
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
-
 # Expose port
 EXPOSE 3000
 
-# Start the application in preview mode
-CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3000"]
+# Start the development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
