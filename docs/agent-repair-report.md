@@ -232,7 +232,7 @@
 ## Priority Action Items
 
 ### High Priority (Immediate)
-1. **Backend:** Create environment-specific Django settings
+1. **Backend:** Create environment-specific Django settings — Owner: [@user] — Issue: #xxx — ETA: 2d
 2. **Frontend:** Implement unit test framework (Jest/Vitest)
 3. **Shared:** Verify Docker configuration consistency
 
@@ -245,7 +245,6 @@
 1. **Backend:** Implement production logging and monitoring
 2. **Frontend:** Add PWA features and internationalization
 3. **Shared:** Enhance CI/CD pipeline with new configurations
-
 ---
 
 **Note:** This report is based on the comprehensive audit findings. Each repair agent should focus on their respective section while coordinating on shared infrastructure changes to avoid conflicts.
