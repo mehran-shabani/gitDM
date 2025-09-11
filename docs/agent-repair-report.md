@@ -1,7 +1,9 @@
 # Agent Repair Report
-**Generated from:** `docs/report-11-09-25.md`  
+
+**Generated from:** [docs/report-11-09-25.md](./report-11-09-25.md)  
+**Source commit:** <!-- short SHA here -->  
 **Date:** September 11, 2025  
-**Purpose:** Actionable breakdown for backend and frontend repair agents
+**Purpose:** Actionable breakdown for backend و frontend repair agents
 
 ---
 
