@@ -131,83 +131,163 @@ Reviews pattern analysis alerts → Sets follow-up reminders
 
 ### Prerequisites
 
-- Python 3.11+
-- Docker and Docker Compose (recommended)
+**Required:**
+- Python 3.13+
+- Node.js 20+ (for frontend)
 - Git
 
-### Quick Start with Docker (Recommended)
+**Optional (for Docker):**
+- Docker and Docker Compose
 
-1. **Clone the repository**
+### Quick Start Options
 
+Choose the setup method that best fits your needs:
+
+#### Option 1: Local Development (Recommended for Development)
+
+**Best for:** Active development, debugging, IDE integration
+
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd gitdm
+
+# 2. Run the setup script
+./scripts/setup-dev.sh
+
+# 3. Start development servers
+./scripts/start-dev.sh
+```
+
+**What you get:**
+- Backend: http://localhost:8000
+- Frontend: http://localhost:3000
+- Admin: http://localhost:8000/admin (admin/admin123)
+
+#### Option 2: Simple Docker Setup
+
+**Best for:** Quick testing, consistent environment
+
+```bash
+# 1. Clone and setup
+git clone <repository-url>
+cd gitdm
+
+# 2. Start with Docker (SQLite)
+./scripts/start-simple.sh
+```
+
+**What you get:**
+- Backend: http://localhost:8000 (SQLite database)
+
+#### Option 3: Full Docker Setup
+
+**Best for:** Production-like environment, full feature testing
+
+```bash
+# 1. Clone and setup
+git clone <repository-url>
+cd gitdm
+
+# 2. Start full stack
+./scripts/start-advanced.sh
+```
+
+**What you get:**
+- Frontend: http://localhost:3000
+- Backend: http://localhost:8000
+- PostgreSQL: localhost:5432
+- Redis: localhost:6379
+
+#### Option 4: GitHub Codespaces
+
+**Best for:** Cloud development, no local setup needed
+
+1. Click "Open in Codespaces" on GitHub
+2. Wait for automatic setup (2-3 minutes)
+3. Access the application through forwarded ports
+
+### Detailed Setup Instructions
+
+#### Local Development Setup
+
+1. **Clone and navigate**
    ```bash
    git clone <repository-url>
    cd gitdm
    ```
 
-2. **Environment setup**
-
+2. **Environment configuration**
    ```bash
-   # Copy environment template (if available)
    cp .env.example .env
-   # Edit .env with your configuration
+   # Edit .env with your settings (optional for development)
    ```
 
-3. **Run bootstrap script**
-
+3. **Backend setup**
    ```bash
-   ./bootstrap.sh
-   ```
-
-4. **Access the application**
-   - Application: <http://localhost:8000>
-   - API Documentation: <http://localhost:8000/api/docs/>
-   - Admin Panel: <http://localhost:8000/admin>
-   - Default admin credentials: `admin` / `admin123`
-
-### GitHub Codespaces Setup
-
-The project includes full GitHub Codespaces support:
-
-1. Open in Codespaces
-2. Automatic setup runs (SQLite database, migrations, static files)
-3. Access via port-forwarded URL on port 8000
-
-### Local Development (Without Docker)
-
-1. **Create virtual environment**
-
-   ```bash
-   python -m venv .venv
-   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-   ```
-
-2. **Install dependencies**
-
-   ```bash
+   # Create virtual environment
+   python -m venv backend/venv
+   source backend/venv/bin/activate  # Windows: backend\venv\Scripts\activate
+   
+   # Install dependencies
    pip install -r requirements.txt
-   ```
-
-3. **Database setup**
-
-   ```bash
+   pip install -r backend/requirements.txt
+   
+   # Database setup
    python manage.py migrate
+   python manage.py createsuperuser  # Optional: create your own admin
+   python manage.py collectstatic --noinput
    ```
 
-4. **Create superuser**
-
+4. **Frontend setup**
    ```bash
-   python manage.py createsuperuser
+   cd frontend
+   npm install
+   npm run build
+   cd ..
    ```
 
-5. **Run development server**
-
+5. **Start development**
    ```bash
-   python manage.py runserver
+   # Option A: Both servers simultaneously
+   ./scripts/start-dev.sh
+   
+   # Option B: Separate terminals
+   ./scripts/start-backend.sh    # Terminal 1
+   ./scripts/start-frontend.sh   # Terminal 2
    ```
 
-### Environment Variables
+#### Docker Setup
 
-Create a `.env` file with the following configuration:
+1. **Simple setup (SQLite)**
+   ```bash
+   git clone <repository-url>
+   cd gitdm
+   ./scripts/start-simple.sh
+   ```
+
+2. **Advanced setup (PostgreSQL + Redis)**
+   ```bash
+   git clone <repository-url>
+   cd gitdm
+   ./scripts/start-advanced.sh
+   ```
+
+3. **Stop services**
+   ```bash
+   ./scripts/stop-simple.sh     # For simple setup
+   ./scripts/stop-advanced.sh   # For advanced setup
+   ```
+
+### Environment Configuration
+
+The project uses environment variables for configuration. Copy `.env.example` to `.env` and customize:
+
+```bash
+cp .env.example .env
+```
+
+**Key Configuration Options:**
 
 ```env
 # Django Core
@@ -216,26 +296,135 @@ DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
 
 # Database (Optional - defaults to SQLite)
-POSTGRES_DB=diabetes
-POSTGRES_USER=diabetes
-POSTGRES_PASSWORD=your-postgres-password
-POSTGRES_HOST=your-postgres-host
-POSTGRES_PORT=5432
+# POSTGRES_DB=gitdm
+# POSTGRES_USER=postgres
+# POSTGRES_PASSWORD=your-password
+# POSTGRES_HOST=localhost
+# POSTGRES_PORT=5432
+
+# AI Services (Optional)
+# OPENAI_API_KEY=your-openai-api-key
 
 # Redis (Optional - for Celery)
-REDIS_URL=redis://your-redis-host:6379/0
+# REDIS_URL=redis://localhost:6379/0
+```
 
-# AI Services
-OPENAI_API_KEY=your-openai-api-key
-GAPGPT_API_KEY=your-gapgpt-api-key
+### GitHub Codespaces
 
-# MinIO (Optional - for file storage)
-MINIO_ENDPOINT=your-minio-host:9000
-MINIO_ACCESS_KEY=your-minio-access-key
-MINIO_SECRET_KEY=your-minio-secret-key
-MINIO_USE_HTTPS=False
-MINIO_MEDIA_BUCKET=media
-MINIO_STATIC_BUCKET=static
+The project includes complete Codespaces support with automatic setup:
+
+1. **Open in Codespaces** from the GitHub repository
+2. **Automatic setup** includes:
+   - Python and Node.js environments
+   - All dependencies installed
+   - Database migrations
+   - Admin user creation
+   - Frontend build
+
+3. **Access services:**
+   - Backend: Port 8000 (auto-forwarded)
+   - Frontend: Port 3000 (start manually with `cd frontend && npm run dev`)
+
+4. **Default credentials:**
+   - Admin: `admin` / `admin123`
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **Port already in use**
+   ```bash
+   # Find what's using the port
+   lsof -i :8000
+   # Kill the process or change port in settings
+   ```
+
+2. **Permission denied on scripts**
+   ```bash
+   chmod +x scripts/*.sh
+   ```
+
+3. **Database issues**
+   ```bash
+   # Reset database (WARNING: deletes data)
+   rm db.sqlite3
+   python manage.py migrate
+   ```
+
+4. **Docker issues**
+   ```bash
+   # Clean up Docker
+   docker system prune -f
+   ./scripts/clean.sh  # Project cleanup script
+   ```
+
+5. **Frontend build errors**
+   ```bash
+   cd frontend
+   rm -rf node_modules package-lock.json
+   npm install
+   npm run build
+   ```
+
+#### Health Check
+
+Run the health check script to verify your setup:
+
+```bash
+./scripts/health-check.sh
+```
+
+This will check:
+- Service availability (Django, React)
+- Database connections
+- Docker containers
+- Environment setup
+
+### Development Workflow
+
+1. **Daily development:**
+   ```bash
+   ./scripts/start-dev.sh     # Start both servers
+   # Develop in your IDE
+   # Press Ctrl+C to stop
+   ```
+
+2. **Testing:**
+   ```bash
+   ./scripts/test.sh          # Run all tests
+   ```
+
+3. **Cleanup:**
+   ```bash
+   ./scripts/clean.sh         # Clean build artifacts
+   ```
+
+4. **Backup:**
+   ```bash
+   ./scripts/backup.sh        # Create project backup
+   ```
+
+### Project Structure
+
+```
+gitdm/
+├── backend/              # Django backend application
+│   ├── config/          # Django settings and configuration
+│   ├── apps/            # Django applications (encounters, pharmacy, etc.)
+│   └── requirements.txt # Backend dependencies
+├── frontend/            # React frontend application
+│   ├── src/            # React source code
+│   ├── package.json    # Frontend dependencies
+│   └── Dockerfile      # Frontend container config
+├── scripts/            # Utility scripts
+│   ├── setup-dev.sh   # Development setup
+│   ├── start-*.sh     # Service startup scripts
+│   └── README.md      # Scripts documentation
+├── .devcontainer/      # GitHub Codespaces configuration
+├── .github/           # GitHub workflows and templates
+├── docker-compose*.yml # Docker configurations
+├── Dockerfile         # Backend container config
+└── requirements.txt   # Root Python dependencies
 ```
 
 ## 🏗️ Project Architecture
