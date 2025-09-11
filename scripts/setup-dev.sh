@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "🚀 Setting up development environment for GitDM..."
+echo "🚀 Setting up development environment for GitDM (SQLite only)..."
+echo "ℹ️  Note: This setup uses SQLite and disables background tasks for simplicity"
 
 # Create .env from .env.example if it doesn't exist
 if [ ! -f .env ]; then
@@ -10,7 +11,7 @@ if [ ! -f .env ]; then
 fi
 
 # Backend setup
-echo "🐍 Setting up backend (Django)..."
+echo "🐍 Setting up backend (Django with SQLite)..."
 if [ ! -d "backend/venv" ]; then
   echo "📦 Creating Python virtual environment..."
   python -m venv backend/venv
@@ -66,3 +67,5 @@ echo "🌐 URLs:"
 echo "  Backend:  http://localhost:8000"
 echo "  Frontend: http://localhost:3000"
 echo "  Admin:    http://localhost:8000/admin (admin/admin123)"
+echo ""
+echo "ℹ️  Note: Background tasks (Celery) are disabled in this simplified setup"

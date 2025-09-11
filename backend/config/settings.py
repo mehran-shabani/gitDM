@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
-    'django_celery_beat',
 
     # Your apps
     'gitdm',
@@ -121,10 +120,11 @@ CACHES = {
 }
 
 # ------------------------
-# Celery - Disabled for Codespaces
+# Background Tasks - Disabled for Simplified Setup
 # ------------------------
-# Celery is disabled in Codespaces environment
-# To enable Celery, you need to set up a message broker
+# Celery and Redis have been removed for simplified development setup.
+# Background tasks are disabled. For production, consider re-enabling
+# Celery with Redis broker for async task processing.
 
 # ------------------------
 # REST Framework
