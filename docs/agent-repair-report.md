@@ -50,7 +50,7 @@
 - **Advanced Queries:** Complex analytics and reporting queries
 - **Data Integrity:** Foreign key constraints and advanced indexing
 - **Migration History:** Custom migrations that may be PostgreSQL-specific
-### ⚠️ Production-Only Configs or Integration Settings to Ignore for Now
+### ⚠️ Production-Only Configs (Out of scope for this PR/MVP)
 - **SSL/HTTPS Configuration:** Production SSL setup not configured
 - **Load Balancing:** Multi-instance deployment configuration missing
 - **Database Backup:** Automated PostgreSQL backup not configured
