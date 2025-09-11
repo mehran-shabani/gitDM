@@ -26,5 +26,23 @@ services:
       - CODESPACES=true
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: react-app-simple
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_BASE_URL=http://web:8000/api
+      - VITE_API_WITH_CREDENTIALS=false
+      - VITE_DEV_MODE=true
+    depends_on:
+      - web
+    restart: unless-stopped
+
 volumes:
   django_db:
