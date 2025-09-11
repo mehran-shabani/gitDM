@@ -60,7 +60,12 @@
 ### 🛠 Cleanup Required in Settings, Environment Files, and Django Project Structure
 
 #### Settings Files:
-- **`backend/config/settings.py`:** Create environment-specific settings (dev/prod)
+- **Settings layout (proposed):**
+  - `backend/config/settings/__init__.py`
+  - `backend/config/settings/base.py`
+  - `backend/config/settings/dev.py`
+  - `backend/config/settings/prod.py`
+  - `DJANGO_SETTINGS_MODULE=config.settings.dev|prod`
 - **Environment Variables:** Review `.env.example` for unused variables
 - **Database Configuration:** Ensure SQLite fallback for development
 - **Static Files:** Configure static file serving for development
@@ -75,7 +80,6 @@
 - **Remove Unused Imports:** Clean up Redis, Celery, MinIO imports if not needed
 - **Conditional Features:** Add feature flags for optional services
 - **Error Handling:** Graceful degradation when services unavailable
-
 ---
 
 ## Frontend Repair Agent Tasks
