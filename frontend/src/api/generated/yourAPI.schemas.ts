@@ -838,7 +838,7 @@ export interface PatchedMedicationOrder {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-redeclare
-export const PatchedPatientSex = {...SexEnum,...BlankEnum,...NullEnum,} as const
+export const PatchedPatientSex = {...SexEnum,...BlankEnum,...NullEnum,} as const;
 /**
  * @nullable
  */
