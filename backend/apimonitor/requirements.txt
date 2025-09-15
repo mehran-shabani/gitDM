@@ -5,7 +5,7 @@ redis==6.4.0
 httpx==0.28.1
 scikit-learn==1.5.0
 python-dotenv==1.1.1
-environs==11.0.0
+environs==14.3.0
 pytest==8.4.2
 pytest-django==4.11.1
 model-bakery==1.20.5
