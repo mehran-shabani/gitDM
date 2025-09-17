@@ -1,0 +1,12 @@
+# پوشه‌های تولیدی فلان
+.dart_tool/
+.packages
+build/
+ios/
+android/
+macos/
+linux/
+windows/
+web/
+# فایل قفل pub؛ در صورت نیاز می‌توان آن را افزود
+pubspec.lock

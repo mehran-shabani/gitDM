@@ -209,3 +209,12 @@ __marimo__/
 */_pycache/
 */__pycache__/
 */.vscode/
+
+# Allow Flutter client sources
+!gitdm_client/lib/
+!gitdm_client/lib/**
+!gitdm_client/test/
+!gitdm_client/test/**
+!gitdm_client/pubspec.yaml
+!gitdm_client/README.md
+!gitdm_client/.gitignore

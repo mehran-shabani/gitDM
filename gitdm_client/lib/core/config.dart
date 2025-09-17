@@ -1,0 +1,13 @@
+/// \u062a\u0646\u0638\u06cc\u0645\u0627\u062a \u067e\u0627\u06cc\u0647\u0654 \u0627\u067e.
+/// \u0622\u062f\u0631\u0633 \u0628\u06a9\u200c\u0627\u0646\u062f \u0628\u0627 --dart-define \u067e\u0627\u0633 \u0645\u06cc\u200c\u0634\u0648\u062f \u062a\u0627 \u062f\u0631 \u06a9\u062f \u0647\u0627\u0631\u062f\u06a9\u064f\u062f \u0646\u0628\u0627\u0634\u062f.
+/// \u0645\u062b\u0627\u0644 \u0627\u062c\u0631\u0627:
+/// flutter run --dart-define=API_BASE_URL=http://localhost:8000
+class AppConfig {
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:8000',
+  );
+
+  /// \u067e\u06cc\u0634\u0648\u0646\u062f \u0647\u0645\u0647\u0654 \u0627\u0646\u062f\u067e\u0648\u06cc\u0646\u062a\u200c\u0647\u0627\u06cc DRF \u0637\u0628\u0642 README
+  static const String apiPrefix = '/api';
+}
