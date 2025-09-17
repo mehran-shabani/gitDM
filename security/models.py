@@ -12,6 +12,13 @@ class AuditLog(models.Model):
     - created_at: auto_now_add
     - meta: JSON (default {})
     """
+    class ActionType(models.TextChoices):
+        CREATE = 'CREATE', 'ایجاد'
+        UPDATE = 'UPDATE', 'به‌روزرسانی'
+        DELETE = 'DELETE', 'حذف'
+        VIEW = 'VIEW', 'مشاهده'
+        EXPORT = 'EXPORT', 'خروجی‌گیری'
+    
     id = models.BigAutoField(primary_key=True)
     user_id = models.UUIDField(null=True, blank=True)
     path = models.CharField(max_length=200)
@@ -19,6 +26,43 @@ class AuditLog(models.Model):
     status_code = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     meta = models.JSONField(default=dict, blank=True)
+    
+    # Extended fields for comprehensive audit logging
+    action = models.CharField(max_length=20, choices=ActionType.choices, null=True, blank=True)
+    resource_type = models.CharField(max_length=50, null=True, blank=True)
+    resource_id = models.CharField(max_length=100, null=True, blank=True)
+    patient_id = models.CharField(max_length=100, null=True, blank=True)
+    old_values = models.JSONField(null=True, blank=True)
+    new_values = models.JSONField(null=True, blank=True)
+    notes = models.TextField(blank=True)
+    
+    @classmethod
+    def log_action(cls, user=None, action=None, resource_type=None, resource_id=None, 
+                   patient_id=None, old_values=None, new_values=None, request=None, notes=None):
+        """Helper method to create audit log entries"""
+        try:
+            return cls.objects.create(
+                user_id=user.id if user and user.is_authenticated else None,
+                path=request.path if request else '',
+                method=request.method if request else '',
+                status_code=200,  # Default success
+                action=action,
+                resource_type=resource_type,
+                resource_id=resource_id,
+                patient_id=patient_id,
+                old_values=old_values,
+                new_values=new_values,
+                notes=notes,
+                meta={'remote_addr': request.META.get('REMOTE_ADDR') if request else None}
+            )
+        except Exception:
+            # Fallback to minimal logging
+            return cls.objects.create(
+                path=request.path if request else '',
+                method=request.method if request else '',
+                status_code=200,
+                meta={'error': 'Extended logging failed'}
+            )
 
     def __str__(self) -> str:  # pragma: no cover - trivial
         return f"{self.method} {self.path} -> {self.status_code}"

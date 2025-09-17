@@ -15,8 +15,6 @@ router.register(r'system-analytics', SystemAnalyticsViewSet, basename='system-an
 router.register(r'reports', ReportViewSet, basename='reports')
 router.register(r'dashboard', DashboardViewSet, basename='dashboard')
 
-app_name = 'analytics'
-
 urlpatterns = [
     path('', include(router.urls)),
 ]

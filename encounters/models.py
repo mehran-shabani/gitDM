@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.utils import timezone
+from gitdm.validators import validate_encounter_date
 
 
 class Encounter(models.Model):
@@ -17,6 +20,28 @@ class Encounter(models.Model):
             models.Index(fields=["patient", "occurred_at"]),
             models.Index(fields=["created_by", "created_at"]),
         ]
+
+    def clean(self):
+        """
+        اعتبارسنجی داده‌های مواجهه
+        """
+        # اعتبارسنجی تاریخ مواجهه
+        if self.occurred_at:
+            validate_encounter_date(self.occurred_at)
+        
+        # بررسی اینکه created_by یک پزشک است
+        if self.created_by and not getattr(self.created_by, 'is_doctor', False):
+            raise ValidationError({
+                'created_by': 'Only doctors can create encounters.'
+            })
+        
+        # بررسی اینکه بیمار متعلق به همان پزشک است (اختیاری)
+        if (self.created_by and self.patient and 
+            hasattr(self.patient, 'primary_doctor') and 
+            self.patient.primary_doctor and 
+            self.patient.primary_doctor != self.created_by):
+            # این فقط یک هشدار است، نه خطا
+            pass
 
     def __str__(self) -> str:
         """
