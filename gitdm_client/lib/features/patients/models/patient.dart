@@ -10,9 +10,7 @@ class Patient {
   factory Patient.fromJson(Map<String, dynamic> json) {
     final first = (json['first_name'] ?? json['firstName'] ?? json['name'] ?? '').toString();
     final last  = (json['last_name'] ?? json['lastName'] ?? '').toString();
-    final combined = (first.isNotEmpty && last.isNotEmpty)
-        ? '$first $last'
-        : (first.isNotEmpty ? first : (last.isNotEmpty ? last : ''));
+    final combined = [first, last].where((s) => s.isNotEmpty).join(' ');
 
     return Patient(
       id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
