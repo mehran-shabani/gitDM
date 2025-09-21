@@ -3,7 +3,6 @@ from django.views.decorators.http import require_GET
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotFound
-from django.core.exceptions import PermissionDenied
 import logging
 from gitdm.models import PatientProfile
 
