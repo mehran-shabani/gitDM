@@ -8,8 +8,8 @@ class TokenPair {
 
   factory TokenPair.fromJson(Map<String, dynamic> json) {
     return TokenPair(
-      access: (json['access'] ?? '') as String,
-      refresh: (json['refresh'] ?? '') as String,
+      access: json['access'] as String? ?? '',
+      refresh: json['refresh'] as String? ?? '',
     );
   }
 }
