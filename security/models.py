@@ -20,7 +20,7 @@ class AuditLog(models.Model):
         EXPORT = 'EXPORT', 'خروجی‌گیری'
     
     id = models.BigAutoField(primary_key=True)
-    user_id = models.UUIDField(null=True, blank=True)
+    user_id = models.BigIntegerField(null=True, blank=True)
     path = models.CharField(max_length=200)
     method = models.CharField(max_length=10)
     status_code = models.IntegerField()
@@ -35,17 +35,25 @@ class AuditLog(models.Model):
     old_values = models.JSONField(null=True, blank=True)
     new_values = models.JSONField(null=True, blank=True)
     notes = models.TextField(blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['created_at', 'action']),
+            models.Index(fields=['resource_type', 'resource_id']),
+            models.Index(fields=['patient_id', 'created_at']),
+        ]
     
     @classmethod
-    def log_action(cls, user=None, action=None, resource_type=None, resource_id=None, 
-                   patient_id=None, old_values=None, new_values=None, request=None, notes=None):
+    def log_action(cls, user=None, action=None, resource_type=None, resource_id=None,
+                   patient_id=None, old_values=None, new_values=None, request=None,
+                   notes=None, status_code: int = 200):
         """Helper method to create audit log entries"""
         try:
             return cls.objects.create(
                 user_id=user.id if user and user.is_authenticated else None,
                 path=request.path if request else '',
                 method=request.method if request else '',
-                status_code=200,  # Default success
+                status_code=status_code,
                 action=action,
                 resource_type=resource_type,
                 resource_id=resource_id,
@@ -53,15 +61,26 @@ class AuditLog(models.Model):
                 old_values=old_values,
                 new_values=new_values,
                 notes=notes,
-                meta={'remote_addr': request.META.get('REMOTE_ADDR') if request else None}
+                meta={
+                    'remote_addr': (
+                        (request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip())
+                        or request.META.get('REMOTE_ADDR')
+                    ) if request else None
+                }
             )
         except Exception:
             # Fallback to minimal logging
             return cls.objects.create(
                 path=request.path if request else '',
                 method=request.method if request else '',
-                status_code=200,
-                meta={'error': 'Extended logging failed'}
+                status_code=500,
+                meta={
+                    'error': 'Extended logging failed',
+                    'remote_addr': (
+                        (request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip())
+                        or request.META.get('REMOTE_ADDR')
+                    ) if request else None
+                }
             )
 
     def __str__(self) -> str:  # pragma: no cover - trivial

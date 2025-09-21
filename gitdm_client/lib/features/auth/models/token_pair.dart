@@ -1,10 +1,15 @@
-/// \u0645\u062f\u0644 \u0633\u0627\u062f\u0647\u0654 \u062a\u0648\u06a9\u0646\u200c\u0647\u0627.
-/// \u067e\u0627\u0633\u062e /api/token/ \u0645\u0639\u0645\u0648\u0644\u0627\u064b \u0634\u0627\u0645\u0644 access \u0648 refresh \u0627\u0633\u062a.
+import 'package:meta/meta.dart';
+
+/// مدل ساده‌ی توکن‌ها.
+/// پاسخ /api/token/ معمولاً شامل access و refresh است.
+/// Example:
+/// { "access": "eyJhbGciOi...", "refresh": "eyJhbGciOi..." }
+@immutable
 class TokenPair {
   final String access;
   final String refresh;
 
-  TokenPair({required this.access, required this.refresh});
+  const TokenPair({required this.access, required this.refresh});
 
   factory TokenPair.fromJson(Map<String, dynamic> json) {
     return TokenPair(
@@ -12,4 +17,25 @@ class TokenPair {
       refresh: json['refresh'] as String? ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'access': access,
+    'refresh': refresh,
+  };
+
+  TokenPair copyWith({String? access, String? refresh}) =>
+      TokenPair(access: access ?? this.access, refresh: refresh ?? this.refresh);
+
+  bool get isComplete => access.isNotEmpty && refresh.isNotEmpty;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TokenPair &&
+          runtimeType == other.runtimeType &&
+          access == other.access &&
+          refresh == other.refresh;
+
+  @override
+  int get hashCode => Object.hash(access, refresh);
 }
