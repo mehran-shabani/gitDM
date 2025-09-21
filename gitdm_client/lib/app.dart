@@ -12,7 +12,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'GitDM Client',
-      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF0B7)),
+      theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF00BB77)),
       initialRoute: '/',
       routes: {
         '/': (_) => const LoginPage(),
