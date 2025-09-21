@@ -24,50 +24,6 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
-import type {
-  AISummary,
-  AISummaryList,
-  AnomalyDetection,
-  BaselineMetrics,
-  ClinicalAlert,
-  ClinicalReference,
-  CreateAISummary,
-  DoctorAnalytics,
-  Encounter,
-  LabResult,
-  MedicalTimeline,
-  MedicationOrder,
-  Notification,
-  PatchedAISummary,
-  PatchedClinicalReference,
-  PatchedDoctorAnalytics,
-  PatchedEncounter,
-  PatchedLabResult,
-  PatchedMedicalTimeline,
-  PatchedMedicationOrder,
-  PatchedPatient,
-  PatchedPatientAnalytics,
-  PatchedPatientTimelinePreference,
-  PatchedReminder,
-  PatchedReport,
-  PatchedSystemAnalytics,
-  PatchedTestReminder,
-  Patient,
-  PatientAnalytics,
-  PatientTimelinePreference,
-  PatternAlert,
-  PatternAnalysis,
-  RegenerateAISummary,
-  Reminder,
-  ReminderTemplate,
-  Report,
-  SystemAnalytics,
-  TestReminder,
-  TimelineEventCategory,
-  TokenObtainPair,
-  TokenRefresh
-} from './yourAPI.schemas';
-
 import { createAxiosInstance } from '../http/axios-instance';
 
 // https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
@@ -96,7 +52,1836 @@ type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
     : T[P];
 } : DistributeReadOnlyOverUnions<T>;
 
+/**
+ * Serializer for AISummary model with enhanced fields
+ */
+export interface AISummary {
+  readonly id: number;
+  patient: number;
+  /** @nullable */
+  content_type?: number | null;
+  /**
+   * @maxLength 64
+   * @nullable
+   */
+  object_id?: string | null;
+  readonly resource_type: string;
+  summary: string;
+  readonly references: readonly string[];
+  readonly created_at: string;
+  readonly updated_at: string;
+}
 
+/**
+ * Simplified serializer for listing AI summaries
+ */
+export interface AISummaryList {
+  readonly id: number;
+  patient: number;
+  readonly resource_type: string;
+  readonly summary_preview: string;
+  readonly references_count: string;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
+/**
+ * Serializer for AnomalyDetection model
+ */
+export interface AnomalyDetection {
+  readonly id: number;
+  patient: number;
+  anomaly_type: AnomalyTypeEnum;
+  readonly anomaly_type_display: string;
+  severity_level: SeverityLevelEnum;
+  readonly severity_level_display: string;
+  description: string;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,6}(?:\.\d{0,4})?$
+   */
+  detected_value?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,6}(?:\.\d{0,4})?$
+   */
+  expected_value?: string | null;
+  /** @pattern ^-?\d{0,2}(?:\.\d{0,3})?$ */
+  deviation_score: string;
+  is_acknowledged?: boolean;
+  /** @nullable */
+  acknowledged_by?: number | null;
+  readonly acknowledged_by_name: string;
+  /** @nullable */
+  acknowledged_at?: string | null;
+  readonly detected_at: string;
+  data_timestamp: string;
+}
+
+/**
+ * * `OUTLIER` - نقطه پرت آماری
+* `SUDDEN_CHANGE` - تغییر ناگهانی
+* `TREND_REVERSAL` - معکوس شدن روند
+* `MISSING_DATA` - داده گمشده
+* `MED_SKIP` - عدم مصرف دارو
+* `UNUSUAL_PATTERN` - الگوی غیرعادی
+ */
+export type AnomalyTypeEnum = typeof AnomalyTypeEnum[keyof typeof AnomalyTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const AnomalyTypeEnum = {
+  OUTLIER: 'OUTLIER',
+  SUDDEN_CHANGE: 'SUDDEN_CHANGE',
+  TREND_REVERSAL: 'TREND_REVERSAL',
+  MISSING_DATA: 'MISSING_DATA',
+  MED_SKIP: 'MED_SKIP',
+  UNUSUAL_PATTERN: 'UNUSUAL_PATTERN',
+} as const;
+
+/**
+ * Serializer for BaselineMetrics model
+ */
+export interface BaselineMetrics {
+  patient: number;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,2}(?:\.\d{0,2})?$
+   */
+  avg_hba1c?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,3}(?:\.\d{0,2})?$
+   */
+  avg_blood_glucose?: string | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_systolic_bp?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_diastolic_bp?: number | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,2}(?:\.\d{0,2})?$
+   */
+  std_hba1c?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,3}(?:\.\d{0,2})?$
+   */
+  std_blood_glucose?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,3}(?:\.\d{0,2})?$
+   */
+  std_systolic_bp?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,3}(?:\.\d{0,2})?$
+   */
+  std_diastolic_bp?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,2}(?:\.\d{0,2})?$
+   */
+  avg_encounters_per_month?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,2}(?:\.\d{0,2})?$
+   */
+  avg_labs_per_month?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,1}(?:\.\d{0,2})?$
+   */
+  medication_adherence_score?: string | null;
+  readonly last_calculated: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  data_points_count?: number;
+}
+
+export type BlankEnum = typeof BlankEnum[keyof typeof BlankEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const BlankEnum = {
+  '': '',
+} as const;
+
+/**
+ * * `MALE` - Male
+ * `FEMALE` - Female
+ * `OTHER` - Other
+ */
+export type SexEnum = typeof SexEnum[keyof typeof SexEnum];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SexEnum = {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER',
+} as const;
+
+/**
+ * Serializer برای هشدارهای بالینی
+ */
+export interface ClinicalAlert {
+  readonly id: number;
+  alert_type: ClinicalAlertAlertTypeEnum;
+  severity?: ClinicalAlertSeverityEnum;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,6}(?:\.\d{0,4})?$
+   */
+  trigger_value?: string | null;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,6}(?:\.\d{0,4})?$
+   */
+  threshold_value?: string | null;
+  message: string;
+  is_active?: boolean;
+  /** @nullable */
+  readonly acknowledged_at: string | null;
+  readonly created_at: string;
+  readonly patient_name: string;
+  readonly acknowledged_by_name: string;
+}
+
+/**
+ * * `HIGH_HBA1C` - HbA1c بالا
+* `LOW_GLUCOSE` - قند خون پایین
+* `HIGH_GLUCOSE` - قند خون بالا
+* `MISSED_APPOINTMENT` - عدم حضور در ویزیت
+* `DRUG_INTERACTION` - تداخل دارویی
+* `ABNORMAL_TREND` - روند غیرطبیعی
+ */
+export type ClinicalAlertAlertTypeEnum = typeof ClinicalAlertAlertTypeEnum[keyof typeof ClinicalAlertAlertTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ClinicalAlertAlertTypeEnum = {
+  HIGH_HBA1C: 'HIGH_HBA1C',
+  LOW_GLUCOSE: 'LOW_GLUCOSE',
+  HIGH_GLUCOSE: 'HIGH_GLUCOSE',
+  MISSED_APPOINTMENT: 'MISSED_APPOINTMENT',
+  DRUG_INTERACTION: 'DRUG_INTERACTION',
+  ABNORMAL_TREND: 'ABNORMAL_TREND',
+} as const;
+
+/**
+ * * `LOW` - پایین
+* `MEDIUM` - متوسط
+* `HIGH` - بالا
+* `CRITICAL` - بحرانی
+ */
+export type ClinicalAlertSeverityEnum = typeof ClinicalAlertSeverityEnum[keyof typeof ClinicalAlertSeverityEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ClinicalAlertSeverityEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+} as const;
+
+export interface ClinicalReference {
+  readonly id: number;
+  /** @maxLength 200 */
+  title: string;
+  /** @maxLength 120 */
+  source: string;
+  /**
+   * @minimum 1900
+   * @maximum 9223372036854776000
+   */
+  year: number;
+  /** @maxLength 200 */
+  url?: string;
+  /** @maxLength 80 */
+  topic: string;
+}
+
+/**
+ * Serializer for creating AI summaries with content to be processed
+ */
+export interface CreateAISummary {
+  patient_id: number;
+  /** Raw medical content to be summarized by AI */
+  content: string;
+  /** Model name for generic relation (e.g., 'encounter', 'lab_result') */
+  content_type_model?: string;
+  /** Object ID for generic relation */
+  object_id?: string;
+  /** Optional patient context for better summarization */
+  context?: string;
+  /** Type of summary for specialized AI prompts
+
+* `medical_record` - Medical Record
+* `encounter` - Patient Encounter
+* `lab_results` - Laboratory Results
+* `medications` - Medications */
+  summary_type?: SummaryTypeEnum;
+  /** Topic hint for linking clinical references */
+  topic_hint?: string;
+  /** Process summary asynchronously using background task */
+  async_processing?: boolean;
+}
+
+/**
+ * * `WEEKLY` - هفتگی
+* `MONTHLY` - ماهانه
+* `QUARTERLY` - سه‌ماهه
+* `BIANNUALLY` - شش‌ماهه
+* `ANNUALLY` - سالانه
+* `CUSTOM` - سفارشی
+ */
+export type DefaultFrequencyEnum = typeof DefaultFrequencyEnum[keyof typeof DefaultFrequencyEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const DefaultFrequencyEnum = {
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  BIANNUALLY: 'BIANNUALLY',
+  ANNUALLY: 'ANNUALLY',
+  CUSTOM: 'CUSTOM',
+} as const;
+
+/**
+ * * `LOW` - پایین
+* `MEDIUM` - متوسط
+* `HIGH` - بالا
+* `URGENT` - فوری
+ */
+export type DefaultPriorityEnum = typeof DefaultPriorityEnum[keyof typeof DefaultPriorityEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const DefaultPriorityEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+} as const;
+
+/**
+ * سریالایزر برای آمارهای پزشک
+ */
+export interface DoctorAnalytics {
+  readonly id: number;
+  doctor: number;
+  readonly doctor_name: string;
+  date?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  active_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  new_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_encounters?: number;
+  /** @nullable */
+  avg_encounters_per_patient?: number | null;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_patient_hba1c?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  patients_at_goal?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  patients_above_goal?: number;
+  readonly goal_achievement_rate: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_alerts?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  critical_alerts?: number;
+  readonly alert_response_rate: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  performance_score?: number | null;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
+export interface Encounter {
+  readonly id: number;
+  patient: number;
+  occurred_at: string;
+  subjective?: string;
+  objective?: unknown;
+  assessment?: unknown;
+  plan?: unknown;
+  readonly created_by: number;
+  readonly created_at: string;
+}
+
+/**
+ * * `ENCOUNTER` - مواجهه بالینی
+* `LAB_RESULT` - نتیجه آزمایش
+* `MEDICATION` - دارو
+* `PHYSICAL_EXAM` - معاینه فیزیکی
+* `DIAGNOSTIC_TEST` - تست تشخیصی
+* `PROCEDURE` - اقدام درمانی
+* `DIET_PLAN` - برنامه غذایی
+* `EXERCISE` - ورزش
+* `ALERT` - هشدار بالینی
+* `REMINDER` - یادآوری
+ */
+export type EventTypeEnum = typeof EventTypeEnum[keyof typeof EventTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const EventTypeEnum = {
+  ENCOUNTER: 'ENCOUNTER',
+  LAB_RESULT: 'LAB_RESULT',
+  MEDICATION: 'MEDICATION',
+  PHYSICAL_EXAM: 'PHYSICAL_EXAM',
+  DIAGNOSTIC_TEST: 'DIAGNOSTIC_TEST',
+  PROCEDURE: 'PROCEDURE',
+  DIET_PLAN: 'DIET_PLAN',
+  EXERCISE: 'EXERCISE',
+  ALERT: 'ALERT',
+  REMINDER: 'REMINDER',
+} as const;
+
+/**
+ * * `pdf` - PDF
+* `excel` - Excel
+* `csv` - CSV
+ */
+export type FormatEnum = typeof FormatEnum[keyof typeof FormatEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const FormatEnum = {
+  pdf: 'pdf',
+  excel: 'excel',
+  csv: 'csv',
+} as const;
+
+/**
+ * * `WEEKLY` - هفتگی
+* `MONTHLY` - ماهانه
+* `QUARTERLY` - سه‌ماهه
+* `BIANNUALLY` - شش‌ماهه
+* `ANNUALLY` - سالانه
+* `CUSTOM` - سفارشی
+ */
+export type FrequencyAc7Enum = typeof FrequencyAc7Enum[keyof typeof FrequencyAc7Enum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const FrequencyAc7Enum = {
+  WEEKLY: 'WEEKLY',
+  MONTHLY: 'MONTHLY',
+  QUARTERLY: 'QUARTERLY',
+  BIANNUALLY: 'BIANNUALLY',
+  ANNUALLY: 'ANNUALLY',
+  CUSTOM: 'CUSTOM',
+} as const;
+
+/**
+ * * `improving` - در حال بهبود
+* `stable` - ثابت
+* `worsening` - در حال بدتر شدن
+ */
+export type GlucoseTrendEnum = typeof GlucoseTrendEnum[keyof typeof GlucoseTrendEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const GlucoseTrendEnum = {
+  improving: 'improving',
+  stable: 'stable',
+  worsening: 'worsening',
+} as const;
+
+/**
+ * * `improving` - در حال بهبود
+* `stable` - ثابت
+* `worsening` - در حال بدتر شدن
+ */
+export type Hba1cTrendEnum = typeof Hba1cTrendEnum[keyof typeof Hba1cTrendEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Hba1cTrendEnum = {
+  improving: 'improving',
+  stable: 'stable',
+  worsening: 'worsening',
+} as const;
+
+export interface LabResult {
+  readonly id: number;
+  patient: number;
+  /** @nullable */
+  encounter?: number | null;
+  /** @maxLength 40 */
+  loinc: string;
+  /** @pattern ^-?\d{0,6}(?:\.\d{0,4})?$ */
+  value: string;
+  /** @maxLength 16 */
+  unit: string;
+  taken_at: string;
+}
+
+/**
+ * سریالایزر برای نمایش رویدادهای تایم‌لاین پزشکی
+ */
+export interface MedicalTimeline {
+  readonly id: number;
+  patient: number;
+  readonly patient_name: string;
+  event_type: EventTypeEnum;
+  readonly event_type_display: string;
+  /** @maxLength 200 */
+  title: string;
+  description?: string;
+  occurred_at: string;
+  metadata?: unknown;
+  severity?: MedicalTimelineSeverityEnum;
+  readonly severity_display: string;
+  readonly created_by: number;
+  readonly created_by_name: string;
+  readonly created_at: string;
+  is_visible?: boolean;
+  readonly content_type_name: string;
+  readonly content_object_data: string;
+}
+
+/**
+ * * `LOW` - پایین
+* `NORMAL` - عادی
+* `HIGH` - بالا
+* `CRITICAL` - بحرانی
+ */
+export type MedicalTimelineSeverityEnum = typeof MedicalTimelineSeverityEnum[keyof typeof MedicalTimelineSeverityEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MedicalTimelineSeverityEnum = {
+  LOW: 'LOW',
+  NORMAL: 'NORMAL',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+} as const;
+
+export interface MedicationOrder {
+  readonly id: number;
+  patient: number;
+  /** @nullable */
+  encounter?: number | null;
+  /**
+   * ATC classification code (e.g., A10BA02 for Metformin)
+   * @maxLength 20
+   * @pattern ^[A-Z]\d{2}[A-Z]{1,2}\d{2}$
+   */
+  atc: string;
+  /** @maxLength 100 */
+  name: string;
+  /**
+   * دوز دارو (مثال: 500mg, 1.5g, 10units)
+   * @maxLength 50
+   */
+  dose: string;
+  frequency?: MedicationOrderFrequencyEnum;
+  start_date: string;
+  /** @nullable */
+  end_date?: string | null;
+}
+
+/**
+ * * `QD` - Once daily
+* `BID` - Twice daily
+* `TID` - Three times daily
+* `QID` - Four times daily
+* `Q6H` - Every 6 hours
+* `Q8H` - Every 8 hours
+* `Q12H` - Every 12 hours
+* `PRN` - As needed
+* `QW` - Weekly
+* `QM` - Monthly
+ */
+export type MedicationOrderFrequencyEnum = typeof MedicationOrderFrequencyEnum[keyof typeof MedicationOrderFrequencyEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const MedicationOrderFrequencyEnum = {
+  QD: 'QD',
+  BID: 'BID',
+  TID: 'TID',
+  QID: 'QID',
+  Q6H: 'Q6H',
+  Q8H: 'Q8H',
+  Q12H: 'Q12H',
+  PRN: 'PRN',
+  QW: 'QW',
+  QM: 'QM',
+} as const;
+
+/**
+ * Serializer برای اطلاع‌رسانی‌ها
+ */
+export interface Notification {
+  readonly id: number;
+  /** @maxLength 200 */
+  title: string;
+  message: string;
+  notification_type?: NotificationTypeEnum;
+  priority?: Priority95eEnum;
+  /**
+   * @maxLength 64
+   * @nullable
+   */
+  patient_id?: string | null;
+  /**
+   * @maxLength 50
+   * @nullable
+   */
+  resource_type?: string | null;
+  /**
+   * @maxLength 64
+   * @nullable
+   */
+  resource_id?: string | null;
+  is_read?: boolean;
+  /** @nullable */
+  readonly read_at: string | null;
+  readonly created_at: string;
+  /** @nullable */
+  expires_at?: string | null;
+  readonly recipient_name: string;
+}
+
+/**
+ * * `INFO` - اطلاعات
+* `WARNING` - هشدار
+* `CRITICAL` - بحرانی
+* `REMINDER` - یادآوری
+* `AI_SUMMARY` - خلاصه هوشمند
+ */
+export type NotificationTypeEnum = typeof NotificationTypeEnum[keyof typeof NotificationTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const NotificationTypeEnum = {
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  CRITICAL: 'CRITICAL',
+  REMINDER: 'REMINDER',
+  AI_SUMMARY: 'AI_SUMMARY',
+} as const;
+
+export type NullEnum = typeof NullEnum[keyof typeof NullEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const NullEnum = {
+} as const;
+
+/**
+ * Serializer for AISummary model with enhanced fields
+ */
+export interface PatchedAISummary {
+  readonly id?: number;
+  patient?: number;
+  /** @nullable */
+  content_type?: number | null;
+  /**
+   * @maxLength 64
+   * @nullable
+   */
+  object_id?: string | null;
+  readonly resource_type?: string;
+  summary?: string;
+  readonly references?: readonly string[];
+  readonly created_at?: string;
+  readonly updated_at?: string;
+}
+
+export interface PatchedClinicalReference {
+  readonly id?: number;
+  /** @maxLength 200 */
+  title?: string;
+  /** @maxLength 120 */
+  source?: string;
+  /**
+   * @minimum 1900
+   * @maximum 9223372036854776000
+   */
+  year?: number;
+  /** @maxLength 200 */
+  url?: string;
+  /** @maxLength 80 */
+  topic?: string;
+}
+
+/**
+ * سریالایزر برای آمارهای پزشک
+ */
+export interface PatchedDoctorAnalytics {
+  readonly id?: number;
+  doctor?: number;
+  readonly doctor_name?: string;
+  date?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  active_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  new_patients?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_encounters?: number;
+  /** @nullable */
+  avg_encounters_per_patient?: number | null;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_patient_hba1c?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  patients_at_goal?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  patients_above_goal?: number;
+  readonly goal_achievement_rate?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_alerts?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  critical_alerts?: number;
+  readonly alert_response_rate?: string;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  performance_score?: number | null;
+  readonly created_at?: string;
+  readonly updated_at?: string;
+}
+
+export interface PatchedEncounter {
+  readonly id?: number;
+  patient?: number;
+  occurred_at?: string;
+  subjective?: string;
+  objective?: unknown;
+  assessment?: unknown;
+  plan?: unknown;
+  readonly created_by?: number;
+  readonly created_at?: string;
+}
+
+export interface PatchedLabResult {
+  readonly id?: number;
+  patient?: number;
+  /** @nullable */
+  encounter?: number | null;
+  /** @maxLength 40 */
+  loinc?: string;
+  /** @pattern ^-?\d{0,6}(?:\.\d{0,4})?$ */
+  value?: string;
+  /** @maxLength 16 */
+  unit?: string;
+  taken_at?: string;
+}
+
+/**
+ * سریالایزر برای نمایش رویدادهای تایم‌لاین پزشکی
+ */
+export interface PatchedMedicalTimeline {
+  readonly id?: number;
+  patient?: number;
+  readonly patient_name?: string;
+  event_type?: EventTypeEnum;
+  readonly event_type_display?: string;
+  /** @maxLength 200 */
+  title?: string;
+  description?: string;
+  occurred_at?: string;
+  metadata?: unknown;
+  severity?: MedicalTimelineSeverityEnum;
+  readonly severity_display?: string;
+  readonly created_by?: number;
+  readonly created_by_name?: string;
+  readonly created_at?: string;
+  is_visible?: boolean;
+  readonly content_type_name?: string;
+  readonly content_object_data?: string;
+}
+
+export interface PatchedMedicationOrder {
+  readonly id?: number;
+  patient?: number;
+  /** @nullable */
+  encounter?: number | null;
+  /**
+   * ATC classification code (e.g., A10BA02 for Metformin)
+   * @maxLength 20
+   * @pattern ^[A-Z]\d{2}[A-Z]{1,2}\d{2}$
+   */
+  atc?: string;
+  /** @maxLength 100 */
+  name?: string;
+  /**
+   * دوز دارو (مثال: 500mg, 1.5g, 10units)
+   * @maxLength 50
+   */
+  dose?: string;
+  frequency?: MedicationOrderFrequencyEnum;
+  start_date?: string;
+  /** @nullable */
+  end_date?: string | null;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatchedPatientSex = {...SexEnum,...BlankEnum,...NullEnum,} as const
+/**
+ * @nullable
+ */
+export type PatchedPatientSex = typeof PatchedPatientSex[keyof typeof PatchedPatientSex]  | null;
+
+export interface PatchedPatient {
+  readonly id?: number;
+  /** @nullable */
+  user?: number | null;
+  /**
+   * کد ملی 10 رقمی
+   * @maxLength 20
+   * @nullable
+   */
+  national_id?: string | null;
+  /** @maxLength 120 */
+  full_name?: string;
+  /**
+   * تاریخ تولد
+   * @nullable
+   */
+  dob?: string | null;
+  /** @nullable */
+  sex?: PatchedPatientSex;
+  /** @nullable */
+  primary_doctor?: number | null;
+  readonly primary_doctor_id?: number;
+  readonly created_at?: string;
+}
+
+/**
+ * سریالایزر برای آمارهای بیمار
+ */
+export interface PatchedPatientAnalytics {
+  readonly id?: number;
+  patient?: number;
+  readonly patient_name?: string;
+  date?: string;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  avg_glucose?: number | null;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  min_glucose?: number | null;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  max_glucose?: number | null;
+  /** @nullable */
+  glucose_std_dev?: number | null;
+  glucose_trend?: GlucoseTrendEnum;
+  readonly glucose_in_range_percentage?: string;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_hba1c?: number | null;
+  hba1c_trend?: Hba1cTrendEnum;
+  readonly hba1c_status?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_systolic?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_diastolic?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  encounters_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  medications_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  lab_tests_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  alerts_count?: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  compliance_score?: number | null;
+  readonly created_at?: string;
+  readonly updated_at?: string;
+}
+
+/**
+ * سریالایزر برای تنظیمات تایم‌لاین بیمار
+ */
+export interface PatchedPatientTimelinePreference {
+  patient?: number;
+  readonly patient_name?: string;
+  show_lab_results?: boolean;
+  show_medications?: boolean;
+  show_encounters?: boolean;
+  show_alerts?: boolean;
+  show_reminders?: boolean;
+  enable_email_reminders?: boolean;
+  enable_sms_reminders?: boolean;
+  /**
+   * @minimum 0
+   * @maximum 9223372036854776000
+   */
+  default_timeline_range_days?: number;
+}
+
+export interface PatchedReminder {
+  readonly id?: number;
+  patient?: number;
+  readonly patient_name?: string;
+  reminder_type?: ReminderTypeEnum;
+  /** @maxLength 200 */
+  title?: string;
+  description?: string;
+  due_at?: string;
+  /** @nullable */
+  snooze_until?: string | null;
+  readonly status?: ReminderStatusEnum;
+  priority?: ReminderPriorityEnum;
+  /** @nullable */
+  readonly completed_at?: string | null;
+  readonly created_at?: string;
+  readonly is_due?: boolean;
+  /** @nullable */
+  readonly created_by?: number | null;
+}
+
+/**
+ * سریالایزر برای گزارش‌ها
+ */
+export interface PatchedReport {
+  readonly id?: number;
+  report_type?: ReportTypeEnum;
+  format?: FormatEnum;
+  status?: ReportStatusEnum;
+  /** @nullable */
+  requested_by?: number | null;
+  readonly requested_by_name?: string;
+  /** @nullable */
+  start_date?: string | null;
+  /** @nullable */
+  end_date?: string | null;
+  /** @nullable */
+  patient?: number | null;
+  readonly patient_name?: string;
+  /** @nullable */
+  doctor?: number | null;
+  readonly doctor_name?: string;
+  /** @nullable */
+  readonly file_path?: string | null;
+  /** @nullable */
+  readonly error_message?: string | null;
+  metadata?: unknown;
+  readonly created_at?: string;
+  /** @nullable */
+  readonly completed_at?: string | null;
+  readonly duration?: string;
+}
+
+/**
+ * سریالایزر برای آمارهای سیستم
+ */
+export interface PatchedSystemAnalytics {
+  readonly id?: number;
+  date?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  active_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_doctors?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_patients?: number;
+  readonly user_engagement_rate?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_encounters?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_lab_tests?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_medications?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_alerts?: number;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_system_hba1c?: number | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  system_goal_achievement?: number | null;
+  readonly data_completeness_score?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  daily_active_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  api_calls?: number;
+  readonly created_at?: string;
+  readonly updated_at?: string;
+}
+
+/**
+ * سریالایزر برای یادآورهای آزمایشات
+ */
+export interface PatchedTestReminder {
+  readonly id?: number;
+  patient?: number;
+  readonly patient_name?: string;
+  test_type?: TestTypeEnum;
+  readonly test_type_display?: string;
+  frequency?: FrequencyAc7Enum;
+  readonly frequency_display?: string;
+  priority?: Priority95eEnum;
+  readonly priority_display?: string;
+  /** @nullable */
+  last_performed?: string | null;
+  next_due?: string;
+  /**
+   * @minimum 0
+   * @maximum 9223372036854776000
+   */
+  reminder_days_before?: number;
+  is_active?: boolean;
+  notes?: string;
+  /**
+   * فاصله سفارشی به روز (فقط برای نوع CUSTOM)
+   * @minimum 0
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  custom_interval_days?: number | null;
+  readonly created_by?: number;
+  readonly created_by_name?: string;
+  readonly created_at?: string;
+  readonly updated_at?: string;
+  readonly is_overdue?: string;
+  readonly days_until_due?: string;
+  readonly should_send_reminder?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatientSex = {...SexEnum,...BlankEnum,...NullEnum,} as const
+/**
+ * @nullable
+ */
+export type PatientSex = typeof PatientSex[keyof typeof PatientSex]  | null;
+
+export interface Patient {
+  readonly id: number;
+  /** @nullable */
+  user?: number | null;
+  /**
+   * کد ملی 10 رقمی
+   * @maxLength 20
+   * @nullable
+   */
+  national_id?: string | null;
+  /** @maxLength 120 */
+  full_name?: string;
+  /**
+   * تاریخ تولد
+   * @nullable
+   */
+  dob?: string | null;
+  /** @nullable */
+  sex?: PatientSex;
+  /** @nullable */
+  primary_doctor?: number | null;
+  readonly primary_doctor_id: number;
+  readonly created_at: string;
+}
+
+/**
+ * سریالایزر برای آمارهای بیمار
+ */
+export interface PatientAnalytics {
+  readonly id: number;
+  patient: number;
+  readonly patient_name: string;
+  date?: string;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  avg_glucose?: number | null;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  min_glucose?: number | null;
+  /**
+   * @minimum 20
+   * @maximum 800
+   * @nullable
+   */
+  max_glucose?: number | null;
+  /** @nullable */
+  glucose_std_dev?: number | null;
+  glucose_trend?: GlucoseTrendEnum;
+  readonly glucose_in_range_percentage: string;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_hba1c?: number | null;
+  hba1c_trend?: Hba1cTrendEnum;
+  readonly hba1c_status: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_systolic?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  avg_diastolic?: number | null;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  encounters_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  medications_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  lab_tests_count?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  alerts_count?: number;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  compliance_score?: number | null;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
+/**
+ * سریالایزر برای تنظیمات تایم‌لاین بیمار
+ */
+export interface PatientTimelinePreference {
+  patient: number;
+  readonly patient_name: string;
+  show_lab_results?: boolean;
+  show_medications?: boolean;
+  show_encounters?: boolean;
+  show_alerts?: boolean;
+  show_reminders?: boolean;
+  enable_email_reminders?: boolean;
+  enable_sms_reminders?: boolean;
+  /**
+   * @minimum 0
+   * @maximum 9223372036854776000
+   */
+  default_timeline_range_days?: number;
+}
+
+/**
+ * Serializer for PatternAlert model
+ */
+export interface PatternAlert {
+  readonly id: number;
+  patient: number;
+  alert_type: PatternAlertAlertTypeEnum;
+  readonly alert_type_display: string;
+  priority: PatternAlertPriorityEnum;
+  readonly priority_display: string;
+  /** @maxLength 200 */
+  title: string;
+  message: string;
+  readonly related_patterns_count: string;
+  readonly related_anomalies_count: string;
+  is_active?: boolean;
+  is_resolved?: boolean;
+  /** @nullable */
+  resolved_by?: number | null;
+  readonly resolved_by_name: string;
+  /** @nullable */
+  resolved_at?: string | null;
+  resolution_notes?: string;
+  readonly created_at: string;
+  /** @nullable */
+  expires_at?: string | null;
+}
+
+/**
+ * * `DETERIORATING` - بدتر شدن کنترل
+* `NON_ADHERENCE` - عدم پایبندی دارویی
+* `MISSED_APPT` - عدم حضور در ویزیت
+* `UNUSUAL_LAB` - الگوی غیرعادی آزمایش
+* `EMERGENCY` - الگوی اورژانسی
+ */
+export type PatternAlertAlertTypeEnum = typeof PatternAlertAlertTypeEnum[keyof typeof PatternAlertAlertTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatternAlertAlertTypeEnum = {
+  DETERIORATING: 'DETERIORATING',
+  NON_ADHERENCE: 'NON_ADHERENCE',
+  MISSED_APPT: 'MISSED_APPT',
+  UNUSUAL_LAB: 'UNUSUAL_LAB',
+  EMERGENCY: 'EMERGENCY',
+} as const;
+
+/**
+ * * `LOW` - کم
+* `MEDIUM` - متوسط
+* `HIGH` - بالا
+* `URGENT` - فوری
+ */
+export type PatternAlertPriorityEnum = typeof PatternAlertPriorityEnum[keyof typeof PatternAlertPriorityEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatternAlertPriorityEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+} as const;
+
+/**
+ * Serializer for PatternAnalysis model
+ */
+export interface PatternAnalysis {
+  readonly id: number;
+  patient: number;
+  pattern_type: PatternTypeEnum;
+  readonly pattern_type_display: string;
+  trend_direction: TrendDirectionEnum;
+  readonly trend_direction_display: string;
+  analysis_result?: unknown;
+  /** @pattern ^-?\d{0,1}(?:\.\d{0,2})?$ */
+  confidence_score: string;
+  /**
+   * @nullable
+   * @pattern ^-?\d{0,1}(?:\.\d{0,3})?$
+   */
+  statistical_significance?: string | null;
+  analysis_start_date: string;
+  analysis_end_date: string;
+  readonly created_at: string;
+}
+
+/**
+ * * `GLUCOSE_TREND` - روند قند خون
+* `HBA1C_TREND` - روند HbA1c
+* `BP_TREND` - روند فشار خون
+* `MED_ADHERENCE` - پایبندی دارویی
+* `VISIT_FREQ` - فراوانی ویزیت
+* `LAB_FREQ` - فراوانی آزمایش
+ */
+export type PatternTypeEnum = typeof PatternTypeEnum[keyof typeof PatternTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const PatternTypeEnum = {
+  GLUCOSE_TREND: 'GLUCOSE_TREND',
+  HBA1C_TREND: 'HBA1C_TREND',
+  BP_TREND: 'BP_TREND',
+  MED_ADHERENCE: 'MED_ADHERENCE',
+  VISIT_FREQ: 'VISIT_FREQ',
+  LAB_FREQ: 'LAB_FREQ',
+} as const;
+
+/**
+ * * `LOW` - پایین
+* `MEDIUM` - متوسط
+* `HIGH` - بالا
+* `URGENT` - فوری
+ */
+export type Priority95eEnum = typeof Priority95eEnum[keyof typeof Priority95eEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const Priority95eEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+} as const;
+
+/**
+ * Serializer for regenerating existing AI summaries
+ */
+export interface RegenerateAISummary {
+  summary_id: string;
+  /** New content to summarize */
+  content: string;
+  /** Optional patient context */
+  context?: string;
+  summary_type?: SummaryTypeEnum;
+}
+
+export interface Reminder {
+  readonly id: number;
+  patient: number;
+  readonly patient_name: string;
+  reminder_type: ReminderTypeEnum;
+  /** @maxLength 200 */
+  title: string;
+  description?: string;
+  due_at: string;
+  /** @nullable */
+  snooze_until?: string | null;
+  readonly status: ReminderStatusEnum;
+  priority?: ReminderPriorityEnum;
+  /** @nullable */
+  readonly completed_at: string | null;
+  readonly created_at: string;
+  readonly is_due: boolean;
+  /** @nullable */
+  readonly created_by: number | null;
+}
+
+/**
+ * * `LOW` - Low
+* `MEDIUM` - Medium
+* `HIGH` - High
+* `URGENT` - Urgent
+ */
+export type ReminderPriorityEnum = typeof ReminderPriorityEnum[keyof typeof ReminderPriorityEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReminderPriorityEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  URGENT: 'URGENT',
+} as const;
+
+/**
+ * * `PENDING` - Pending
+* `SENT` - Sent
+* `COMPLETED` - Completed
+* `CANCELLED` - Cancelled
+ */
+export type ReminderStatusEnum = typeof ReminderStatusEnum[keyof typeof ReminderStatusEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReminderStatusEnum = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+
+/**
+ * سریالایزر برای قالب‌های یادآوری
+ */
+export interface ReminderTemplate {
+  readonly id: number;
+  test_type: TestTypeEnum;
+  readonly test_type_display: string;
+  default_frequency: DefaultFrequencyEnum;
+  readonly default_frequency_display: string;
+  default_priority?: DefaultPriorityEnum;
+  readonly default_priority_display: string;
+  /**
+   * @minimum 0
+   * @maximum 9223372036854776000
+   */
+  default_reminder_days?: number;
+  instructions?: string;
+  preparation_notes?: string;
+  is_active?: boolean;
+}
+
+/**
+ * * `HBA1C` - HbA1c
+* `FBS` - Fasting Blood Sugar
+* `2HPP` - 2-Hour Postprandial Glucose
+* `BUN` - Blood Urea Nitrogen
+* `CR` - Creatinine
+* `ALT` - Alanine Transaminase
+* `AST` - Aspartate Transaminase
+* `ALP` - Alkaline Phosphatase
+* `PR_URINE_24H` - 24h Urine Protein
+* `EYE_EXAM` - Eye Physical Exam
+* `EMG` - EMG
+* `NCV` - NCV
+* `TSH` - Thyroid Stimulating Hormone
+* `BMI` - Body Mass Index
+* `DIET` - Diet/Nutrition Review
+* `OTHER` - Other
+ */
+export type ReminderTypeEnum = typeof ReminderTypeEnum[keyof typeof ReminderTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReminderTypeEnum = {
+  HBA1C: 'HBA1C',
+  FBS: 'FBS',
+  '2HPP': '2HPP',
+  BUN: 'BUN',
+  CR: 'CR',
+  ALT: 'ALT',
+  AST: 'AST',
+  ALP: 'ALP',
+  PR_URINE_24H: 'PR_URINE_24H',
+  EYE_EXAM: 'EYE_EXAM',
+  EMG: 'EMG',
+  NCV: 'NCV',
+  TSH: 'TSH',
+  BMI: 'BMI',
+  DIET: 'DIET',
+  OTHER: 'OTHER',
+} as const;
+
+/**
+ * سریالایزر برای گزارش‌ها
+ */
+export interface Report {
+  readonly id: number;
+  report_type: ReportTypeEnum;
+  format?: FormatEnum;
+  status?: ReportStatusEnum;
+  /** @nullable */
+  requested_by?: number | null;
+  readonly requested_by_name: string;
+  /** @nullable */
+  start_date?: string | null;
+  /** @nullable */
+  end_date?: string | null;
+  /** @nullable */
+  patient?: number | null;
+  readonly patient_name: string;
+  /** @nullable */
+  doctor?: number | null;
+  readonly doctor_name: string;
+  /** @nullable */
+  readonly file_path: string | null;
+  /** @nullable */
+  readonly error_message: string | null;
+  metadata?: unknown;
+  readonly created_at: string;
+  /** @nullable */
+  readonly completed_at: string | null;
+  readonly duration: string;
+}
+
+/**
+ * * `pending` - در انتظار
+* `processing` - در حال پردازش
+* `completed` - تکمیل شده
+* `failed` - ناموفق
+ */
+export type ReportStatusEnum = typeof ReportStatusEnum[keyof typeof ReportStatusEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReportStatusEnum = {
+  pending: 'pending',
+  processing: 'processing',
+  completed: 'completed',
+  failed: 'failed',
+} as const;
+
+/**
+ * * `patient_summary` - خلاصه بیمار
+* `doctor_performance` - عملکرد پزشک
+* `system_overview` - نمای کلی سیستم
+* `custom` - سفارشی
+ */
+export type ReportTypeEnum = typeof ReportTypeEnum[keyof typeof ReportTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const ReportTypeEnum = {
+  patient_summary: 'patient_summary',
+  doctor_performance: 'doctor_performance',
+  system_overview: 'system_overview',
+  custom: 'custom',
+} as const;
+
+/**
+ * * `LOW` - کم
+* `MEDIUM` - متوسط
+* `HIGH` - بالا
+* `CRITICAL` - بحرانی
+ */
+export type SeverityLevelEnum = typeof SeverityLevelEnum[keyof typeof SeverityLevelEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SeverityLevelEnum = {
+  LOW: 'LOW',
+  MEDIUM: 'MEDIUM',
+  HIGH: 'HIGH',
+  CRITICAL: 'CRITICAL',
+} as const;
+
+// SexEnum moved to earlier in file to avoid usage before declaration
+
+/**
+ * * `medical_record` - Medical Record
+* `encounter` - Patient Encounter
+* `lab_results` - Laboratory Results
+* `medications` - Medications
+ */
+export type SummaryTypeEnum = typeof SummaryTypeEnum[keyof typeof SummaryTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const SummaryTypeEnum = {
+  medical_record: 'medical_record',
+  encounter: 'encounter',
+  lab_results: 'lab_results',
+  medications: 'medications',
+} as const;
+
+/**
+ * سریالایزر برای آمارهای سیستم
+ */
+export interface SystemAnalytics {
+  readonly id: number;
+  date?: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  active_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_doctors?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_patients?: number;
+  readonly user_engagement_rate: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_encounters?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_lab_tests?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_medications?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  total_alerts?: number;
+  /**
+   * @minimum 4
+   * @maximum 18
+   * @nullable
+   */
+  avg_system_hba1c?: number | null;
+  /**
+   * @minimum 0
+   * @maximum 100
+   * @nullable
+   */
+  system_goal_achievement?: number | null;
+  readonly data_completeness_score: string;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  daily_active_users?: number;
+  /**
+   * @minimum -9223372036854776000
+   * @maximum 9223372036854776000
+   */
+  api_calls?: number;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
+/**
+ * سریالایزر برای یادآورهای آزمایشات
+ */
+export interface TestReminder {
+  readonly id: number;
+  patient: number;
+  readonly patient_name: string;
+  test_type: TestTypeEnum;
+  readonly test_type_display: string;
+  frequency: FrequencyAc7Enum;
+  readonly frequency_display: string;
+  priority?: Priority95eEnum;
+  readonly priority_display: string;
+  /** @nullable */
+  last_performed?: string | null;
+  next_due: string;
+  /**
+   * @minimum 0
+   * @maximum 9223372036854776000
+   */
+  reminder_days_before?: number;
+  is_active?: boolean;
+  notes?: string;
+  /**
+   * فاصله سفارشی به روز (فقط برای نوع CUSTOM)
+   * @minimum 0
+   * @maximum 9223372036854776000
+   * @nullable
+   */
+  custom_interval_days?: number | null;
+  readonly created_by: number;
+  readonly created_by_name: string;
+  readonly created_at: string;
+  readonly updated_at: string;
+  readonly is_overdue: string;
+  readonly days_until_due: string;
+  readonly should_send_reminder: string;
+}
+
+/**
+ * * `HBA1C` - HbA1c (هموگلوبین گلیکوزیله)
+* `FBS` - قند ناشتا (Fasting Blood Sugar)
+* `2HPP` - قند ۲ ساعت بعد از غذا (2-Hour Post-Prandial)
+* `BUN` - اوره خون (Blood Urea Nitrogen)
+* `CR` - کراتینین (Creatinine)
+* `ALT` - آلانین آمینوترانسفراز
+* `AST` - آسپارتات آمینوترانسفراز
+* `ALP` - آلکالین فسفاتاز
+* `TSH` - هورمون محرک تیروئید
+* `PR_URINE_24` - پروتئین ادرار ۲۴ ساعته
+* `EYE_EXAM` - معاینه چشم
+* `EMG` - الکترومایوگرافی
+* `NCV` - سرعت رسانش عصبی
+* `BMI` - شاخص توده بدنی
+* `BP` - فشار خون
+* `DIET` - مشاوره تغذیه
+* `EXERCISE` - برنامه ورزشی
+ */
+export type TestTypeEnum = typeof TestTypeEnum[keyof typeof TestTypeEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TestTypeEnum = {
+  HBA1C: 'HBA1C',
+  FBS: 'FBS',
+  '2HPP': '2HPP',
+  BUN: 'BUN',
+  CR: 'CR',
+  ALT: 'ALT',
+  AST: 'AST',
+  ALP: 'ALP',
+  TSH: 'TSH',
+  PR_URINE_24: 'PR_URINE_24',
+  EYE_EXAM: 'EYE_EXAM',
+  EMG: 'EMG',
+  NCV: 'NCV',
+  BMI: 'BMI',
+  BP: 'BP',
+  DIET: 'DIET',
+  EXERCISE: 'EXERCISE',
+} as const;
+
+/**
+ * سریالایزر برای دسته‌بندی رویدادهای تایم‌لاین
+ */
+export interface TimelineEventCategory {
+  readonly id: number;
+  /** @maxLength 100 */
+  name: string;
+  description?: string;
+  /** @maxLength 7 */
+  color?: string;
+  /** @maxLength 50 */
+  icon?: string;
+}
+
+export interface TokenObtainPair {
+  email: string;
+  password: string;
+  readonly access: string;
+  readonly refresh: string;
+}
+
+export interface TokenRefresh {
+  readonly access: string;
+  refresh: string;
+}
+
+/**
+ * * `IMPROVING` - بهبود
+* `STABLE` - پایدار
+* `WORSENING` - بدتر شدن
+* `FLUCTUATING` - نوسان
+ */
+export type TrendDirectionEnum = typeof TrendDirectionEnum[keyof typeof TrendDirectionEnum];
+
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const TrendDirectionEnum = {
+  IMPROVING: 'IMPROVING',
+  STABLE: 'STABLE',
+  WORSENING: 'WORSENING',
+  FLUCTUATING: 'FLUCTUATING',
+} as const;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
@@ -11257,7 +13042,3 @@ export function useTimelineApiTimelineTimelineSummaryRetrieve<TData = Awaited<Re
 
   return query;
 }
-
-
-
-

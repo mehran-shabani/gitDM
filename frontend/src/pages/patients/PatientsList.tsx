@@ -1,5 +1,6 @@
 import { useApiPatientsList } from '../../api/generated/gitdmApi';
-import { SexEnum, type Patient } from '../../api/generated/gitdmApi.schemas';
+import { SexEnum } from '../../api/generated/gitdmApi';
+import type { Patient } from '../../api/generated/gitdmApi.schemas';
 import { getErrorMessage } from '../../lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/Card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/Table';

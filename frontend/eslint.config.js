@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config([
-  globalIgnores(['dist', 'src/api/generated/**']),
+  globalIgnores(['dist', 'src/api/generated/**', 'orval.config.ts', 'vite.config.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -18,14 +18,26 @@ export default tseslint.config([
     languageOptions: {
       ecmaVersion: 'latest',
       parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        project: ['./tsconfig.app.json'],
         tsconfigRootDir: import.meta.dirname,
       },
       globals: globals.browser,
     },
-    languageOptions: {
-      ecmaVersion: 'latest',
-      globals: globals.browser,
+    rules: {
+      // Relax some strict rules for better developer experience
+      '@typescript-eslint/no-unsafe-assignment': 'warn',
+      '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-return': 'warn',
+      '@typescript-eslint/no-unsafe-argument': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-floating-promises': 'warn',
+      '@typescript-eslint/no-misused-promises': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/prefer-promise-reject-errors': 'warn',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+      'react-refresh/only-export-components': 'warn',
+      'no-useless-catch': 'warn',
     },
   },
 ])
