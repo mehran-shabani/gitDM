@@ -22,6 +22,6 @@ class PatientRepository {
       return list.map((e) => Patient.fromJson(e as Map<String, dynamic>)).toList();
     }
 
-    return [];
+    throw FormatException('Unexpected patients payload shape: ${data.runtimeType}');
   }
 }

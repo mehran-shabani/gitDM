@@ -1,6 +1,6 @@
-/// \u0645\u062f\u0644 \u0645\u06cc\u0646\u06cc\u0645\u0627\u0644 \u0628\u06cc\u0645\u0627\u0631.
-/// \u0641\u06cc\u0644\u062f\u0647\u0627 \u0645\u0645\u06a9\u0646 \u0627\u0633\u062a \u062f\u0631 \u0628\u06a9\u200c\u0627\u0646\u062f \u0634\u0645\u0627 \u0645\u062e\u062a\u0644\u0641 \u0628\u0627\u0634\u0646\u062f.
-/// \u0627\u06cc\u0646\u062c\u0627 \u0686\u0646\u062f \u0641\u06cc\u0644\u062f \u0631\u0627\u06cc\u062c \u0631\u0627 \u062f\u0631 \u0646\u0638\u0631 \u0645\u06cc\u200c\u06af\u06cc\u0631\u06cc\u0645\u061b \u062f\u0631 \u0635\u0648\u0631\u062a \u0646\u06cc\u0627\u0632 \u0628\u0627 API \u0648\u0627\u0642\u0639\u06cc \u0647\u0645\u0627\u0647\u0646\u06af \u06a9\u0646\u06cc\u062f.
+/// مدل مینیمال بیمار.
+/// فیلدها ممکن است در بک‌اند شما مختلف باشند.
+/// اینجا چند فیلد رایج را در نظر می‌گیریم؛ در صورت نیاز با API واقعی هماهنگ کنید.
 class Patient {
   final int id;
   final String fullName;
@@ -8,13 +8,37 @@ class Patient {
   Patient({required this.id, required this.fullName});
 
   factory Patient.fromJson(Map<String, dynamic> json) {
-    final first = (json['first_name'] ?? json['firstName'] ?? json['name'] ?? '').toString();
-    final last  = (json['last_name'] ?? json['lastName'] ?? '').toString();
-    final combined = [first, last].where((s) => s.isNotEmpty).join(' ');
+    // ابتدا full_name یا fullName را بررسی می‌کنیم
+    final full = (json['full_name'] ?? json['fullName'])?.toString() ?? '';
+    final first = (json['first_name'] ?? json['firstName'] ?? '').toString();
+    final last = (json['last_name'] ?? json['lastName'] ?? '').toString();
+    
+    // اگر full_name موجود بود، از آن استفاده می‌کنیم
+    final combined = full.isNotEmpty
+        ? full
+        : (first.isNotEmpty && last.isNotEmpty)
+            ? '$first $last'
+            : (first.isNotEmpty ? first : (last.isNotEmpty ? last : ''));
+
+    // در صورت عدم وجود نام ترکیبی، json['name'] را به عنوان نام کامل در نظر می‌گیریم
+    final finalName = combined.isNotEmpty 
+        ? combined 
+        : (json['name']?.toString() ?? '');
+
+    // پارس ایمن ID - پشتیبانی از int، string، و double
+    int parsedId = 0;
+    final rawId = json['id'];
+    if (rawId is int) {
+      parsedId = rawId;
+    } else if (rawId is String) {
+      parsedId = int.tryParse(rawId) ?? 0;
+    } else if (rawId is double) {
+      parsedId = rawId.toInt();
+    }
 
     return Patient(
-      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
-      fullName: combined.isNotEmpty ? combined : '\u0646\u0627\u0645\u200c\u0646\u0627\u0645\u0634\u062e\u0635',
+      id: parsedId,
+      fullName: finalName.isNotEmpty ? finalName : 'نام‌نامشخص',
     );
   }
 }

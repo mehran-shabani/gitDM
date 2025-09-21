@@ -2,8 +2,9 @@
 .dart_tool/
 .packages
 build/
-ios/
-android/
+# Note: android/ and ios/ are tracked for INTERNET permission
+# ios/
+# android/
 macos/
 linux/
 windows/

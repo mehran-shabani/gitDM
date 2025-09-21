@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'app.dart';
 import 'core/config.dart';
@@ -18,8 +19,10 @@ void main() {
   final patientRepo = PatientRepository(api);
 
   // \u0635\u0631\u0641\u0627\u064b \u0628\u0631\u0627\u06cc \u062f\u06cc\u0628\u0627\u06af: \u0646\u0645\u0627\u06cc\u0634 \u0622\u062f\u0631\u0633 \u0633\u0631\u0648\u0631 (\u0645\u06cc\u200c\u062a\u0648\u0627\u0646\u06cc\u062f \u062d\u0630\u0641 \u06a9\u0646\u06cc\u062f)
-  // ignore: avoid_print
-  print('API = ${AppConfig.apiBaseUrl}${AppConfig.apiPrefix}');
+  // صرفاً برای دیباگ: نمایش آدرس سرور
+  if (kDebugMode) {
+    debugPrint('API = ${AppConfig.apiBaseUrl}${AppConfig.apiPrefix}');
+  }
 
   runApp(
     MultiProvider(
