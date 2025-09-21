@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from .models import PatientAnalytics, DoctorAnalytics, SystemAnalytics, Report
 
 
@@ -23,6 +24,7 @@ class PatientAnalyticsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
     
+    @extend_schema_field(serializers.FloatField(allow_null=True))
     def get_glucose_in_range_percentage(self, obj):
         """محاسبه درصد قندهای در محدوده نرمال"""
         if not obj.avg_glucose:
@@ -36,6 +38,7 @@ class PatientAnalyticsSerializer(serializers.ModelSerializer):
         else:
             return max(0, (180 / obj.avg_glucose) * 100)
     
+    @extend_schema_field(serializers.ChoiceField(choices=['excellent', 'good', 'fair', 'poor', 'unknown']))
     def get_hba1c_status(self, obj):
         """تعیین وضعیت HbA1c"""
         if not obj.avg_hba1c:
@@ -72,12 +75,14 @@ class DoctorAnalyticsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
     
+    @extend_schema_field(serializers.FloatField())
     def get_goal_achievement_rate(self, obj):
         """محاسبه نرخ دستیابی به اهداف درمانی"""
         if obj.total_patients == 0:
             return 0
         return round((obj.patients_at_goal / obj.total_patients) * 100, 2)
     
+    @extend_schema_field(serializers.FloatField())
     def get_alert_response_rate(self, obj):
         """محاسبه نرخ پاسخ به هشدارها"""
         # این باید از داده‌های واقعی محاسبه شود
@@ -105,12 +110,14 @@ class SystemAnalyticsSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
     
+    @extend_schema_field(serializers.FloatField())
     def get_user_engagement_rate(self, obj):
         """محاسبه نرخ درگیری کاربران"""
         if obj.total_users == 0:
             return 0
         return round((obj.active_users / obj.total_users) * 100, 2)
     
+    @extend_schema_field(serializers.FloatField())
     def get_data_completeness_score(self, obj):
         """محاسبه امتیاز کامل بودن داده‌ها"""
         # این باید بر اساس معیارهای مختلف محاسبه شود
@@ -159,6 +166,7 @@ class ReportSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['file_path', 'error_message', 'created_at', 'completed_at']
     
+    @extend_schema_field(serializers.FloatField(allow_null=True))
     def get_duration(self, obj):
         """محاسبه مدت زمان تولید گزارش"""
         if obj.completed_at and obj.created_at:
