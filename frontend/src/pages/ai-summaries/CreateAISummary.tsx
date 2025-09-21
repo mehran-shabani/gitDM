@@ -265,12 +265,12 @@ export function CreateAISummary() {
               </Label>
             </div>
 
-            {createMutation.error && (
+            {createMutation.error ? (
               <ErrorMessage
                 title="Submission Error"
                 message={getErrorMessage()}
               />
-            )}
+            ) : null}
 
             <div className="flex justify-end gap-3">
               <Button

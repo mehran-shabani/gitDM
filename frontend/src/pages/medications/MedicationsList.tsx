@@ -9,7 +9,8 @@ import { ErrorMessage } from '../../components/ui/ErrorMessage';
 import { Eye, RefreshCw, Plus, Pill, Clock, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { format, isBefore, isAfter, parseISO } from 'date-fns';
-import type { FrequencyEnum, MedicationOrder } from '../../api/generated/gitdmApi.schemas';
+import type { MedicationOrder } from '../../api/generated/gitdmApi.schemas';
+import type { MedicationOrderFrequencyEnum } from '../../api/generated/gitdmApi';
 
 type MedicationStatus = {
   status: 'scheduled' | 'active' | 'completed';
@@ -37,8 +38,8 @@ export function MedicationsList() {
 
   const medications = data || [];
 
-  const getFrequencyLabel = (frequency?: FrequencyEnum) => {
-    const labels: Record<FrequencyEnum, string> = {
+  const getFrequencyLabel = (frequency?: MedicationOrderFrequencyEnum) => {
+    const labels: Record<MedicationOrderFrequencyEnum, string> = {
       QD: 'Once daily',
       BID: 'Twice daily',
       TID: 'Three times daily',

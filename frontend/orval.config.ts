@@ -4,8 +4,8 @@ export default defineConfig({
   api: {
     input: './OpenAPI.yaml',
     output: {
-      mode: 'split',
-      target: 'src/api/generated',
+      mode: 'single',
+      target: 'src/api/generated/gitdmApi.ts',
       client: 'react-query',
       prettier: true,
       clean: true,
