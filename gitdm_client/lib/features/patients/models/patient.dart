@@ -15,7 +15,7 @@ class Patient {
         : (first.isNotEmpty ? first : (last.isNotEmpty ? last : ''));
 
     return Patient(
-      id: (json['id'] ?? 0) as int,
+      id: int.tryParse(json['id']?.toString() ?? '') ?? 0,
       fullName: combined.isNotEmpty ? combined : '\u0646\u0627\u0645\u200c\u0646\u0627\u0645\u0634\u062e\u0635',
     );
   }
