@@ -31,15 +31,18 @@ jobs:
     - name: Run migrations
       env:
         CODESPACES: true
+        DJANGO_SETTINGS_MODULE: config.settings
+        PYTHONPATH: backend
       run: |
-        python manage.py migrate
+        cd backend && python manage.py migrate
 
     - name: Run tests
       env:
         CODESPACES: true
         DJANGO_SETTINGS_MODULE: config.settings
-        PYTHONPATH: .
+        PYTHONPATH: backend
       run: |
+        cd backend
         # Run tests with better error handling
         pytest -v --tb=short || true
         
@@ -49,5 +52,7 @@ jobs:
     - name: Check Django settings (development mode)
       env:
         CODESPACES: true
+        DJANGO_SETTINGS_MODULE: config.settings
+        PYTHONPATH: backend
       run: |
-        python manage.py check
+        cd backend && python manage.py check

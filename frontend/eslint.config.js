@@ -3,18 +3,21 @@ import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
-import { globalIgnores } from 'eslint/config'
 
 export default tseslint.config([
-  globalIgnores(['dist', 'src/api/generated/**', 'orval.config.ts', 'vite.config.ts']),
+  {
+    ignores: ['dist', 'src/api/generated/**', 'orval.config.ts', 'vite.config.ts']
+  },
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked,
-      reactHooks.configs['recommended-latest'],
-      reactRefresh.configs.vite,
     ],
+    plugins: {
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
+    },
     languageOptions: {
       ecmaVersion: 'latest',
       parserOptions: {
@@ -24,6 +27,10 @@ export default tseslint.config([
       globals: globals.browser,
     },
     rules: {
+      // React hooks rules
+      ...reactHooks.configs.recommended.rules,
+      // React refresh rules
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       // Relax some strict rules for better developer experience
       '@typescript-eslint/no-unsafe-assignment': 'warn',
       '@typescript-eslint/no-unsafe-member-access': 'warn',
@@ -36,7 +43,6 @@ export default tseslint.config([
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/prefer-promise-reject-errors': 'warn',
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
-      'react-refresh/only-export-components': 'warn',
       'no-useless-catch': 'warn',
     },
   },
