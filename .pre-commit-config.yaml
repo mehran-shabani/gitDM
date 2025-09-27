@@ -12,11 +12,13 @@ repos:
 
   # Python formatting with Ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.6
+    rev: v0.8.4
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+        files: ^backend/
       - id: ruff-format
+        files: ^backend/
 
   # Environment file linting
   - repo: https://github.com/dotenv-linter/dotenv-linter
@@ -45,8 +47,9 @@ repos:
 
   # Security
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.7.5
+    rev: 1.7.10
     hooks:
       - id: bandit
-        args: ['-c', 'pyproject.toml']
+        args: ['-c', 'backend/pyproject.toml', '--exclude', 'backend/migrations,backend/tests']
         additional_dependencies: ['bandit[toml]']
+        files: ^backend/

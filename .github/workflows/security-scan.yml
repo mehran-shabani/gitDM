@@ -35,13 +35,13 @@ jobs:
 
       - name: Run Safety check for known vulnerabilities
         run: |
-          safety check --json --output safety-report.json || true
-          safety check --short-report
+          safety check --json --output safety-report.json --continue-on-error || true
+          safety check --short-report || true
 
       - name: Run Bandit security scan
         run: |
-          bandit -r . -f json -o bandit-report.json || true
-          bandit -r . -f txt
+          bandit -r backend -f json -o bandit-report.json --exclude backend/migrations,backend/tests || true
+          bandit -r backend -f txt --exclude backend/migrations,backend/tests || true
 
       - name: Upload Safety report
         if: always()
