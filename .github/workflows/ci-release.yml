@@ -26,19 +26,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r backend/requirements.txt
-          # Ensure Celery is installed for imports during tests
-          python - <<'PY'
-import importlib, sys
-missing = []
-for m in ("celery",):
-    try:
-        importlib.import_module(m)
-    except Exception as e:
-        missing.append((m, str(e)))
-if missing:
-    sys.exit("Missing modules: " + ", ".join(m for m,_ in missing))
-print("All required modules present")
-PY
 
       - name: Prepare env file (if needed)
         run: |
