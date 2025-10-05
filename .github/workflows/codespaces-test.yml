@@ -16,16 +16,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.13'
+        python-version: '3.12'
 
-    - name: Copy .env.example to .env
-      run: cp .env.example .env
+    - name: Prepare env file
+      run: |
+        if [ -f .env.example ]; then
+          cp .env.example .env
+        else
+          printf "DJANGO_DEBUG=True\nDJANGO_SECRET_KEY=dev\n" > .env
+        fi
+      working-directory: ./backend
 
     - name: Install dependencies
+      working-directory: ./backend
       run: |
         python -m pip install --upgrade pip
+        pip install -r ../requirements.txt
         pip install -r requirements.txt
-        pip install -r backend/requirements.txt
         pip install pytest pytest-django pytest-cov
 
     - name: Run migrations
@@ -33,6 +40,7 @@ jobs:
         CODESPACES: true
       run: |
         python manage.py migrate
+      working-directory: ./backend
 
     - name: Run tests
       env:
@@ -45,9 +53,11 @@ jobs:
         
         # Run specific test to verify setup
         pytest tests/test_codespaces_setup.py -v || true
+      working-directory: ./backend
 
     - name: Check Django settings (development mode)
       env:
         CODESPACES: true
       run: |
         python manage.py check
+      working-directory: ./backend

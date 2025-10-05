@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -35,6 +35,7 @@ jobs:
           fi
 
       - name: Run pytest
+        working-directory: ./backend
         env:
           DJANGO_SETTINGS_MODULE: config.settings
           PYTHONPATH: .
@@ -83,7 +84,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install zip tool
         run: |
@@ -116,17 +117,19 @@ jobs:
           git push origin "$new_tag"
           echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Build release zip (only Django project files)
+      - name: Build release zip (Django project from backend/)
         id: build
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist/package
-          cp manage.py dist/package/
+          cp backend/manage.py dist/package/
           cp requirements.txt dist/package/
-          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security gateway api; do
-            if [ -d "$d" ]; then
-              cp -r "$d" dist/package/
+          cp backend/requirements.txt dist/package/ || true
+          # Copy Django apps from backend directory
+          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security notifications reminders gateway analytics timeline api; do
+            if [ -d "backend/$d" ]; then
+              cp -r "backend/$d" dist/package/
             fi
           done
           (cd dist/package && zip -r "../django-project-${{ steps.bump.outputs.new_tag }}.zip" .)
