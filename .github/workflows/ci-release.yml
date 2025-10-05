@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
@@ -38,7 +39,6 @@ jobs:
         working-directory: ./backend
         env:
           DJANGO_SETTINGS_MODULE: config.settings
-          PYTHONPATH: .
         run: |
           pytest -v --tb=short
 
@@ -55,7 +55,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '20.11'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -127,7 +127,7 @@ jobs:
           cp requirements.txt dist/package/
           cp backend/requirements.txt dist/package/ || true
           # Copy Django apps from backend directory
-          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security notifications reminders gateway analytics timeline api; do
+          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security notifications reminders gateway analytics timeline api apimonitor; do
             if [ -d "backend/$d" ]; then
               cp -r "backend/$d" dist/package/
             fi

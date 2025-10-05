@@ -17,6 +17,7 @@ jobs:
       uses: actions/setup-python@v6
       with:
         python-version: '3.12'
+        cache: 'pip'
 
     - name: Prepare env file
       run: |
@@ -46,10 +47,9 @@ jobs:
       env:
         CODESPACES: true
         DJANGO_SETTINGS_MODULE: config.settings
-        PYTHONPATH: .
       run: |
-        # Run tests with better error handling
-        pytest -v --tb=short || true
+        # Run tests with proper error handling
+        pytest -v --tb=short
         
         # Run specific test to verify setup
         pytest tests/test_codespaces_setup.py -v || true
