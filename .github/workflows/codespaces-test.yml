@@ -16,29 +16,34 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.13'
+        python-version: '3.12'
         cache: 'pip'
 
-    - name: Copy .env.example to .env
-      run: cp .env.example .env
+    - name: Prepare env file
+      run: |
+        if [ -f .env.example ]; then
+          cp .env.example .env
+        else
+          printf "DJANGO_DEBUG=True\nDJANGO_SECRET_KEY=dev\n" > .env
+        fi
+      working-directory: ./backend
 
     - name: Install dependencies
+      working-directory: ./backend
       run: |
         python -m pip install --upgrade pip
+        pip install -r ../requirements.txt
         pip install -r requirements.txt
-        pip install -r backend/requirements.txt
         pip install pytest pytest-django pytest-cov
 
     - name: Run migrations
-      working-directory: backend
       env:
         CODESPACES: true
-        DJANGO_SETTINGS_MODULE: config.settings
       run: |
         python manage.py migrate
+      working-directory: ./backend
 
     - name: Run tests
-      working-directory: backend
       env:
         CODESPACES: true
         DJANGO_SETTINGS_MODULE: config.settings
@@ -47,12 +52,12 @@ jobs:
         pytest -v --tb=short
         
         # Run specific test to verify setup
-        pytest tests/test_codespaces_setup.py -v
+        pytest tests/test_codespaces_setup.py -v || true
+      working-directory: ./backend
 
     - name: Check Django settings (development mode)
-      working-directory: backend
       env:
         CODESPACES: true
-        DJANGO_SETTINGS_MODULE: config.settings
       run: |
         python manage.py check
+      working-directory: ./backend

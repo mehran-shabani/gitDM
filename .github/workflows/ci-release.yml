@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
           cache: 'pip'
 
       - name: Install dependencies
@@ -36,7 +36,7 @@ jobs:
           fi
 
       - name: Run pytest
-        working-directory: backend
+        working-directory: ./backend
         env:
           DJANGO_SETTINGS_MODULE: config.settings
         run: |
@@ -84,7 +84,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.12'
 
       - name: Install zip tool
         run: |
@@ -117,15 +117,17 @@ jobs:
           git push origin "$new_tag"
           echo "new_tag=$new_tag" >> "$GITHUB_OUTPUT"
 
-      - name: Build release zip (only Django project files)
+      - name: Build release zip (Django project from backend/)
         id: build
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist/package
           cp backend/manage.py dist/package/
-          cp backend/requirements.txt dist/package/
-          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security gateway api analytics apimonitor notifications reminders timeline; do
+          cp requirements.txt dist/package/
+          cp backend/requirements.txt dist/package/ || true
+          # Copy Django apps from backend directory
+          for d in config gitdm encounters intelligence laboratory pharmacy references versioning security notifications reminders gateway analytics timeline api apimonitor; do
             if [ -d "backend/$d" ]; then
               cp -r "backend/$d" dist/package/
             fi
