@@ -35,6 +35,12 @@ jobs:
         pip install -r ../requirements.txt
         pip install -r requirements.txt
         pip install pytest pytest-django pytest-cov
+        # Sanity check celery import for tasks decorated in apps
+        python - <<'PY'
+import importlib, sys
+importlib.import_module('celery')
+print('celery OK')
+PY
 
     - name: Run migrations
       env:
