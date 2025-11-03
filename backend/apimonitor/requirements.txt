@@ -3,7 +3,7 @@ djangorestframework==3.16.1
 celery==5.5.3
 redis==7.0.0
 httpx==0.28.1
-scikit-learn==1.6.1
+scikit-learn==1.7.2
 python-dotenv==1.1.1
 environs==14.3.0
 pytest==8.4.2
