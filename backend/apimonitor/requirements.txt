@@ -4,7 +4,7 @@ celery==5.5.3
 redis==7.0.1
 httpx==0.28.1
 scikit-learn==1.7.2
-python-dotenv==1.1.1
+python-dotenv==1.2.1
 environs==14.3.0
 pytest==8.4.2
 pytest-django==4.11.1
